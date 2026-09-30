@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base target="_top">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{--navy:#1F3A5F;--olive:#5E6B3A;--gold:#B8914A;--cream:#F6F1E6;--ink:#3a3a3a;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:transparent;font-family:Lora,Georgia,serif;color:var(--ink);overflow-x:hidden}
+  .wrap{padding:8px 6px 18px}
+  .eyebrow{text-align:center;font-size:12px;letter-spacing:4px;color:var(--gold);font-weight:600;text-transform:uppercase}
+  h2{text-align:center;font-family:'Libre Baskerville',serif;font-weight:400;color:var(--navy);font-size:30px;margin:8px 0 6px}
+  .orn{display:flex;align-items:center;justify-content:center;gap:12px;color:var(--gold);margin-bottom:26px}
+  .orn span{height:1px;width:70px;background:linear-gradient(90deg,transparent,var(--gold))}
+  .orn span:last-child{background:linear-gradient(90deg,var(--gold),transparent)}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  a.card{position:relative;display:block;text-decoration:none;background:#fff;border:1px solid #e8dfcc;border-radius:14px;padding:26px 22px 22px;overflow:hidden;
+    box-shadow:0 2px 6px rgba(31,58,95,.06);transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s;
+    opacity:0;transform:translateY(18px);animation:up .7s forwards}
+  a.card:nth-child(2){animation-delay:.08s}a.card:nth-child(3){animation-delay:.16s}a.card:nth-child(4){animation-delay:.24s}a.card:nth-child(5){animation-delay:.32s}a.card:nth-child(6){animation-delay:.4s}
+  @keyframes up{to{opacity:1;transform:none}}
+  a.card::before{content:"";position:absolute;left:0;top:0;height:4px;width:100%;background:var(--c);transform:scaleX(.18);transform-origin:left;transition:transform .45s}
+  a.card:hover{transform:translateY(-6px);box-shadow:0 18px 34px rgba(31,58,95,.16);border-color:transparent}
+  a.card:hover::before{transform:scaleX(1)}
+  .ic{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;font-size:24px;margin-bottom:16px;
+    box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 14%,transparent);transition:transform .45s}
+  a.card:hover .ic{transform:rotate(-8deg) scale(1.08)}
+  h3{font-family:'Libre Baskerville',serif;color:var(--navy);font-size:19px;font-weight:700;margin-bottom:8px}
+  p{font-size:14.5px;line-height:1.55;color:#555}
+  .go{margin-top:14px;font-size:13px;font-weight:600;color:var(--c);letter-spacing:.5px;display:inline-flex;align-items:center;gap:8px}
+  .go i{transition:transform .3s}
+  a.card:hover .go i{transform:translateX(5px)}
+  .bg{position:absolute;right:-14px;bottom:-18px;font-size:92px;color:var(--c);opacity:.06;transition:opacity .4s,transform .6s}
+  a.card:hover .bg{opacity:.12;transform:rotate(-10deg)}
+  @media (max-width:760px){
+    h2{font-size:23px}.orn{margin-bottom:16px}
+    .grid{grid-template-columns:1fr 1fr;gap:12px}
+    a.card{padding:16px 13px;border-radius:12px}
+    .ic{width:42px;height:42px;font-size:18px;margin-bottom:10px;box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 14%,transparent)}
+    h3{font-size:15px;margin-bottom:4px} p{font-size:12.5px;line-height:1.4} .go{display:none} .bg{font-size:64px}
+  }
+</style></head><body>
+<div class="wrap">
+  <div class="eyebrow">Explore the archive</div>
+  <h2>Discover the Greek Riverland</h2>
+  <div class="orn"><span></span><i class="fa-solid fa-leaf"></i><span></span></div>
+  <div class="grid">
+    <a class="card" style="--c:#1F3A5F" href="https://sites.google.com/view/greeksoftheriverland/families" target="_top">
+      <i class="fa-solid fa-people-roof bg"></i><div class="ic"><i class="fa-solid fa-people-roof"></i></div>
+      <h3>Families</h3><p>Explore the families of the Greek Riverland, A to Z.</p><span class="go">Browse families <i class="fa-solid fa-arrow-right"></i></span></a>
+    <a class="card" style="--c:#2F5D62" href="https://sites.google.com/view/greeksoftheriverland/towns" target="_top">
+      <i class="fa-solid fa-map-location-dot bg"></i><div class="ic"><i class="fa-solid fa-map-location-dot"></i></div>
+      <h3>Towns</h3><p>Berri, Renmark, Barmera, Monash, Loxton, Paringa and more.</p><span class="go">See the towns <i class="fa-solid fa-arrow-right"></i></span></a>
+    <a class="card" style="--c:#5E6B3A" href="https://sites.google.com/view/greeksoftheriverland/stories-photos" target="_top">
+      <i class="fa-solid fa-camera-retro bg"></i><div class="ic"><i class="fa-solid fa-camera-retro"></i></div>
+      <h3>Stories &amp; Photos</h3><p>Weddings, sport, school, farm life and old photographs.</p><span class="go">Read stories <i class="fa-solid fa-arrow-right"></i></span></a>
+    <a class="card" style="--c:#4A4E5A" href="https://sites.google.com/view/greeksoftheriverland/in-memoriam" target="_top">
+      <i class="fa-solid fa-dove bg"></i><div class="ic"><i class="fa-solid fa-dove"></i></div>
+      <h3>In Memoriam</h3><p>Remembering those who came before us.</p><span class="go">Remember <i class="fa-solid fa-arrow-right"></i></span></a>
+    <a class="card" style="--c:#A8742F" href="https://sites.google.com/view/greeksoftheriverland/add-your-family" target="_top">
+      <i class="fa-solid fa-feather-pointed bg"></i><div class="ic"><i class="fa-solid fa-feather-pointed"></i></div>
+      <h3>Add Your Family</h3><p>Share your family story, names, dates and photographs.</p><span class="go">Share yours <i class="fa-solid fa-arrow-right"></i></span></a>
+    <a class="card" style="--c:#3D5A40" href="https://sites.google.com/view/greeksoftheriverland/about-contact" target="_top">
+      <i class="fa-solid fa-landmark bg"></i><div class="ic"><i class="fa-solid fa-landmark"></i></div>
+      <h3>About the Project</h3><p>Our purpose, how to contribute and how to get in touch.</p><span class="go">Learn more <i class="fa-solid fa-arrow-right"></i></span></a>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base target="_top">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{--navy:#1F3A5F;--olive:#5E6B3A;--gold:#B8914A;--cream:#F6F1E6}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:transparent;font-family:Lora,Georgia,serif;overflow-x:hidden}
+  .band{position:relative;border-radius:18px;overflow:hidden;color:#fff;padding:40px 44px;
+    background:radial-gradient(circle at 85% 20%,rgba(226,196,142,.25),transparent 45%),linear-gradient(135deg,#1F3A5F 0%,#26466b 55%,#3d4f3a 100%)}
+  .band::after{content:"";position:absolute;inset:0;background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 2px,transparent 2px 26px);pointer-events:none}
+  .meander{position:absolute;left:0;right:0;bottom:0;height:14px;opacity:.35;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Cpath d='M0 13h6V5h8v4h-4V7H8v6h12V1H2' fill='none' stroke='%23E2C48E' stroke-width='1.6'/%3E%3C/svg%3E") repeat-x}
+  .top{display:grid;grid-template-columns:1.1fr 1fr;gap:36px;align-items:center;position:relative;z-index:1}
+  .eyebrow{font-size:12px;letter-spacing:4px;color:#E2C48E;font-weight:600;text-transform:uppercase}
+  h2{font-family:'Libre Baskerville',serif;font-weight:400;font-size:28px;line-height:1.3;margin:10px 0 12px}
+  h2 em{color:#E2C48E}
+  .lead{font-size:15px;line-height:1.6;color:#e7ecf2}
+  .btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:40px;font-weight:600;font-size:14.5px;text-decoration:none;transition:all .3s}
+  .btn.p{background:#E2C48E;color:#1F3A5F;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+  .btn.p:hover{background:#fff;transform:translateY(-2px)}
+  .btn.s{border:1.5px solid rgba(255,255,255,.6);color:#fff}
+  .btn.s:hover{background:rgba(255,255,255,.12);border-color:#fff}
+  .btn.p i{animation:beat 2.4s infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+  .steps{display:grid;gap:14px}
+  .step{display:flex;gap:16px;align-items:flex-start;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:14px 16px;
+    backdrop-filter:blur(2px);transition:background .3s,transform .3s}
+  .step:hover{background:rgba(255,255,255,.13);transform:translateX(4px)}
+  .num{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#E2C48E;color:#1F3A5F;font-size:18px}
+  .step b{font-family:'Libre Baskerville',serif;font-weight:700;font-size:15.5px;display:block;margin-bottom:3px}
+  .step span{font-size:13.5px;color:#d9e1ea;line-height:1.45}
+  .note{position:relative;z-index:1;margin-top:26px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15);font-size:13px;color:#cfd8e2;font-style:italic;display:flex;gap:10px;align-items:center}
+  @media (max-width:760px){
+    .band{padding:24px 18px 26px;border-radius:14px}
+    .top{grid-template-columns:1fr;gap:16px}
+    h2{font-size:21px;margin:6px 0 8px}.lead{font-size:13.5px}
+    .btns{margin-top:14px;gap:8px}.btn{padding:10px 16px;font-size:13px}
+    .steps{gap:8px}.step{padding:10px 12px;gap:12px}.num{width:34px;height:34px;font-size:14px}
+    .step b{font-size:13.5px}.step span{font-size:12px}
+    .note{font-size:11.5px;margin-top:14px;padding-top:10px}
+    .step span{display:none}.step{align-items:center}.step b{margin:0}.lead{line-height:1.5}
+  }
+</style></head><body>
+<div class="band">
+  <div class="top">
+    <div>
+      <div class="eyebrow"><i class="fa-solid fa-feather-pointed"></i>&nbsp; Be part of the story</div>
+      <h2>Do you have a family story, a photograph or a memory to <em>share?</em></h2>
+      <p class="lead">Many of the original migrants have now passed away. Your names, dates, photographs and memories help make sure the Greek community of the Riverland is never forgotten.</p>
+      <div class="btns">
+        <a class="btn p" href="https://sites.google.com/view/greeksoftheriverland/add-your-family" target="_top"><i class="fa-solid fa-heart"></i> Add Your Family</a>
+        <a class="btn s" href="https://sites.google.com/view/greeksoftheriverland/support-the-project" target="_top"><i class="fa-solid fa-hand-holding-heart"></i> Support the Project</a>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num"><i class="fa-solid fa-pen-to-square"></i></div><div><b>1. Share</b><span>Fill in the simple online form: family details, memories and up to five photos.</span></div></div>
+      <div class="step"><div class="num"><i class="fa-solid fa-magnifying-glass"></i></div><div><b>2. Review</b><span>Every submission is checked by the project team. Nothing is published automatically.</span></div></div>
+      <div class="step"><div class="num"><i class="fa-solid fa-book-open"></i></div><div><b>3. Preserve</b><span>Approved stories become part of the family and town pages for future generations.</span></div></div>
+    </div>
+  </div>
+  <div class="note"><i class="fa-solid fa-lock"></i> Your private contact details are never published. This is a volunteer community project.</div>
+  <div class="meander"></div>
+</div>
+</body></html>
