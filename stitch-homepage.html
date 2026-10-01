@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Greeks of the Riverland | Families, Stories, Memories</title>
+<!-- Tailwind CSS CDN with forms and container-queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Cormorant Garamond, Playfair Display, Cinzel, Montserrat, Caveat & Dancing Script -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&amp;family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Dancing+Script:wght@500;700&amp;family=Montserrat:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;family=Alex+Brush&amp;display=swap" rel="stylesheet"/>
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            heritage: {
+              cream: '#f9f6f0',
+              sand: '#f2ece1',
+              cardBg: '#f7f4ed',
+              navy: '#1b3b5a',
+              deepNavy: '#112538',
+              olive: '#556b3b',
+              oliveHover: '#44572e',
+              slateBlue: '#2e5b7a',
+              darkSlate: '#23445d',
+              gold: '#c29d59',
+              goldBorder: '#dfcaa2',
+              charcoal: '#2d3134',
+              muted: '#666b70',
+              borderMuted: '#e3dcd1',
+              pinRed: '#8f201d'
+            }
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            cormorant: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            cinzel: ['"Cinzel"', 'serif'],
+            sans: ['"Montserrat"', 'sans-serif'],
+            script: ['"Dancing Script"', 'cursive'],
+            alex: ['"Alex Brush"', 'cursive']
+          }
+        }
+      }
+    };
+  </script>
+<style data-purpose="custom-typography">
+    .font-cormorant {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+    .font-cinzel {
+      font-family: 'Cinzel', serif;
+    }
+    .font-script {
+      font-family: 'Dancing Script', cursive;
+    }
+    .font-alex {
+      font-family: 'Alex Brush', cursive;
+    }
+    .sepia-filter {
+      filter: sepia(0.28) contrast(1.05) brightness(0.92);
+    }
+    .vintage-bw {
+      filter: grayscale(100%) contrast(1.1) brightness(0.95);
+    }
+  </style>
+<style data-purpose="decorative-elements">
+    /* Subtle paper texture overlay */
+    .bg-parchment {
+      background-color: #faf7f2;
+      background-image: radial-gradient(#e9e2d5 0.75px, transparent 0.75px);
+      background-size: 16px 16px;
+    }
+    .hero-vignette {
+      box-shadow: inset 0 0 100px rgba(0,0,0,0.6);
+    }
+  </style>
+</head>
+<body class="bg-parchment text-heritage-charcoal font-sans antialiased min-h-screen flex flex-col selection:bg-heritage-gold selection:text-white">
+<!-- BEGIN: SiteNavigation -->
+<header class="bg-white border-b border-heritage-borderMuted sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-20">
+<!-- Logo and Site Tagline -->
+<div class="flex flex-col">
+<a class="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-heritage-navy" href="#">
+            Greeks of the Riverland
+          </a>
+<span class="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-heritage-muted font-medium mt-0.5">
+            Families. Stories. Memories.
+          </span>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center space-x-5 lg:space-x-7 text-xs lg:text-[13px] font-medium tracking-wide">
+<a class="text-heritage-navy border-b-2 border-heritage-navy pb-1 font-semibold" href="#">Home</a>
+<a class="text-gray-700 hover:text-heritage-navy transition-colors pb-1" href="#">Families</a>
+<a class="text-gray-700 hover:text-heritage-navy transition-colors pb-1" href="#">Towns</a>
+<a class="text-gray-700 hover:text-heritage-navy transition-colors pb-1" href="#">Stories &amp; Photos</a>
+<a class="text-gray-700 hover:text-heritage-navy transition-colors pb-1" href="#">In Memoriam</a>
+<a class="text-gray-700 hover:text-heritage-navy transition-colors pb-1" href="#">Add Your Family</a>
+<a class="text-gray-700 hover:text-heritage-navy transition-colors pb-1" href="#">About</a>
+<a class="text-gray-700 hover:text-heritage-navy transition-colors pb-1" href="#">Contact</a>
+<!-- Search Icon Button -->
+<button aria-label="Search" class="text-heritage-navy hover:text-heritage-gold transition-colors pl-2" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</nav>
+<!-- Mobile Menu Hamburger Button -->
+<div class="md:hidden flex items-center">
+<button aria-label="Open mobile menu" class="text-heritage-navy p-2" type="button">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- END: SiteNavigation -->
+<main class="flex-grow">
+<!-- BEGIN: HeroBanner -->
+<section class="relative w-full overflow-hidden bg-stone-900 border-b border-stone-700" data-purpose="hero-banner">
+<!-- Panoramic archival photo container -->
+<div class="relative w-full h-[380px] sm:h-[460px] md:h-[520px] lg:h-[580px] overflow-hidden">
+<img alt="Kalantzis and Vlachos families fruit growers in Renmark 1965" class="w-full h-full object-cover object-[center_35%] vintage-bw opacity-60 scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiNs6MRYwwKCHsy8pR87pZqtl6UwsbgLl1YvVRugzHnrQB5txvwDm3EFj8rAvbcyW5O5XNq2FTViJnTmkMkePxChQLqy8cxHH4gKhVxr0-xEqQTh6Y-zw-mgBy8cAU3W4phFechaV8rfGFK-ULJe3nSj2abT1JjEonWV_Lom5ZYEgHW3LtGwvrr49jcXjjo-lsPNJ3OftJ2ewLJTl-uXqPRs97ouZr1fgBs_Z-XI1tqwbNIBB-z9r7qw"/>
+<!-- Dark gradient vignette overlay to match archival aesthetic -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/60 pointer-events-none"></div>
+<!-- Hero Center Typography & Title -->
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4 sm:px-6 z-10">
+<h1 class="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-wide drop-shadow-md mb-2">
+            Greeks of the Riverland
+          </h1>
+<p class="font-cormorant text-base sm:text-2xl md:text-3xl text-stone-200 tracking-wider font-light drop-shadow">
+            Families, stories and memories from South Australia’s Greek community
+          </p>
+<p class="font-cormorant text-sm sm:text-xl md:text-2xl text-stone-300 italic tracking-widest mt-1">
+            1950 – 2020
+          </p>
+<!-- Golden Olive Branch / Wheat Motif divider -->
+<div class="flex items-center justify-center mt-3 text-heritage-gold opacity-90">
+<div class="w-12 sm:w-20 h-[1px] bg-gradient-to-r from-transparent via-heritage-gold to-heritage-gold"></div>
+<svg class="w-8 h-4 mx-2 text-heritage-gold fill-current" viewbox="0 0 40 18">
+<path d="M20,9 C16,4 12,3 7,3 C12,5 14,7 15,9 C14,11 12,13 7,15 C12,15 16,14 20,9 Z M20,9 C24,4 28,3 33,3 C28,5 26,7 25,9 C26,11 28,13 33,15 C28,15 24,14 20,9 Z"></path>
+<circle cx="20" cy="9" r="2"></circle>
+</svg>
+<div class="w-12 sm:w-20 h-[1px] bg-gradient-to-l from-transparent via-heritage-gold to-heritage-gold"></div>
+</div>
+</div>
+<!-- Archival Photo Attribution Caption -->
+<div class="absolute bottom-3 right-4 sm:right-6 text-right z-10">
+<p class="text-[11px] sm:text-xs text-stone-300 font-serif italic drop-shadow-sm">
+            Greek family fruit growers, Renmark, 1965
+          </p>
+<p class="text-[10px] sm:text-[11px] text-stone-400 font-serif italic">
+            (Kalantzis and Vlachos families)
+          </p>
+</div>
+</div>
+</section>
+<!-- END: HeroBanner -->
+<!-- BEGIN: MissionAndCallouts -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14" data-purpose="mission-and-actions">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+<!-- Left Column: Narrative Mission -->
+<div class="lg:col-span-6 space-y-4">
+<h2 class="font-serif text-2xl sm:text-3xl md:text-4xl text-heritage-navy font-bold leading-tight">
+            A community far from home.<br/>
+            A story worth remembering.
+          </h2>
+<p class="text-stone-700 text-sm sm:text-base leading-relaxed">
+            From the 1950s onward, Greek migrants and their families became an important part of life in South Australia’s Riverland. They worked in orchards, packing sheds, factories, shops and small businesses. They raised families, supported one another and created a close-knit community.
+          </p>
+<p class="text-stone-700 text-sm sm:text-base leading-relaxed">
+            This project has been created to record the families, photographs, memories and stories of the Greek community of the Riverland, so that their history is not forgotten.
+          </p>
+</div>
+<!-- Middle Column: Action Buttons -->
+<div class="lg:col-span-4 flex flex-col space-y-3.5">
+<!-- Add Your Family CTA -->
+<a class="group flex items-center justify-between px-5 py-3.5 bg-heritage-olive hover:bg-heritage-oliveHover text-white rounded shadow-sm transition duration-200" href="#">
+<div class="flex items-center space-x-3.5">
+<svg class="w-6 h-6 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<div class="text-left">
+<div class="text-xs sm:text-sm font-bold tracking-wider uppercase">Add Your Family</div>
+<div class="text-[11px] text-stone-200 font-light">Help us preserve this history</div>
+</div>
+</div>
+<svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</a>
+<!-- Share Photos CTA -->
+<a class="group flex items-center justify-between px-5 py-3.5 bg-heritage-slateBlue hover:bg-heritage-darkSlate text-white rounded shadow-sm transition duration-200" href="#">
+<div class="flex items-center space-x-3.5">
+<svg class="w-6 h-6 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<div class="text-left">
+<div class="text-xs sm:text-sm font-bold tracking-wider uppercase">Share Photos</div>
+<div class="text-[11px] text-stone-200 font-light">Upload and identify photographs</div>
+</div>
+</div>
+<svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</a>
+<!-- Support Project CTA -->
+<a class="group flex items-center justify-between px-5 py-3.5 bg-heritage-deepNavy hover:bg-slate-900 text-white rounded shadow-sm transition duration-200" href="#">
+<div class="flex items-center space-x-3.5">
+<svg class="w-6 h-6 text-white shrink-0" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+</svg>
+<div class="text-left">
+<div class="text-xs sm:text-sm font-bold tracking-wider uppercase">Support the Project</div>
+<div class="text-[11px] text-stone-200 font-light">Make a contribution</div>
+</div>
+</div>
+<svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</a>
+</div>
+<!-- Right Column: Olive Branch Illustration & Script Quote -->
+<div class="lg:col-span-2 flex flex-col items-center justify-center text-center py-2">
+<!-- Hand-drawn style Olive branch SVG -->
+<svg class="w-28 h-28 text-stone-600 opacity-80" fill="none" stroke="currentColor" viewbox="0 0 100 100">
+<path d="M25 80 C40 65, 60 45, 80 20" stroke-linecap="round" stroke-width="2.5"></path>
+<path d="M40 65 C32 55, 30 40, 38 34 C45 42, 45 55, 40 65 Z" fill="#75825d" opacity="0.6"></path>
+<path d="M55 52 C48 38, 55 25, 65 24 C68 35, 62 48, 55 52 Z" fill="#88966c" opacity="0.6"></path>
+<path d="M68 38 C75 25, 88 28, 88 38 C80 44, 72 42, 68 38 Z" fill="#75825d" opacity="0.6"></path>
+<circle cx="48" cy="58" fill="#4d5236" r="4.5"></circle>
+<circle cx="62" cy="42" fill="#3c4028" r="4"></circle>
+</svg>
+<div class="mt-2 font-script text-lg sm:text-xl text-stone-700 leading-tight">
+            “Different countries<br/>but the same roots.”
+          </div>
+</div>
+</div>
+</section>
+<!-- END: MissionAndCallouts -->
+<!-- BEGIN: CategoryCardsGrid -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 sm:pb-16" data-purpose="category-navigation">
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4">
+<!-- Card 1: Families -->
+<div class="bg-heritage-cardBg border border-stone-200/80 rounded p-2.5 sm:p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition">
+<div class="w-full h-24 sm:h-28 overflow-hidden rounded mb-3">
+<img alt="Families" class="w-full h-full object-cover vintage-bw" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9t1ZamgZHPS-6k1hH7d0Peg3P1BfVPgd9p-SmnGc21X3UAH26NnG-EJvcUL3OMgyYCXywBcFbFcZ2QqehVAFOe60MjQqj7m3K3yT5yPSUL-D5zonUubVCTXFtNTDlYNoJx1_-WkRp9YLiW1nI1Qixo2D-ebpWF9zAGdfyuvcaKVycdVtXfKXGHmzLv1-KqvsozycWBNPowwZnxcSp8uf2iJ5Xbh2jVlXOmoyZTiwVbabVIOmReVJqjg"/>
+</div>
+<!-- Family Icon -->
+<div class="text-heritage-navy my-1">
+<svg class="w-5 h-5 mx-auto" fill="currentColor" viewbox="0 0 24 24">
+<path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"></path>
+</svg>
+</div>
+<h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-heritage-navy mt-1">Families</h3>
+<p class="text-[11px] text-stone-600 font-light mt-1 flex-grow">
+            Explore the families of the Greek Riverland
+          </p>
+<a class="mt-2 text-heritage-navy hover:text-heritage-gold inline-flex items-center text-xs font-semibold" href="#">
+            →
+          </a>
+</div>
+<!-- Card 2: Towns -->
+<div class="bg-heritage-cardBg border border-stone-200/80 rounded p-2.5 sm:p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition">
+<div class="w-full h-24 sm:h-28 overflow-hidden rounded mb-3">
+<img alt="Towns and River" class="w-full h-full object-cover vintage-bw" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjynKqEcV49Qasl7CzCgoFdelrM9d5se3Y6c78R_PUIzjIKKK_thxL4gYZdQaRZdF8E0Y1Bq_DagY96sgfBGYXAEbQalvGqFzFrOFWcOvxgp1zVY98Sc2_Jz0m7ScWENxGVb999oQrHBvgJ8I2RFYEY1yVLCyxHtNqUOwnsKNu9qxZybSK8GvcoqoWp0JWRKRFo1iO3hcUQvcfF6v2Ixc2kMScVRZJaOgbvv4J5FqRXA7FUUnRKXGGPA"/>
+</div>
+<!-- Location Pin Icon -->
+<div class="text-heritage-navy my-1">
+<svg class="w-5 h-5 mx-auto" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
+</svg>
+</div>
+<h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-heritage-navy mt-1">Towns</h3>
+<p class="text-[11px] text-stone-600 font-light mt-1 flex-grow">
+            Browse by Berri, Renmark, Monash, Loxton and more
+          </p>
+<a class="mt-2 text-heritage-navy hover:text-heritage-gold inline-flex items-center text-xs font-semibold" href="#">
+            →
+          </a>
+</div>
+<!-- Card 3: Stories & Photos -->
+<div class="bg-heritage-cardBg border border-stone-200/80 rounded p-2.5 sm:p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition">
+<div class="w-full h-24 sm:h-28 overflow-hidden rounded mb-3">
+<img alt="Stories &amp; Photos" class="w-full h-full object-cover vintage-bw" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBObOXI5_7dZVvX8XxdzKDynewMbjTUww45a8d8g1Qe4Zj1u9MaJK3qFEzBHdpNIV3lN_Y-M1wcaETEk0TEbsgcmu0SzGrDGUVXvbzOAXRZ8uiZLiTeXsUSSgqKQggNy5yOAfJn15JIZzx9Eo60CltBSXXP9lHgYsviCYBHHu_zOw7RIVSdoR7OxL2DWAXf6rEszL90Y5Sik8Yiu88uLU9H8E1MB7gfQu2-x7adwEKys6Qk8RqVSKOYZA"/>
+</div>
+<!-- Open Book Icon -->
+<div class="text-heritage-navy my-1">
+<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-heritage-navy mt-1">Stories &amp; Photos</h3>
+<p class="text-[11px] text-stone-600 font-light mt-1 flex-grow">
+            Memories, photographs and community life
+          </p>
+<a class="mt-2 text-heritage-navy hover:text-heritage-gold inline-flex items-center text-xs font-semibold" href="#">
+            →
+          </a>
+</div>
+<!-- Card 4: In Memoriam -->
+<div class="bg-heritage-cardBg border border-stone-200/80 rounded p-2.5 sm:p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition">
+<div class="w-full h-24 sm:h-28 overflow-hidden rounded mb-3">
+<img alt="Church and In Memoriam" class="w-full h-full object-cover vintage-bw" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOYTRw23c5UZ52gyQRdDG9aXdVKH1YqqjpO5D2-9vnYAoAWCOSakn32cKL0O-KfiVl6s3Jkm5YmB4uAC9D_cbuwbAge0d1S_KEqNsK_hGQgzm6nW7R8G2heM_0h3qAw9yWVz5IbSQNq2fUa8bBDofOdu2U5U3iWO0F0WnL2I80P8Sb0PoQqhbiu-dIZepBYpcndnbwBqwFapNvmgJykcOWHh__l5cbPpML0SVHVUGA65jKtVNuXSCzjA"/>
+</div>
+<!-- Orthodox Cross Icon -->
+<div class="text-heritage-navy my-1">
+<svg class="w-5 h-5 mx-auto" fill="currentColor" viewbox="0 0 24 24">
+<path d="M10 2h4v5h5v4h-5v11h-4V11H5V7h5V2z"></path>
+</svg>
+</div>
+<h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-heritage-navy mt-1">In Memoriam</h3>
+<p class="text-[11px] text-stone-600 font-light mt-1 flex-grow">
+            Remembering those who came before us
+          </p>
+<a class="mt-2 text-heritage-navy hover:text-heritage-gold inline-flex items-center text-xs font-semibold" href="#">
+            →
+          </a>
+</div>
+<!-- Card 5: Businesses & Workplaces -->
+<div class="bg-heritage-cardBg border border-stone-200/80 rounded p-2.5 sm:p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition">
+<div class="w-full h-24 sm:h-28 overflow-hidden rounded mb-3">
+<img alt="Workplaces" class="w-full h-full object-cover vintage-bw" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1ei1wZyOWwzIseZuCF9gN3vXwWt7_wujMZKlBqLLko2YCGMDAAn1Yy8znulZoMg4xeWJxAOQO9gM-1PULOXIAcLD5YPO1uobolG1mriOS1EvWIYqYm7Z-N36Abi4IztDMl6vejX0h1y3LRaiyhIsoAY5nDs7HfnfvOqdktD6D_NhMarw9SAwMKFtU9AYLNdwxTkbFd66wkjRzff-mN7vBXriKkqnBuWl1g4o4Pg9oR9uu_y6ZlgbkCA"/>
+</div>
+<!-- Workplace / Store Icon -->
+<div class="text-heritage-navy my-1">
+<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-heritage-navy mt-1">Businesses &amp; Workplaces</h3>
+<p class="text-[11px] text-stone-600 font-light mt-1 flex-grow">
+            Farms, shops, packing sheds and more
+          </p>
+<a class="mt-2 text-heritage-navy hover:text-heritage-gold inline-flex items-center text-xs font-semibold" href="#">
+            →
+          </a>
+</div>
+<!-- Card 6: About the Project -->
+<div class="bg-heritage-cardBg border border-stone-200/80 rounded p-2.5 sm:p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition">
+<div class="w-full h-24 sm:h-28 overflow-hidden rounded mb-3">
+<img alt="About Archive" class="w-full h-full object-cover vintage-bw" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDa9L_3rfIrN2NY0XSIiEBUWKVRX4b018Ff2dLaheQWZ52h2lnn5j3SY0XFefqX-47aQJSRRS4oQ2UKECYG_lyv-OS3IURdsfgqiRPY6wbflkLLqJYwperCvKQbHKMOfkQgsW2wQuvZBNCxuFOv2ht4A1WvRVLAsuP0jUb8E_IDXEzIU0Ms52dPVBYxHaIJKGwkw75G82VOoKkPoFrOgX58QVo3_NyfQtoVmmBXRDo_SPWu3jsIhDHPuQ"/>
+</div>
+<!-- Document / Purpose Icon -->
+<div class="text-heritage-navy my-1">
+<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-heritage-navy mt-1">About the Project</h3>
+<p class="text-[11px] text-stone-600 font-light mt-1 flex-grow">
+            Our purpose, how to contribute and contact information
+          </p>
+<a class="mt-2 text-heritage-navy hover:text-heritage-gold inline-flex items-center text-xs font-semibold" href="#">
+            →
+          </a>
+</div>
+</div>
+</section>
+<!-- END: CategoryCardsGrid -->
+<!-- BEGIN: ExploreAndArchiveSection -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 sm:pb-20" data-purpose="explore-and-archive">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+<!-- Left Sub-Section: Explore Riverland Map (approx 5 cols) -->
+<div class="lg:col-span-5 flex flex-col justify-between">
+<div>
+<h2 class="font-serif text-2xl sm:text-3xl font-bold text-heritage-navy">
+              Explore the Riverland
+            </h2>
+<p class="text-stone-600 text-xs sm:text-sm mt-1 mb-4">
+              See which Greek families lived in each town and area.
+            </p>
+<!-- Illustrated River Map Graphic -->
+<div class="relative w-full aspect-[4/3] bg-[#f0ebd9] border border-stone-300 rounded overflow-hidden shadow-inner p-3">
+<!-- SVG Stylized Murray River Map -->
+<svg class="w-full h-full" viewbox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+<!-- Soft background terrain contours -->
+<path d="M0,0 L400,0 L400,300 L0,300 Z" fill="#eee8d7"></path>
+<!-- River flow path -->
+<path d="M 40,30 C 50,60 30,110 50,150 C 70,190 120,180 160,170 C 190,165 210,140 230,120 C 255,95 285,100 310,120 C 335,140 360,190 350,230 C 340,265 290,270 240,260 C 200,250 180,275 140,285" fill="none" stroke="#a4c9db" stroke-linecap="round" stroke-linejoin="round" stroke-width="26"></path>
+<path d="M 40,30 C 50,60 30,110 50,150 C 70,190 120,180 160,170 C 190,165 210,140 230,120 C 255,95 285,100 310,120 C 335,140 360,190 350,230 C 340,265 290,270 240,260 C 200,250 180,275 140,285" fill="none" stroke="#7ab2cd" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+<!-- Town Markers & Labels -->
+<!-- Renmark -->
+<circle cx="235" cy="100" fill="#8f201d" r="5"></circle>
+<text fill="#1b3b5a" font-family="Montserrat" font-size="11" font-weight="600" x="245" y="103">Renmark</text>
+<!-- Paringa -->
+<circle cx="285" cy="138" fill="#8f201d" r="4.5"></circle>
+<text fill="#1b3b5a" font-family="Montserrat" font-size="10.5" font-weight="600" x="295" y="141">Paringa</text>
+<!-- Berri -->
+<circle cx="128" cy="105" fill="#8f201d" r="4.5"></circle>
+<text fill="#1b3b5a" font-family="Montserrat" font-size="10.5" font-weight="600" x="136" y="109">Berri</text>
+<!-- Barmera -->
+<circle cx="85" cy="172" fill="#8f201d" r="4.5"></circle>
+<text fill="#1b3b5a" font-family="Montserrat" font-size="10.5" font-weight="600" x="94" y="176">Barmera</text>
+<!-- Monash -->
+<circle cx="172" cy="192" fill="#8f201d" r="4.5"></circle>
+<text fill="#1b3b5a" font-family="Montserrat" font-size="10.5" font-weight="600" x="182" y="196">Monash</text>
+<!-- Loxton -->
+<circle cx="288" cy="220" fill="#8f201d" r="4.5"></circle>
+<text fill="#1b3b5a" font-family="Montserrat" font-size="10.5" font-weight="600" x="297" y="224">Loxton</text>
+<!-- Murray River label -->
+<text fill="#2e5b7a" font-family="Playfair Display" font-size="13" font-style="italic" x="278" y="278">Murray River</text>
+</svg>
+</div>
+</div>
+<div class="mt-4">
+<a class="inline-flex items-center px-4 py-2.5 bg-heritage-navy hover:bg-heritage-deepNavy text-white rounded text-xs font-semibold tracking-wider uppercase transition" href="#">
+              View All Towns
+              <svg class="w-3.5 h-3.5 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</a>
+</div>
+</div>
+<!-- Right Sub-Section: From the Archive (approx 7 cols) -->
+<div class="lg:col-span-7 flex flex-col justify-between">
+<div>
+<div class="flex items-baseline justify-between mb-4">
+<div>
+<h2 class="font-serif text-2xl sm:text-3xl font-bold text-heritage-navy">
+                  From the Archive
+                </h2>
+<p class="text-stone-600 text-xs sm:text-sm mt-0.5">
+                  A glimpse into the lives of Greek families in the Riverland.
+                </p>
+</div>
+<a class="text-heritage-navy hover:text-heritage-gold text-xs sm:text-sm font-semibold inline-flex items-center" href="#">
+                View more photos <span class="ml-1">→</span>
+</a>
+</div>
+<!-- 3 Archival Photo Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<!-- Photo 1: Vineyards -->
+<div class="bg-heritage-cardBg border border-stone-200/90 rounded overflow-hidden shadow-sm flex flex-col">
+<div class="h-44 sm:h-48 overflow-hidden bg-stone-300">
+<img alt="Working in the vineyards" class="w-full h-full object-cover vintage-bw hover:scale-105 transition duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXFsGp1GXzh7K2qCWzUOBzuCY5expPEZRwx8q5u8EOj4dPeYe0Gay7ndDPs17O4M_7TQdny5CZt-hu8siX2bxo9rEyrhCViIVVTLoSfZ2E22gEjzV8oYDkYRCuJkC_jzgO30Dr67bh-WdNe8Zc9gMN0OjsDWqjoKqQL42qnOMfle_1HvOCcbJHw650gVx1rxv2lUITytpw9KJs3WglU-Iym36ySKpxmEKQsOiAwjs-WDaxZynuQmVMFg"/>
+</div>
+<div class="p-3">
+<h4 class="text-xs font-semibold text-stone-800">Working in the vineyards</h4>
+<p class="text-[11px] text-stone-500 italic mt-0.5">Monash, 1970s</p>
+</div>
+</div>
+<!-- Photo 2: Greek wedding -->
+<div class="bg-heritage-cardBg border border-stone-200/90 rounded overflow-hidden shadow-sm flex flex-col">
+<div class="h-44 sm:h-48 overflow-hidden bg-stone-300">
+<img alt="Greek wedding" class="w-full h-full object-cover vintage-bw hover:scale-105 transition duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhD3rbk4ZGSCp73w5LbpQFBFIPXsP-DFya48Dl2erKVIulTLCUfMQHWcVuv39WIBpNJAWgoBeh79qjQOGhDjhw3VSXtZuGDrGlX8q9pHyTU8Q4l4EFGDQjhCNH_ERgA6Yr2arY6kqkmk5Hpfr4p7OTFNg7Y9nRc4Yz8hQ7-_9NrUfQocM4cnEWYkRETUlUkvxzAeEWyDjX_9nKeZYCpUl84rVe5EaJFjutEUzw8a4NKxLOG_V6LkWEpA"/>
+</div>
+<div class="p-3">
+<h4 class="text-xs font-semibold text-stone-800">Greek wedding</h4>
+<p class="text-[11px] text-stone-500 italic mt-0.5">Renmark, 1960s</p>
+</div>
+</div>
+<!-- Photo 3: Packing shed -->
+<div class="bg-heritage-cardBg border border-stone-200/90 rounded overflow-hidden shadow-sm flex flex-col">
+<div class="h-44 sm:h-48 overflow-hidden bg-stone-300">
+<img alt="Packing shed" class="w-full h-full object-cover vintage-bw hover:scale-105 transition duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjZ2qq4OAd4j484WXeKNb2U-2pC-URo5-v1Zv8UXQrjLXy6fUv4IV8hO6KxoXJOfu_57FFbBoYBwCKbp4CkUdDUxm6tyf8YqfFP6-9onwrHNW03-zVPN1I0S7z942XtaFXKwQ80ZBu3W9xp6sgF6PO1jI1ZvwDEnRSYe-8yLnS_Vh7h1DrL9-Q2RvlD114BXspRCv2Yuix4CWP6PzePs-kntL8XinxnXRgiuGMggjPPUobbbrZR0CD_g"/>
+</div>
+<div class="p-3">
+<h4 class="text-xs font-semibold text-stone-800">Packing shed</h4>
+<p class="text-[11px] text-stone-500 italic mt-0.5">Berri, 1970s</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: ExploreAndArchiveSection -->
+<!-- BEGIN: ThreeColumnHighlights -->
+<section class="border-t border-heritage-borderMuted bg-stone-100/60 py-12 sm:py-16" data-purpose="stories-memorial-support">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+<!-- Column 1: Latest Stories -->
+<div class="space-y-4">
+<h3 class="font-serif text-xl sm:text-2xl font-bold text-heritage-navy border-l-2 border-heritage-navy pl-3">
+              Latest Stories
+            </h3>
+<div class="flex items-start space-x-3.5">
+<img alt="Savas Savaidis" class="w-16 h-20 sm:w-20 sm:h-24 object-cover vintage-bw rounded shrink-0 border border-stone-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5_t2-Z1S4HfxZqQaZu1myfG0oc-dSL4XNca8EvziGQ6bXFHPTdv2y735kNSh6Bhf5qDkqg3EHg34wVU7sani-WzGoqkaBWQf06992rsmbLaKjnkm4i5qXXKa_QF0h_pZYsTa7MGP_xhjhgxcF6YXWU1Ck7UFdpAeXnS0IgXi1__yLyoYMcj1hXS-mbIcnJqaU1m8lTYpAtGDXgohNHF5EdHkUHrdNyQCsw8Lh2FBiWK3IGSyRcTylqA"/>
+<div class="flex flex-col justify-between">
+<h4 class="text-xs sm:text-sm font-bold text-heritage-navy">
+                  Memories of Monash
+                </h4>
+<p class="text-xs text-stone-600 italic mt-1 leading-relaxed">
+                  “We worked long hours, but we always had our friends and our family. The Greek community in Monash was like a second home.”
+                </p>
+<a class="mt-2 text-xs font-semibold text-heritage-navy hover:text-heritage-gold inline-flex items-center" href="#">
+                  Read more <span class="ml-1">→</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Column 2: In Memoriam -->
+<div class="space-y-4">
+<h3 class="font-serif text-xl sm:text-2xl font-bold text-heritage-navy border-l-2 border-heritage-navy pl-3">
+              In Memoriam
+            </h3>
+<div class="flex items-start space-x-3.5">
+<img alt="Athina Savaidis" class="w-16 h-20 sm:w-20 sm:h-24 object-cover vintage-bw rounded shrink-0 border border-stone-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAusdZUnmlNWCYQmgtwfMJcyLG7fjDY79y2BLyCe9JOtrAXx4PQehnGRGteKJlvk66Z5KhFmtNan-AxUcXSq82VPEnVLVrh_WiT4y8zwHQyy-i_vVLw-v5tYbA_l0BWI4S0PNfziaSN2HA6Jrxo6Qh4bg9QWw0jVrQVUUlO-cM5NlCrybh9sbSyA3aMoZUup03wscfrr9pz7OsytKnAxg_EPF8-nyrR3NCjKA-sPoBWdg-KUb2_A37lnw"/>
+<div class="flex flex-col justify-between">
+<div>
+<h4 class="text-xs sm:text-sm font-bold text-heritage-navy">
+                    Athina Savaidis
+                  </h4>
+<p class="text-[11px] text-stone-500 font-medium">
+                    1935 – 2010
+                  </p>
+</div>
+<p class="text-xs text-stone-600 italic mt-1 leading-relaxed">
+                  “A beloved wife, mother, grandmother and friend. She will always be remembered.”
+                </p>
+<a class="mt-2 text-xs font-semibold text-heritage-navy hover:text-heritage-gold inline-flex items-center" href="#">
+                  Read more <span class="ml-1">→</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Column 3: Support the Project -->
+<div class="space-y-4">
+<h3 class="font-serif text-xl sm:text-2xl font-bold text-heritage-navy border-l-2 border-heritage-navy pl-3">
+              Support the Project
+            </h3>
+<div class="flex items-start space-x-3.5">
+<!-- Illustrated Hand holding Heart badge -->
+<div class="w-16 h-16 sm:w-20 sm:h-20 bg-[#efe7d3] rounded border border-stone-300 flex items-center justify-center shrink-0">
+<svg class="w-10 h-10 text-heritage-olive" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+</svg>
+</div>
+<p class="text-xs text-stone-600 leading-relaxed">
+                Your contribution helps cover website hosting, storage, digitisation and future improvements.
+              </p>
+</div>
+<a class="w-full inline-flex items-center justify-between px-4 py-2.5 bg-heritage-navy hover:bg-heritage-deepNavy text-white rounded text-xs font-bold tracking-wider uppercase transition" href="#">
+<span>Make a Contribution</span>
+<svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</a>
+</div>
+</div>
+</div>
+</section>
+<!-- END: ThreeColumnHighlights -->
+</main>
+<!-- BEGIN: SiteFooter -->
+<footer class="relative w-full overflow-hidden bg-black text-white" data-purpose="site-footer">
+<!-- Atmospheric Murray River Sunset Banner with Paddle Steamer -->
+<div class="relative w-full h-48 sm:h-64 md:h-72 overflow-hidden">
+<img alt="Murray River sunset with paddle steamer" class="w-full h-full object-cover opacity-75" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBF95KqlBUwiODCC4LA_PmXUP4ag2hxN_hXaiX81DqCJ49FwrlTKWxSIzuogHwTJ2PIf9FI5oXu8eDec8iJF-NVNZ1NSSuybbVI8SKjuZMmNvqKoSB9JZnRGcnfIQlglpPdDyI8jFKV7-ZZp83c12n8VcQQ9eiOR-Z_x9OuUG0lGRmtVyUa0DDFJiVjJh1sALNK7rhP5BRQv3DInHQ4DJUNW0KKmDGllLqbu0eglaItiVLNqdA0AnfPQ"/>
+<!-- Dramatic golden hour / warm dark gradient overlay -->
+<div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/85"></div>
+<!-- Content inside the footer banner -->
+<div class="absolute inset-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+<!-- Left: Script phrase with olive twig -->
+<div class="flex items-center space-x-3 text-amber-100">
+<div class="font-script text-2xl sm:text-3xl md:text-4xl tracking-wide drop-shadow-md">
+            “Different shores,<br class="hidden sm:inline"/> the same people.”
+          </div>
+<!-- Decorative leaf twig -->
+<svg class="w-8 h-8 text-amber-200/70 hidden sm:block fill-current" viewbox="0 0 24 24">
+<path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-8 2s-3-2-5-2c0 0 1 4 4 5z"></path>
+</svg>
+</div>
+<!-- Right: Script / Serif closing homage -->
+<div class="text-right">
+<div class="font-serif italic text-base sm:text-2xl md:text-3xl text-stone-200 tracking-wide drop-shadow-md">
+            Honouring the past.
+          </div>
+<div class="font-serif italic text-sm sm:text-xl md:text-2xl text-stone-300 drop-shadow-md">
+            Preserving it for the future.
+          </div>
+</div>
+</div>
+</div>
+<!-- Heritage copyright and acknowledgment bottom strip -->
+<div class="bg-[#0b1622] border-t border-stone-800 py-5 text-center text-xs text-stone-400 font-light">
+<div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
+<p>© Greeks of the Riverland Archive Project (1950 – 2020). South Australia. All rights reserved.</p>
+<p class="text-[11px] text-stone-500">A community historical preservation initiative.</p>
+</div>
+</div>
+</footer>
+<!-- END: SiteFooter -->
+</body></html>
