@@ -28,6 +28,7 @@ const CONFIG = {
 function setupAll() {
   const out = [];
   out.push(setupSheetTabs_());
+  out.push(setupMap());
   out.push(getUploadRootFolder_().getUrl());
   out.push(removeFileUploadQuestions_());
   out.push(installTriggers_());
@@ -466,12 +467,14 @@ TOWNS.forEach(function(t){
   el('rect',{'class':'hit',x:x0,y:y-(major?26:20),width:ww,height:major?52:40,rx:12},grp);
   var n=fams(name).length;
   if(n){var b=el('g',{'class':'badge'},grp);el('circle',{cx:x+r*0.75,cy:y-r*0.85,r:12},b);var tx=el('text',{x:x+r*0.75,y:y-r*0.85+1},b);tx.textContent=n;}
-  grp.addEventListener('mouseenter',function(){if(!pinned)show(grp)});
-  grp.addEventListener('mouseleave',function(){if(!pinned)hide()});
+  grp.addEventListener('mouseenter',function(){clearTimeout(hideT);if(!pinned)show(grp)});
+  grp.addEventListener('mouseleave',function(){if(!pinned)hideT=setTimeout(function(){if(!pinned&&!overCard)hide()},350)});
   grp.addEventListener('click',function(e){e.stopPropagation();if(pinned===grp){pinned=null;hide();return}pinned=grp;show(grp)});
   grp.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();pinned=grp;show(grp)}});
 });
-card.addEventListener('mouseenter',function(){if(!pinned&&cur)pinned=cur});
+var hideT=null,overCard=false;
+card.addEventListener('mouseenter',function(){overCard=true;clearTimeout(hideT)});
+card.addEventListener('mouseleave',function(){overCard=false;if(!pinned)hideT=setTimeout(function(){if(!pinned&&!overCard)hide()},250)});
 document.addEventListener('click',function(e){if(!card.contains(e.target)){pinned=null;hide()}});
 var cur=null;
 function show(grp){
@@ -486,11 +489,11 @@ function show(grp){
 function hide(){card.classList.remove('show');if(cur){cur.classList.remove('on');cur=null}}
 function place(grp){
   var t=TOWNS.filter(function(z){return z[0]===grp.dataset.town})[0],W=wrap.clientWidth,H=wrap.clientHeight,s=W/1402;
-  var px=t[1]*s,py=t[2]*s,cw=card.offsetWidth,ch=card.offsetHeight,gap=18;
-  var left=px+gap, top=py-ch/2;
-  if(left+cw>W-6)left=px-gap-cw;
-  if(left<6)left=Math.max(6,Math.min(W-cw-6,px-cw/2));
-  if(left===Math.max(6,Math.min(W-cw-6,px-cw/2))){top=py+gap; if(top+ch>H-6)top=py-gap-ch;}
+  var px=t[1]*s,py=t[2]*s,cw=card.offsetWidth,ch=card.offsetHeight,gap=18,r=(t[4]?22:14)*s,lw=Math.abs(t[3])*s;
+  var right=(t[3]>0?px+r+lw:px+r)+gap, leftSide=(t[3]<0?px-r-lw:px-r)-gap-cw;
+  var left=right, top=py-ch/2;
+  if(left+cw>W-6)left=leftSide;
+  if(left<6){left=Math.max(6,Math.min(W-cw-6,px-cw/2));top=py+r+gap; if(top+ch>H-6)top=py-r-gap-ch;}
   top=Math.max(6,Math.min(H-ch-6,top));
   card.style.left=left+'px';card.style.top=top+'px';
 }
