@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_top">
+<title>Riverland Towns – Greeks of the Riverland</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#fbf7ec;font-family:'Source Sans 3',Arial,sans-serif;color:#1b2a3a}
+.wrap{position:relative;width:100%;max-width:1402px;margin:0 auto;aspect-ratio:1402/1122;overflow:hidden}
+svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hit{fill:transparent;cursor:pointer}
+.ring{fill:none;stroke:#c5a059;stroke-width:5;opacity:0;transition:opacity .15s}
+.town.on .ring,.town:hover .ring{opacity:1}
+.town:focus{outline:none}
+.badge circle{fill:#b85d39;stroke:#fff;stroke-width:2.5}
+.badge text{fill:#fff;font:700 15px 'Source Sans 3',Arial,sans-serif;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.hint{font:600 22px 'Source Sans 3',Arial,sans-serif;fill:#1b365d}
+.hint2{font:400 18px 'Source Sans 3',Arial,sans-serif;fill:#5f5b53}
+.card{position:absolute;z-index:5;min-width:210px;max-width:300px;background:#fff;border:1px solid #e2dcd0;border-top:4px solid #1b365d;border-radius:10px;box-shadow:0 10px 30px rgba(20,30,50,.22);padding:12px 14px 12px;display:none;font-size:14px}
+.card.show{display:block}
+.card h3{font-family:'Playfair Display',Georgia,serif;font-size:19px;color:#1b365d;line-height:1.15;padding-right:22px}
+.card .sub{font-size:12px;color:#7a7368;text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.card ul{list-style:none;margin:8px 0 6px;max-height:190px;overflow:auto}
+.card li a{display:flex;justify-content:space-between;gap:10px;padding:6px 8px;margin:0 -8px;border-radius:6px;color:#1b365d;text-decoration:none;font-weight:600}
+.card li a:hover{background:#f3efe6}
+.card li a span{color:#b85d39}
+.card .none{color:#5f5b53;margin:8px 0;line-height:1.35}
+.card .foot{border-top:1px solid #eee7da;margin-top:6px;padding-top:7px;display:flex;flex-wrap:wrap;gap:4px 14px}
+.card .foot a{color:#b85d39;font-weight:700;text-decoration:none;font-size:13px}
+.card .x{position:absolute;right:8px;top:6px;border:0;background:none;font-size:20px;color:#7a7368;cursor:pointer;line-height:1}
+@media (max-width:600px){.card{font-size:13px;min-width:180px;max-width:240px;padding:10px 11px}.card h3{font-size:17px}}
+</style></head><body>
+<div class="wrap" id="wrap">
+<svg viewBox="0 0 1402 1122" id="map" aria-label="Interactive map of Riverland towns">
+  <image href="__IMG__" x="0" y="0" width="1402" height="1122"/>
+  <g id="hintg"><text class="hint" x="1000" y="1010" text-anchor="middle">Hover or tap a town to see its families</text>
+  <text class="hint2" x="1000" y="1040" text-anchor="middle">Click a family name to open their page</text></g>
+  <g id="towns"></g>
+</svg>
+<div class="card" id="card" role="dialog" aria-live="polite"></div>
+</div>
+<script>
+var DATA = __DATA__;
+var SITE='https://sites.google.com/view/greeksoftheriverland/';
+// x,y = dot centre; w = width of clickable label area to the right (negative = label on the left); major = big green dot
+var TOWNS=[
+ ['Morgan',57,289,120],['Cadell',189,325,90],['Ramco',291,437,-95],['Waikerie',369,465,175,1],['Blanchetown',75,573,160],
+ ['Woolpunda',443,598,130],['Overland Corner',632,428,190],['Kingston-on-Murray',511,551,215],['Cobdogla',662,627,120],
+ ['Moorook',632,717,115],['Barmera',782,599,155,1],['Loveday',784,691,105],['Cooltong',1032,377,110],['Monash',965,528,100],
+ ['Glossop',924,580,100],['Berri',1023,618,105,1],['Lyrup',1118,580,80],['Winkie',930,762,90],['Loxton',1050,791,135,1],
+ ['Pyap',1195,751,75],['Renmark',1219,499,155,1],['Paringa',1299,534,95]];
+var TOWN_PAGES={Berri:'towns/berri',Renmark:'towns/renmark',Barmera:'towns/barmera',Monash:'towns/monash',Loxton:'towns/loxton',Paringa:'towns/paringa'};
+var ADD=SITE+'add-your-family', OTHER=SITE+'towns/surrounding-districts';
+function fams(t){return (DATA.families||[]).filter(function(f){return norm(f.town)===norm(t)}).sort(function(a,b){return a.family.localeCompare(b.family)})}
+function norm(s){return String(s||'').toLowerCase().replace(/[^a-z]/g,'')}
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function url(u){u=String(u||'').trim();if(!u)return '';if(/^https?:\/\//.test(u))return u;return SITE+u.replace(/^\//,'')}
+var NS='http://www.w3.org/2000/svg',g=document.getElementById('towns'),card=document.getElementById('card'),wrap=document.getElementById('wrap'),pinned=null;
+function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);(p||g).appendChild(e);return e}
+TOWNS.forEach(function(t){
+  var name=t[0],x=t[1],y=t[2],w=t[3],major=t[4],r=major?22:14;
+  var grp=el('g',{'class':'town','tabindex':'0','role':'button','aria-label':name});grp.dataset.town=name;
+  el('circle',{'class':'ring',cx:x,cy:y,r:r+7},grp);
+  var x0=w<0?x+w-12:x-r-6, ww=Math.abs(w)+r+18;
+  el('rect',{'class':'hit',x:x0,y:y-(major?26:20),width:ww,height:major?52:40,rx:12},grp);
+  var n=fams(name).length;
+  if(n){var b=el('g',{'class':'badge'},grp);el('circle',{cx:x+r*0.75,cy:y-r*0.85,r:12},b);var tx=el('text',{x:x+r*0.75,y:y-r*0.85+1},b);tx.textContent=n;}
+  grp.addEventListener('mouseenter',function(){if(!pinned)show(grp)});
+  grp.addEventListener('mouseleave',function(){if(!pinned)hide()});
+  grp.addEventListener('click',function(e){e.stopPropagation();if(pinned===grp){pinned=null;hide();return}pinned=grp;show(grp)});
+  grp.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();pinned=grp;show(grp)}});
+});
+card.addEventListener('mouseenter',function(){if(!pinned&&cur)pinned=cur});
+document.addEventListener('click',function(e){if(!card.contains(e.target)){pinned=null;hide()}});
+var cur=null;
+function show(grp){
+  if(cur&&cur!==grp)cur.classList.remove('on');cur=grp;grp.classList.add('on');
+  var name=grp.dataset.town,list=fams(name),tp=TOWN_PAGES[name]?SITE+TOWN_PAGES[name]:OTHER;
+  var h='<button class="x" aria-label="Close" onclick="event.stopPropagation();pinned=null;hide()">&times;</button><h3>'+esc(name)+'</h3><div class="sub">'+(list.length?list.length+(list.length>1?' families':' family'):'Riverland town')+'</div>';
+  if(list.length){h+='<ul>'+list.map(function(f){var u=url(f.url);return '<li>'+(u?'<a href="'+esc(u)+'" target="_top">'+esc(f.family)+' family <span>&rarr;</span></a>':'<a>'+esc(f.family)+' family</a>')+'</li>'}).join('')+'</ul>'}
+  else h+='<p class="none">No families recorded here yet. Did your family live in '+esc(name)+'?</p>';
+  h+='<div class="foot"><a href="'+tp+'" target="_top">'+(TOWN_PAGES[name]?'About '+esc(name)+' &rarr;':'Surrounding districts &rarr;')+'</a><a href="'+ADD+'" target="_top">Add your family &rarr;</a></div>';
+  card.innerHTML=h;card.classList.add('show');place(grp);
+}
+function hide(){card.classList.remove('show');if(cur){cur.classList.remove('on');cur=null}}
+function place(grp){
+  var t=TOWNS.filter(function(z){return z[0]===grp.dataset.town})[0],W=wrap.clientWidth,H=wrap.clientHeight,s=W/1402;
+  var px=t[1]*s,py=t[2]*s,cw=card.offsetWidth,ch=card.offsetHeight,gap=18;
+  var left=px+gap, top=py-ch/2;
+  if(left+cw>W-6)left=px-gap-cw;
+  if(left<6)left=Math.max(6,Math.min(W-cw-6,px-cw/2));
+  if(left===Math.max(6,Math.min(W-cw-6,px-cw/2))){top=py+gap; if(top+ch>H-6)top=py-gap-ch;}
+  top=Math.max(6,Math.min(H-ch-6,top));
+  card.style.left=left+'px';card.style.top=top+'px';
+}
+window.addEventListener('resize',function(){if(cur)place(cur)});
+</script>
+</body></html>
