@@ -749,7 +749,7 @@ function setupRegister() {
     c += n;
   });
   sh.setRowHeight(1, 28); sh.setRowHeight(2, 48);
-  sh.setFrozenRows(2); sh.setFrozenColumns(3);
+  sh.setFrozenRows(2);
   sh.getRange(3, 1, 998, headers.length).setWrap(true).setVerticalAlignment('top');
 
   // Column widths
