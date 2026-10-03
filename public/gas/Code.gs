@@ -1117,6 +1117,8 @@ const FIND_HTML = String.raw`<!DOCTYPE html>
 *{box-sizing:border-box}
 html,body{margin:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
 .box{background:var(--pale);border:1px solid var(--line);border-radius:16px;padding:16px;min-height:100vh}
+.ttl{margin:2px 2px 2px;font:700 27px/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.sub{margin:0 2px 14px;font-size:17px;color:#41526a}
 .search{position:relative}
 .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%)}
 input{width:100%;font:italic 18px Lora,Georgia,serif;padding:15px 14px 15px 46px;border:2px solid #9fb5cf;border-radius:12px;background:#fff;color:var(--ink)}
@@ -1129,7 +1131,7 @@ input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,5
 .bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .bar h3{margin:0;font:700 17px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
 .back{font:600 15px Lora,Georgia,serif;background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:9px;padding:9px 12px;cursor:pointer}
-.list{max-height:calc(100vh - 175px);overflow:auto;padding-right:4px}
+.list{max-height:calc(100vh - 250px);overflow:auto;padding-right:4px}
 .item{display:block;background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;text-decoration:none;color:var(--ink)}
 a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
 .item b{font:700 18px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
@@ -1138,6 +1140,7 @@ a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
 .empty a{color:var(--navy);font-weight:600}
 </style></head>
 <body><div class="box">
+<h2 class="ttl">Find a Family</h2><p class="sub">Search by surname or browse A&ndash;Z.</p>
 <div class="search">
  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b365d" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
  <input id="q" type="search" placeholder="Search surname..." aria-label="Search surname" autocomplete="off">
