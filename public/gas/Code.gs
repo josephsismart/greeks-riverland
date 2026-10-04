@@ -163,6 +163,7 @@ function doGet(e) {
   const pg = e && e.parameter && e.parameter.page;
   if (pg === 'map' || pg === 'towns') return townsMapPage_();
   if (pg === 'find') return findPage_();
+  if (pg === 'privacy') return privacyPage_();
   if (pg === 'oldmap') return mapPage_();
   const t = HtmlService.createTemplate(UPLOAD_HTML);
   t.maxPhotos = CONFIG.MAX_PHOTOS;
@@ -577,7 +578,13 @@ function rebuildForm() {
       'Every Greek family connected with the Riverland has a story.\n\n' +
       'We would love your help in preserving those stories — the people, places, work, friendships, photographs and memories that formed part of Greek life in the Riverland.\n\n' +
       'You do not need to know exact dates or have all the answers. Please share whatever you know. You can write as much or as little as you like.\n\n' +
-      'Your personal contact details will not be published.')
+      'Your personal contact details will not be published.\n\n' +
+      '—\n\n' +
+      'Your Family\'s Story, Shared With Care\n\n' +
+      'Greeks of the Riverland is about preserving our community\'s history while respecting the people and families who are part of it.\n\n' +
+      'Please only share information and photographs that you are comfortable contributing and have the right to share. We will avoid publishing sensitive personal information about living people.\n\n' +
+      'Material submitted through this form will be kept securely and will not automatically be made public.\n\n' +
+      'If you or a family member ever want something corrected, updated or removed, please contact us and we will review the request with care.')
     .setConfirmationMessage(
       'Thank you for helping preserve the story of Greeks in the Riverland.\n\n' +
       'Every contribution — whether it is a detailed family history, a few memories or a single old photograph — helps build a fuller picture of this community and its history.')
@@ -989,6 +996,10 @@ function findPage_() {
   return widgetOut_(FIND_HTML.replace('__DATA__', function () { return jsonForHtml_(data); }), 'Find a Family');
 }
 
+function privacyPage_() {
+  return widgetOut_(PRIVACY_HTML, 'Privacy, Permission and Photo Use');
+}
+
 /* ------------------------------------------------------------------ */
 
 const TOWNS_MAP_HTML = String.raw`<!DOCTYPE html>
@@ -1168,3 +1179,55 @@ $('back').onclick=reset;
 $('q').addEventListener('input',function(){var v=fold(this.value.trim()); if(!v){reset();return;}
   show(this.value.trim(), fams.filter(function(f){return fold(f.family).indexOf(v)>=0||fold(f.alt).indexOf(v)>=0}), 'Results for “'+this.value.trim()+'”');});
 </script></body></html>`;
+
+/* ------------------------------------------------------------------ */
+
+const PRIVACY_HTML = String.raw`<!DOCTYPE html>
+<html lang=”en”><head><meta charset=”utf-8”><base target=”_top”>
+<meta name=”viewport” content=”width=device-width,initial-scale=1”>
+<link href=”https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:wght@400;600&display=swap” rel=”stylesheet”>
+<style>
+:root{--navy:#1b365d;--olive:#5E6B3A;--gold:#B8914A;--cream:#F6F1E6;--line:#e4d9c3;--ink:#2f2a24}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fbf8f1;font-family:Lora,Georgia,serif;color:var(--ink);line-height:1.7}
+.top{background:linear-gradient(135deg,#1f3a5f,#26466b 60%,#3d4f3a);color:#fff;padding:34px 18px 30px;text-align:center;position:relative}
+.top:after{content:””;position:absolute;left:0;right:0;bottom:0;height:12px;opacity:.4;background:url(“data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Cpath d='M0 13h6V5h8v4h-4V7H8v6h12V1H2' fill='none' stroke='%23E2C48E' stroke-width='1.6'/%3E%3C/svg%3E”) repeat-x}
+.eyebrow{letter-spacing:4px;font-size:12px;color:#E2C48E;font-weight:600;text-transform:uppercase}
+h1{font-family:'Libre Baskerville',serif;font-weight:400;font-size:clamp(24px,5vw,36px);margin:8px 0 0}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 26px;box-shadow:0 2px 10px rgba(31,58,95,.06)}
+h2{font-family:'Libre Baskerville',serif;color:var(--navy);font-weight:700;font-size:22px;margin:0 0 18px;line-height:1.3}
+p{margin:0 0 14px;font-size:16px}
+p:last-child{margin-bottom:0}
+.aim{background:var(--cream);border-left:4px solid var(--olive);padding:16px 18px;border-radius:10px;margin-top:18px;font-style:italic;font-size:15px}
+.aim p{margin:0}
+.back{display:inline-block;margin-top:22px;font:600 15px Lora,Georgia,serif;color:var(--navy);text-decoration:none}
+.back:hover{text-decoration:underline}
+</style></head>
+<body>
+<div class=”top”>
+  <div class=”eyebrow”><i class=”fa-solid fa-shield-halved”></i> &nbsp;Privacy</div>
+  <h1>Privacy, Permission &amp; Photo Use</h1>
+</div>
+<div class=”wrap”>
+  <div class=”card”>
+    <h2>Our commitment to you</h2>
+    <p>We want Greeks of the Riverland to be a respectful and trusted community history project.</p>
+    <p>Information and photographs submitted to us will not automatically be published. We will review material before it appears on the website and will only publish information that is appropriate for a public historical record.</p>
+    <p>Please only submit photographs, stories or personal information that you have the right to share. If a photograph includes living people, we ask that you consider whether they would be comfortable having the image published online.</p>
+    <p>We will avoid publishing sensitive personal information about living people, such as current addresses, phone numbers, email addresses, dates of birth, financial information or other private details.</p>
+
+    <h2 style=”margin-top:24px”>How we store your information</h2>
+    <p>Information submitted through our online forms will be stored in password-protected Google systems, with access limited to authorised project administrators. Private records will not be made publicly accessible through the website.</p>
+    <p>While no online system can guarantee absolute security, we will take reasonable steps to protect information and limit access to it.</p>
+
+    <h2 style=”margin-top:24px”>Corrections and removal</h2>
+    <p>If you believe information or a photograph relating to you or your family should be corrected, updated or removed, please contact us and we will review the request.</p>
+
+    <div class=”aim”>
+      <p>Our aim is simple: to preserve the history, stories and photographs of the Greek families of the Riverland while respecting the privacy and wishes of the people whose history we are recording.</p>
+    </div>
+  </div>
+  <a class=”back” href=”https://sites.google.com/view/greeksoftheriverland”>&larr; Back to Greeks of the Riverland</a>
+</div>
+</body></html>`;
