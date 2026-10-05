@@ -960,6 +960,88 @@ function linkUploadToRegister_(meta, uploadFolder, count) {
   } catch (e) {}
   return '';
 }
+
+/* ======================= END-TO-END TEST ======================= */
+/*
+ * testFormSubmission()    submits a real test response to the Form (surname "Zztest"), exactly like a visitor.
+ *                         The onFamilySubmit trigger then adds it to the Family Register within a minute.
+ * removeTestSubmissions() deletes the Zztest rows, their Form responses and their Drive folders.
+ */
+const TEST_SURNAME = 'Zztest';
+
+function testFormSubmission() {
+  const form = FormApp.openById(CONFIG.FORM_ID);
+  const items = {};
+  form.getItems().forEach(function (it) { items[it.getTitle()] = it; });
+  const need = function (t) { if (!items[t]) throw new Error('Question not found: ' + t); return items[t]; };
+  const r = form.createResponse();
+  r.withItemResponse(need(Q.name).asTextItem().createResponse('TEST entry (automated check)'));
+  r.withItemResponse(need(Q.email).asTextItem().createResponse('test@example.com'));
+  r.withItemResponse(need(Q.connection).asTextItem().createResponse('Test only - please delete'));
+  r.withItemResponse(need(Q.mayContact).asMultipleChoiceItem().createResponse('No'));
+  r.withItemResponse(need(Q.surname).asTextItem().createResponse(TEST_SURNAME));
+  r.withItemResponse(need(Q.towns).asCheckboxItem().createResponse(['Morgan', 'Glossop']));
+  r.withItemResponse(need(Q.firstYear).asTextItem().createResponse('1955'));
+  r.withItemResponse(need(Q.people).asParagraphTextItem().createResponse('Test Person - father - deceased 1990\nTest Child - daughter'));
+  r.withItemResponse(need(Q.story).asParagraphTextItem().createResponse('Automated test of the Add Your Family form. Safe to delete.'));
+  r.withItemResponse(need(Q.wantsUpload).asMultipleChoiceItem().createResponse('No'));
+  r.withItemResponse(need(Q.perms).asCheckboxItem().createResponse(REG.PERM));
+  r.withItemResponse(need(Q.confirmName).asTextItem().createResponse('TEST entry (automated check)'));
+  r.submit();
+  return 'Test response submitted. Check the Family Register for "' + TEST_SURNAME + '" in about a minute.';
+}
+
+function checkTestSubmission() {
+  const sh = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(REG.TAB);
+  const H = regHeaders_();
+  const rows = sh.getLastRow() < 3 ? [] : sh.getRange(3, 1, sh.getLastRow() - 2, H.length).getValues();
+  const hit = rows.filter(function (r) { return r[H.indexOf('Family Surname')] === TEST_SURNAME; });
+  const out = hit.length ? hit.map(function (r) {
+    return ['ID ' + r[0], 'Towns: ' + r[H.indexOf('Riverland Towns / Areas')], 'Deceased: ' + r[H.indexOf('Deceased Family Members')],
+      'Permission: ' + r[H.indexOf('Permission to Publish')], 'Status: ' + r[H.indexOf('Website Status')],
+      'Folder: ' + (r[H.indexOf('Drive Folder Link')] ? 'yes' : 'MISSING')].join(' | ');
+  }).join('\n') : 'No Zztest row yet';
+  Logger.log(out);
+  return out;
+}
+
+function removeTestSubmissions() {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const H = regHeaders_();
+  const out = [];
+  const sh = ss.getSheetByName(REG.TAB);
+  let n = 0;
+  if (sh && sh.getLastRow() >= 3) {
+    const rows = sh.getRange(3, 1, sh.getLastRow() - 2, H.length).getValues();
+    for (let i = rows.length - 1; i >= 0; i--) {
+      if (rows[i][H.indexOf('Family Surname')] !== TEST_SURNAME) continue;
+      const m = String(rows[i][H.indexOf('Drive Folder Link')]).match(/folders\/([\w-]+)/);
+      if (m) { try { DriveApp.getFolderById(m[1]).setTrashed(true); } catch (e) {} }
+      sh.deleteRow(i + 3); n++;
+    }
+  }
+  out.push('Register rows removed: ' + n);
+  const form = FormApp.openById(CONFIG.FORM_ID);
+  let k = 0;
+  form.getResponses().forEach(function (resp) {
+    const isTest = resp.getItemResponses().some(function (ir) { return ir.getItem().getTitle() === Q.surname && ir.getResponse() === TEST_SURNAME; });
+    if (isTest) { form.deleteResponse(resp.getId()); k++; }
+  });
+  out.push('Form responses removed: ' + k);
+  const raw = ss.getSheetByName(REG.RAW_TAB);
+  let j = 0;
+  if (raw && raw.getLastRow() >= 2) {
+    const head = raw.getRange(1, 1, 1, raw.getLastColumn()).getValues()[0];
+    const c = head.indexOf(Q.surname);
+    if (c >= 0) {
+      const vals = raw.getRange(2, c + 1, raw.getLastRow() - 1, 1).getValues();
+      for (let i = vals.length - 1; i >= 0; i--) if (vals[i][0] === TEST_SURNAME) { raw.deleteRow(i + 2); j++; }
+    }
+  }
+  out.push('Raw response rows removed: ' + j);
+  Logger.log(out.join('\n'));
+  return out.join('\n');
+}
 /**
  * Greeks of the Riverland — homepage widgets (served by the same web app)
  *   ?page=map   Geographically accurate Riverland map (OpenStreetMap data). Click a town → its page.
