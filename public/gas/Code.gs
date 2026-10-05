@@ -378,6 +378,10 @@ function setupMap() {
     sh.getRange(2, 1, 1, 5).setValues([['Monash', 'Savaidis', CONFIG.SITE_URL + '/families/savaidis-family', 'Yes', 'Sample family page']]);
     sh.setColumnWidth(1, 160); sh.setColumnWidth(2, 170); sh.setColumnWidth(3, 420); sh.setColumnWidth(4, 110); sh.setColumnWidth(5, 260);
   }
+  if (!String(sh.getRange(1, 6).getValue()).trim()) {
+    sh.getRange(1, 6).setValue('Detail on town page (optional)').setFontWeight('bold').setBackground('#1b365d').setFontColor('#ffffff');
+    sh.setColumnWidth(6, 320);
+  }
   sh.getRange('A2:A1000').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(MAP_TOWNS, true).setAllowInvalid(false).build());
   sh.getRange('D2:D1000').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['Yes', 'No'], true).build());
   return 'Map ready. Image id ' + id + '. Map link: ' + CONFIG.UPLOAD_URL + '?page=map';
@@ -386,9 +390,9 @@ function setupMap() {
 function mapFamilies_() {
   const sh = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName('Map Families');
   if (!sh || sh.getLastRow() < 2) return [];
-  return sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues()
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 6).getValues()
     .filter(function (r) { return r[0] && r[1] && String(r[3]).toLowerCase() !== 'no'; })
-    .map(function (r) { return { town: String(r[0]).trim(), family: String(r[1]).trim(), url: String(r[2]).trim() }; });
+    .map(function (r) { return { town: String(r[0]).trim(), family: String(r[1]).trim(), url: String(r[2]).trim(), detail: String(r[5] || '').trim() }; });
 }
 
 function mapPage_() {
@@ -1090,8 +1094,8 @@ function publicFamilies_() {
   } catch (e) {}
   mapFamilies_().forEach(function (f) {
     const ex = out.filter(function (o) { return o.family.toLowerCase() === f.family.toLowerCase(); })[0];
-    if (ex) { if (ex.towns.indexOf(f.town) < 0) ex.towns = ex.towns ? ex.towns + ', ' + f.town : f.town; if (!ex.url) ex.url = f.url; }
-    else out.push({ family: f.family, alt: '', towns: f.town, url: f.url });
+    if (ex) { if (ex.towns.indexOf(f.town) < 0) ex.towns = ex.towns ? ex.towns + ', ' + f.town : f.town; if (!ex.url) ex.url = f.url; if (!ex.detail) ex.detail = f.detail; }
+    else out.push({ family: f.family, alt: '', towns: f.town, url: f.url, detail: f.detail || '' });
   });
   return out;
 }
@@ -1375,19 +1379,19 @@ $('q').addEventListener('input',function(){var v=fold(this.value.trim()); if(!v)
 const TOWN_HTML = String.raw`<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><base target="_top">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#1b365d;--ink:#2b2a27;--line:#ddd3bf;--muted:#6b6257;--gold:#b8914a}
 *{box-sizing:border-box}
-html,body{margin:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;padding:2px}
-.item{display:block;background:#fff;border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:10px;padding:11px 14px;text-decoration:none;color:var(--ink)}
-a.item:hover,a.item:focus{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15);outline:none}
-.item b{font:700 17px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
-.item small{display:block;font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.35}
-.item .go{color:var(--gold);font-weight:600}
-.none{font-size:15px;line-height:1.55;margin:2px}
-.none a{color:var(--navy);font-weight:600}
+html,body{margin:0;padding:0;background:transparent;font:16px/1.38 Lora,Georgia,serif;color:#000}
+h2{margin:0;font:700 22.67px/1.38 'Libre Baskerville',Georgia,serif;color:#1f3a5f}
+h3{margin:18.67px 0 0;font:700 17.33px/1.38 'Libre Baskerville',Georgia,serif;color:#1f3a5f}
+p{margin:8px 0 0}
+ul{list-style:none;margin:8px 0 0;padding:0}
+li{margin:0 0 4px}
+a{color:#1f3a5f;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+a:hover,a:focus{color:#b8914a}
+b{font-weight:700}
+.muted{color:#5f5b53}
 </style></head>
 <body><div id="out"></div>
 <script>
@@ -1395,18 +1399,22 @@ var DATA = __DATA__;
 function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function norm(s){return String(s||'').toLowerCase().replace(/[^a-z]/g,'')}
 function link(u){u=String(u||'').trim();if(!u)return '';return /^https?:/.test(u)?u:DATA.site+u.replace(/^\/?/,'/')}
-var add = DATA.site + '/add-your-family';
-var f = DATA.families || [];
-document.getElementById('out').innerHTML = f.length
-  ? '<div class="grid">' + f.map(function(x){
-      var also = String(x.towns||'').split(/\s*,\s*/).filter(function(t){return t && norm(t)!==norm(DATA.town)});
-      var sub = [also.length ? 'Also: ' + also.join(', ') : '', x.alt ? 'Also spelt ' + x.alt : ''].filter(String).join(' · ');
-      var u = link(x.url);
-      var inner = '<b>' + esc(x.family) + ' family</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') +
-        (u ? '<small class="go">Read their story &rarr;</small>' : '<small>Family page coming soon</small>');
-      return u ? '<a class="item" href="' + esc(u) + '" target="_top">' + inner + '</a>' : '<div class="item">' + inner + '</div>';
-    }).join('') + '</div>'
-  : '<p class="none">No families listed yet. Did your family live in ' + esc(DATA.town) + '? <a href="' + esc(add) + '" target="_top">Add your family &rarr;</a></p>';
+var T = esc(DATA.town), f = DATA.families || [];
+var h = '<h2>Greek families of ' + T + '</h2>' +
+  '<p>This page gathers what is known about the Greek community of ' + T + ': the families who lived here, the businesses and farms they ran, and the places they worked.</p>' +
+  '<h3>Families</h3>';
+if (f.length) {
+  h += '<ul>' + f.map(function (x) {
+    var u = link(x.url), name = esc(x.family) + ' Family';
+    var also = String(x.towns||'').split(/\s*,\s*/).filter(function(t){return t && norm(t)!==norm(DATA.town)});
+    var extra = [x.detail ? esc(x.detail) : '', also.length ? 'also ' + esc(also.join(', ')) : ''].filter(String).join(' · ');
+    return '<li>' + (u ? '<a href="' + esc(u) + '" target="_top">' + name + '</a>' : '<b>' + name + '</b>') +
+      (extra ? ' <span class="muted">— ' + extra + '</span>' : '') + '</li>';
+  }).join('') + '</ul>';
+} else {
+  h += '<p><em>No families listed yet.</em></p>';
+}
+document.getElementById('out').innerHTML = h;
 </script></body></html>`;
 
 const PRIVACY_HTML = String.raw`<!DOCTYPE html>
