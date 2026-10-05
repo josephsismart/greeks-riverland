@@ -164,6 +164,7 @@ function doGet(e) {
   if (pg === 'map' || pg === 'towns') return townsMapPage_();
   if (pg === 'find') return findPage_();
   if (pg === 'privacy') return privacyPage_();
+  if (pg === 'town') return townPage_(e.parameter.t);
   if (pg === 'oldmap') return mapPage_();
   const t = HtmlService.createTemplate(UPLOAD_HTML);
   t.maxPhotos = CONFIG.MAX_PHOTOS;
@@ -287,7 +288,7 @@ button.go:disabled{opacity:.5;cursor:default}
       <div><label>Phone <small>(optional)</small></label><input type="tel" id="phone" autocomplete="tel"></div>
       <div><label>Family surname *</label><input type="text" id="surname" placeholder="e.g. Savaidis"></div>
       <div><label>Riverland town <small>(optional)</small></label>
-        <select id="town"><option value=""></option><option>Berri</option><option>Renmark</option><option>Barmera</option><option>Monash</option><option>Loxton</option><option>Paringa</option><option>Glossop</option><option>Cobdogla</option><option>Waikerie</option><option>Other</option></select></div>
+        <select id="town"><option value=""></option><option>Barmera</option><option>Berri</option><option>Blanchetown</option><option>Cobdogla</option><option>Glossop</option><option>Loveday</option><option>Loxton</option><option>Monash</option><option>Morgan</option><option>Paringa</option><option>Renmark</option><option>Waikerie</option><option>Other</option></select></div>
     </div>
     <label class="consent" style="font-weight:400;color:inherit;margin-top:14px"><input type="checkbox" id="contact" checked> You may contact me about these photos.</label>
   </div>
@@ -523,7 +524,7 @@ const REG = {
   TAB: 'Family Register',
   RAW_TAB: 'Form Responses (raw)',
   FAMILY_FOLDER: 'Family Submissions',
-  TOWNS: ['Berri', 'Barmera', 'Renmark', 'Loxton', 'Monash', 'Glossop', 'Waikerie', 'Paringa', 'Loveday', 'Cobdogla'],
+  TOWNS: ['Barmera', 'Berri', 'Blanchetown', 'Cobdogla', 'Glossop', 'Loveday', 'Loxton', 'Monash', 'Morgan', 'Paringa', 'Renmark', 'Waikerie'],
   PERM: [
     'I give Greeks of the Riverland permission to use the family history information I have provided on the Greeks of the Riverland website and project.',
     'If I have uploaded photographs or documents, I give permission for them to be displayed as part of the project.',
@@ -569,22 +570,24 @@ const Q = {
 
 /* ============================ FORM ============================ */
 
+const FORM_DESCRIPTION =
+  'Every Greek family connected with the Riverland has a story.\n\n' +
+  'We would love your help in preserving those stories — the people, places, work, friendships, photographs and memories that formed part of Greek life in the Riverland.\n\n' +
+  'You do not need to know exact dates or have all the answers. Please share whatever you know. You can write as much or as little as you like.\n\n' +
+  'Your personal contact details will not be published.\n\n' +
+  '—\n\n' +
+  'Your Family\'s Story, Shared With Care\n\n' +
+  'Greeks of the Riverland is about preserving our community\'s history while respecting the people and families who are part of it.\n\n' +
+  'Please only share information and photographs that you are comfortable contributing and have the right to share. We will avoid publishing sensitive personal information about living people.\n\n' +
+  'Material submitted through this form will be kept securely and will not automatically be made public.\n\n' +
+  'If you or a family member ever want something corrected, updated or removed, please contact us and we will review the request with care.';
+
 function rebuildForm() {
   const form = FormApp.openById(CONFIG.FORM_ID);
   form.getItems().forEach(function (it) { form.deleteItem(it); });
 
   form.setTitle('Add Your Family — Greeks of the Riverland')
-    .setDescription(
-      'Every Greek family connected with the Riverland has a story.\n\n' +
-      'We would love your help in preserving those stories — the people, places, work, friendships, photographs and memories that formed part of Greek life in the Riverland.\n\n' +
-      'You do not need to know exact dates or have all the answers. Please share whatever you know. You can write as much or as little as you like.\n\n' +
-      'Your personal contact details will not be published.\n\n' +
-      '—\n\n' +
-      'Your Family\'s Story, Shared With Care\n\n' +
-      'Greeks of the Riverland is about preserving our community\'s history while respecting the people and families who are part of it.\n\n' +
-      'Please only share information and photographs that you are comfortable contributing and have the right to share. We will avoid publishing sensitive personal information about living people.\n\n' +
-      'Material submitted through this form will be kept securely and will not automatically be made public.\n\n' +
-      'If you or a family member ever want something corrected, updated or removed, please contact us and we will review the request with care.')
+    .setDescription(FORM_DESCRIPTION)
     .setConfirmationMessage(
       'Thank you for helping preserve the story of Greeks in the Riverland.\n\n' +
       'Every contribution — whether it is a detailed family history, a few memories or a single old photograph — helps build a fuller picture of this community and its history.')
@@ -699,6 +702,30 @@ function rebuildForm() {
   p7b.setGoToPage(p8);
 
   return 'Form rebuilt: ' + form.getItems().length + ' items · ' + form.getPublishedUrl();
+}
+
+/**
+ * Safe update of the live Form WITHOUT deleting questions (keeps every past response linked):
+ * refreshes the description (privacy text), the Riverland towns list and the upload-page link.
+ */
+function updateFormInPlace() {
+  const form = FormApp.openById(CONFIG.FORM_ID);
+  form.setDescription(FORM_DESCRIPTION);
+  const out = ['Description updated'];
+  form.getItems(FormApp.ItemType.CHECKBOX).forEach(function (it) {
+    if (it.getTitle() === Q.towns) { it.asCheckboxItem().setChoiceValues(REG.TOWNS).showOtherOption(true); out.push('Towns: ' + REG.TOWNS.length); }
+  });
+  form.getItems(FormApp.ItemType.PAGE_BREAK).forEach(function (it) {
+    if (it.getTitle() === 'Upload your photographs and documents') {
+      it.asPageBreakItem().setHelpText(
+        'Please open our photo upload page in a new tab — no Google account is needed:\n' + CONFIG.UPLOAD_URL + '\n\n' +
+        'You can upload family photographs, school photographs, newspaper clippings, letters, certificates or other historical material. ' +
+        'Use the same family surname and email address as on this form so we can match them together.\n\n' +
+        'Then come back to this tab and tell us whatever you know about what you uploaded. It is completely fine if you don\'t know all the details.');
+      out.push('Upload link refreshed');
+    }
+  });
+  return out.join(' · ');
 }
 
 /* ========================== REGISTER ========================== */
@@ -937,6 +964,7 @@ function linkUploadToRegister_(meta, uploadFolder, count) {
  * Greeks of the Riverland — homepage widgets (served by the same web app)
  *   ?page=map   Geographically accurate Riverland map (OpenStreetMap data). Click a town → its page.
  *   ?page=find  Find a Family: surname search + A–Z, from published families only.
+ *   ?page=town&t=Berri  Families of one town (embedded on each town page).
  *
  * Town positions are the official OpenStreetMap / Nominatim coordinates (checked 3 Oct 2026).
  * To add a town later: add a line to RIVERLAND_TOWNS (name, lat, lng, page path).
@@ -994,6 +1022,86 @@ function townsMapPage_() {
 function findPage_() {
   const data = { site: CONFIG.SITE_URL, families: publicFamilies_() };
   return widgetOut_(FIND_HTML.replace('__DATA__', function () { return jsonForHtml_(data); }), 'Find a Family');
+}
+
+/** ?page=town&t=Berri — the families list embedded on each town page. */
+function townPage_(name) {
+  const t = RIVERLAND_TOWNS.filter(function (x) { return x.name.toLowerCase() === String(name || '').trim().toLowerCase(); })[0];
+  const town = t ? t.name : String(name || '').trim().slice(0, 40);
+  const norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+  const fams = publicFamilies_().filter(function (f) {
+    return String(f.towns).split(/\s*,\s*/).map(norm).indexOf(norm(town)) >= 0;
+  }).sort(function (a, b) { return a.family.localeCompare(b.family); });
+  const data = { site: CONFIG.SITE_URL, town: town, families: fams };
+  return widgetOut_(TOWN_HTML.replace('__DATA__', function () { return jsonForHtml_(data); }), (town || 'Town') + ' families');
+}
+
+/* =================== SAMPLE DATA (demo only) =================== */
+/*
+ * seedSampleData()   adds demonstration families to the Family Register (marked Published) so the
+ *                    map, Find a Family and town pages can be seen working. Safe to run again.
+ * removeSampleData() deletes every SAMPLE-xx row. Run this before the site goes public with real data.
+ */
+const SAMPLE_FAMILIES = [
+  ['Andreou', '', 'Berri, Barmera', 'Kythera', 'Greece', '1951', 'Fruit block and packing shed work'],
+  ['Christodoulou', '', 'Renmark', 'Kastellorizo', 'Greece', '1949', 'Market garden and later a fruit shop'],
+  ['Dimitriou', '', 'Loxton', 'Florina', 'Greece', '1956', 'Irrigation channel work and vineyard'],
+  ['Georgiou', '', 'Waikerie', 'Lefkada', 'Greece', '1954', 'Citrus growing'],
+  ['Karamanos', '', 'Morgan', 'Ithaca', 'Greece', '1938', 'River trade and general store'],
+  ['Konstantinidis', 'Constantinidis', 'Monash, Glossop', 'Kozani', 'Greece', '1960', 'Dried fruit block'],
+  ['Lambrou', '', 'Paringa, Renmark', 'Nicosia', 'Cyprus', '1958', 'Winery and cellar work'],
+  ['Papadopoulos', '', 'Barmera', 'Kalamata', 'Greece', '1952', 'Cafe on the main street'],
+  ['Vlahos', 'Vlachos', 'Blanchetown', 'Chios', 'Greece', '1947', 'Fishing and boat building']
+];
+const SAMPLE_NOTE = 'SAMPLE DATA - for demonstration only. Delete by running removeSampleData() in Apps Script.';
+
+function seedSampleData() {
+  removeSampleData();
+  const sh = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(REG.TAB);
+  if (!sh) throw new Error('Run setupRegister() first.');
+  const H = regHeaders_();
+  const rows = SAMPLE_FAMILIES.map(function (f, i) {
+    const v = {
+      'Submission ID': 'SAMPLE-' + ('0' + (i + 1)).slice(-2), 'Date Submitted': new Date(),
+      'Family Surname': f[0], 'Other Surname Spellings': f[1], 'Riverland Towns / Areas': f[2],
+      'Place of Origin': f[3], 'Region / Country': f[4], 'Year Arrived in Australia': f[5], 'Work / Occupations': f[6],
+      'Family Story': 'Sample entry used to demonstrate the website. Not a real family record.',
+      'Permission to Publish': 'Yes', 'Photo Permission': 'No', 'Contributor Name': 'Sample data', 'May Contact?': 'No',
+      'Photos / Documents Supplied': 'No', 'Website Status': 'Published', 'Priority': 'Low',
+      'Needs Editing': 'No', 'Needs Fact Check': 'No', 'Needs Photo Caption': 'No', 'Ready to Publish': 'Yes',
+      'Follow-up Needed': 'No', 'Follow-up Notes': SAMPLE_NOTE
+    };
+    return H.map(function (h) { return v[h] === undefined ? '' : v[h]; });
+  });
+  const r = Math.max(sh.getLastRow() + 1, 3);
+  sh.getRange(r, 1, rows.length, H.length).setValues(rows);
+  return 'Sample families added: ' + rows.length;
+}
+
+function removeSampleData() {
+  const sh = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(REG.TAB);
+  if (!sh || sh.getLastRow() < 3) return 'Sample rows removed: 0';
+  const ids = sh.getRange(3, 1, sh.getLastRow() - 2, 1).getValues();
+  let n = 0;
+  for (let i = ids.length - 1; i >= 0; i--) {
+    if (/^SAMPLE-/.test(String(ids[i][0]))) { sh.deleteRow(i + 3); n++; }
+  }
+  return 'Sample rows removed: ' + n;
+}
+
+/** Quick self-check: run from the editor; every line should read OK. */
+function selfTest() {
+  const out = [];
+  const fams = publicFamilies_();
+  out.push('OK public families: ' + fams.length);
+  RIVERLAND_TOWNS.forEach(function (t) {
+    const html = townPage_(t.name).getContent();
+    out.push((html.indexOf('__DATA__') < 0 ? 'OK ' : 'FAIL ') + 'town widget ' + t.name);
+  });
+  out.push((townsMapPage_().getContent().indexOf('__DATA__') < 0 ? 'OK' : 'FAIL') + ' map');
+  out.push((findPage_().getContent().indexOf('__DATA__') < 0 ? 'OK' : 'FAIL') + ' find');
+  Logger.log(out.join('\n'));
+  return out.join('\n');
 }
 
 function privacyPage_() {
@@ -1181,6 +1289,43 @@ $('q').addEventListener('input',function(){var v=fold(this.value.trim()); if(!v)
 </script></body></html>`;
 
 /* ------------------------------------------------------------------ */
+
+const TOWN_HTML = String.raw`<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><base target="_top">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1b365d;--ink:#2b2a27;--line:#ddd3bf;--muted:#6b6257;--gold:#b8914a}
+*{box-sizing:border-box}
+html,body{margin:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;padding:2px}
+.item{display:block;background:#fff;border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:10px;padding:11px 14px;text-decoration:none;color:var(--ink)}
+a.item:hover,a.item:focus{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15);outline:none}
+.item b{font:700 17px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.item small{display:block;font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.35}
+.item .go{color:var(--gold);font-weight:600}
+.none{font-size:15px;line-height:1.55;margin:2px}
+.none a{color:var(--navy);font-weight:600}
+</style></head>
+<body><div id="out"></div>
+<script>
+var DATA = __DATA__;
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function norm(s){return String(s||'').toLowerCase().replace(/[^a-z]/g,'')}
+function link(u){u=String(u||'').trim();if(!u)return '';return /^https?:/.test(u)?u:DATA.site+u.replace(/^\/?/,'/')}
+var add = DATA.site + '/add-your-family';
+var f = DATA.families || [];
+document.getElementById('out').innerHTML = f.length
+  ? '<div class="grid">' + f.map(function(x){
+      var also = String(x.towns||'').split(/\s*,\s*/).filter(function(t){return t && norm(t)!==norm(DATA.town)});
+      var sub = [also.length ? 'Also: ' + also.join(', ') : '', x.alt ? 'Also spelt ' + x.alt : ''].filter(String).join(' · ');
+      var u = link(x.url);
+      var inner = '<b>' + esc(x.family) + ' family</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') +
+        (u ? '<small class="go">Read their story &rarr;</small>' : '<small>Family page coming soon</small>');
+      return u ? '<a class="item" href="' + esc(u) + '" target="_top">' + inner + '</a>' : '<div class="item">' + inner + '</div>';
+    }).join('') + '</div>'
+  : '<p class="none">No families listed yet. Did your family live in ' + esc(DATA.town) + '? <a href="' + esc(add) + '" target="_top">Add your family &rarr;</a></p>';
+</script></body></html>`;
 
 const PRIVACY_HTML = String.raw`<!DOCTYPE html>
 <html lang=”en”><head><meta charset=”utf-8”><base target=”_top”>
