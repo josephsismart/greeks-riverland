@@ -1384,7 +1384,7 @@ const TOWN_HTML = String.raw`<!DOCTYPE html>
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:transparent;font:16px/1.38 Lora,Georgia,serif;color:#000}
 h2{margin:0;font:700 22.67px/1.38 'Libre Baskerville',Georgia,serif;color:#1f3a5f}
-h3{margin:18.67px 0 0;font:700 17.33px/1.38 'Libre Baskerville',Georgia,serif;color:#1f3a5f}
+h3{margin:0;font:700 17.33px/1.38 'Libre Baskerville',Georgia,serif;color:#1f3a5f}
 p{margin:8px 0 0}
 ul{list-style:none;margin:8px 0 0;padding:0}
 li{margin:0 0 4px}
@@ -1392,17 +1392,17 @@ a{color:#1f3a5f;font-weight:700;text-decoration:underline;text-underline-offset:
 a:hover,a:focus{color:#b8914a}
 b{font-weight:700}
 .muted{color:#5f5b53}
+.cta{margin-top:18px}
+.cta a{font-weight:400}
 </style></head>
-<body><div id="out"></div>
+<body><div id="out" style="padding-left:6px"></div>
 <script>
 var DATA = __DATA__;
 function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function norm(s){return String(s||'').toLowerCase().replace(/[^a-z]/g,'')}
 function link(u){u=String(u||'').trim();if(!u)return '';return /^https?:/.test(u)?u:DATA.site+u.replace(/^\/?/,'/')}
 var T = esc(DATA.town), f = DATA.families || [];
-var h = '<h2>Greek families of ' + T + '</h2>' +
-  '<p>This page gathers what is known about the Greek community of ' + T + ': the families who lived here, the businesses and farms they ran, and the places they worked.</p>' +
-  '<h3>Families</h3>';
+var h = '<h3>Families</h3>';
 if (f.length) {
   h += '<ul>' + f.map(function (x) {
     var u = link(x.url), name = esc(x.family) + ' Family';
@@ -1414,6 +1414,7 @@ if (f.length) {
 } else {
   h += '<p><em>No families listed yet.</em></p>';
 }
+h += '<p class="cta"><b>Did your family live in ' + T + '?</b> Please share what you know on the <a href="' + esc(DATA.site) + '/add-your-family" target="_top">Add Your Family</a> page.</p>';
 document.getElementById('out').innerHTML = h;
 </script></body></html>`;
 
