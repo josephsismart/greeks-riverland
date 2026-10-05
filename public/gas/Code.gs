@@ -1197,7 +1197,7 @@ function privacyPage_() {
 /* ------------------------------------------------------------------ */
 
 const TOWNS_MAP_HTML = String.raw`<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><base target="_top">
+<html lang="en"><head><meta charset="utf-8"><base target="_blank">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
@@ -1252,7 +1252,7 @@ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_L
 L.control.zoom({position: small ? 'bottomright' : 'bottomleft'}).addTo(map);
 map.attributionControl.setPrefix(false);
 DATA.towns.slice().sort(function(a,b){return a.name.localeCompare(b.name)}).forEach(function(t){var o=document.createElement('option');o.value=link(t.path);o.textContent=t.name;document.getElementById('pick').appendChild(o)});
-document.getElementById('pick').onchange=function(){if(this.value)window.top.location.href=this.value};
+document.getElementById('pick').onchange=function(){if(this.value)window.open(this.value,'_blank');this.value=''};
 var bounds = L.latLngBounds(DATA.towns.map(function(t){return [t.lat,t.lng]}));
 map.fitBounds(bounds, {padding: small ? [18,18] : [60,80]});
 map.setMaxBounds(bounds.pad(1.2));
@@ -1262,9 +1262,9 @@ DATA.towns.forEach(function (t, i) {
   var fam = famsOf(t.name);
   var m = L.marker([t.lat,t.lng], {icon:L.divIcon({className:'',html:'<div class="dot" title="'+esc(t.name)+'"></div>',iconSize:[18,18],iconAnchor:[9,9]}), keyboard:false}).addTo(map);
   m.bindPopup('<div class="pop"><b>'+esc(t.name)+'</b>'+(fam.length?'<div>Families: '+esc(fam.join(', '))+'</div>':'')+
-    '<a class="go" href="'+esc(link(t.path))+'" target="_top">Open '+esc(t.name)+' page &rarr;</a></div>');
+    '<a class="go" href="'+esc(link(t.path))+'" target="_blank" rel="noopener">Open '+esc(t.name)+' page &rarr;</a></div>');
   var a = document.createElement('a');
-  a.className = 'lbl'; a.href = link(t.path); a.target = '_top';
+  a.className = 'lbl'; a.href = link(t.path); a.target = '_blank'; a.rel = 'noopener';
   a.innerHTML = esc(t.name) + (fam.length ? '<span class="n">' + fam.length + ' famil' + (fam.length===1?'y':'ies') + '</span>' : '');
   a.setAttribute('aria-label', 'Open the ' + t.name + ' page');
   map.getContainer().appendChild(a); a.style.zIndex = 700;
@@ -1314,7 +1314,7 @@ map.on('zoom move resize', place); setTimeout(place, 50); addEventListener('load
 /* ------------------------------------------------------------------ */
 
 const FIND_HTML = String.raw`<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><base target="_top">
+<html lang="en"><head><meta charset="utf-8"><base target="_blank">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -1365,8 +1365,8 @@ var fams = DATA.families.slice().sort(function(a,b){return a.family.localeCompar
 function show(key, list, title){
   $('az').style.display='none'; $('note').style.display='none'; $('res').style.display='block'; $('ttl').textContent=title;
   $('list').innerHTML = list.length ? list.map(function(f){var u=link(f.url);var inner='<b>'+esc(f.family)+'</b>'+((f.towns||f.alt)?'<small>'+esc([f.towns,f.alt&&('Also spelt: '+f.alt)].filter(String).join(' · '))+'</small>':'')+(u?'':'<small>Family page coming soon</small>');
-    return u?'<a class="item" href="'+esc(u)+'" target="_top">'+inner+'</a>':'<div class="item">'+inner+'</div>'}).join('')
-   : '<div class="empty">No family names '+(key.length===1?'under <b>'+esc(key)+'</b>':'match <b>'+esc(key)+'</b>')+' yet. Family names are added as records are submitted and verified.<br><a href="'+esc(DATA.site)+'/add-your-family" target="_top">Add your family to the history &rarr;</a></div>';
+    return u?'<a class="item" href="'+esc(u)+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="item">'+inner+'</div>'}).join('')
+   : '<div class="empty">No family names '+(key.length===1?'under <b>'+esc(key)+'</b>':'match <b>'+esc(key)+'</b>')+' yet. Family names are added as records are submitted and verified.<br><a href="'+esc(DATA.site)+'/add-your-family" target="_blank" rel="noopener">Add your family to the history &rarr;</a></div>';
 }
 function reset(){ $('q').value=''; $('az').style.display=''; $('note').style.display=''; $('res').style.display='none'; }
 $('back').onclick=reset;
@@ -1377,7 +1377,7 @@ $('q').addEventListener('input',function(){var v=fold(this.value.trim()); if(!v)
 /* ------------------------------------------------------------------ */
 
 const TOWN_HTML = String.raw`<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><base target="_top">
+<html lang="en"><head><meta charset="utf-8"><base target="_blank">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
@@ -1408,26 +1408,27 @@ if (f.length) {
     var u = link(x.url), name = esc(x.family) + ' Family';
     var also = String(x.towns||'').split(/\s*,\s*/).filter(function(t){return t && norm(t)!==norm(DATA.town)});
     var extra = [x.detail ? esc(x.detail) : '', also.length ? 'also ' + esc(also.join(', ')) : ''].filter(String).join(' · ');
-    return '<li>' + (u ? '<a href="' + esc(u) + '" target="_top">' + name + '</a>' : '<b>' + name + '</b>') +
+    return '<li>' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + name + '</a>' : '<b>' + name + '</b>') +
       (extra ? ' <span class="muted">— ' + extra + '</span>' : '') + '</li>';
   }).join('') + '</ul>';
 } else {
   h += '<p><em>No families listed yet.</em></p>';
 }
-h += '<p class="cta"><b>Did your family live in ' + T + '?</b> Please share what you know on the <a href="' + esc(DATA.site) + '/add-your-family" target="_top">Add Your Family</a> page.</p>';
+h += '<p class="cta"><b>Did your family live in ' + T + '?</b> Please share what you know on the <a href="' + esc(DATA.site) + '/add-your-family" target="_blank" rel="noopener">Add Your Family</a> page.</p>';
 document.getElementById('out').innerHTML = h;
 </script></body></html>`;
 
 const PRIVACY_HTML = String.raw`<!DOCTYPE html>
-<html lang=”en”><head><meta charset=”utf-8”><base target=”_top”>
-<meta name=”viewport” content=”width=device-width,initial-scale=1”>
-<link href=”https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:wght@400;600&display=swap” rel=”stylesheet”>
+<html lang="en"><head><meta charset="utf-8"><base target="_top">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
 :root{--navy:#1b365d;--olive:#5E6B3A;--gold:#B8914A;--cream:#F6F1E6;--line:#e4d9c3;--ink:#2f2a24}
 *{box-sizing:border-box}
 html,body{margin:0;background:#fbf8f1;font-family:Lora,Georgia,serif;color:var(--ink);line-height:1.7}
 .top{background:linear-gradient(135deg,#1f3a5f,#26466b 60%,#3d4f3a);color:#fff;padding:34px 18px 30px;text-align:center;position:relative}
-.top:after{content:””;position:absolute;left:0;right:0;bottom:0;height:12px;opacity:.4;background:url(“data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Cpath d='M0 13h6V5h8v4h-4V7H8v6h12V1H2' fill='none' stroke='%23E2C48E' stroke-width='1.6'/%3E%3C/svg%3E”) repeat-x}
+.top:after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;opacity:.4;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Cpath d='M0 13h6V5h8v4h-4V7H8v6h12V1H2' fill='none' stroke='%23E2C48E' stroke-width='1.6'/%3E%3C/svg%3E") repeat-x}
 .eyebrow{letter-spacing:4px;font-size:12px;color:#E2C48E;font-weight:600;text-transform:uppercase}
 h1{font-family:'Libre Baskerville',serif;font-weight:400;font-size:clamp(24px,5vw,36px);margin:8px 0 0}
 .wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
@@ -1441,29 +1442,29 @@ p:last-child{margin-bottom:0}
 .back:hover{text-decoration:underline}
 </style></head>
 <body>
-<div class=”top”>
-  <div class=”eyebrow”><i class=”fa-solid fa-shield-halved”></i> &nbsp;Privacy</div>
+<div class="top">
+  <div class="eyebrow"><i class="fa-solid fa-shield-halved"></i> &nbsp;Privacy</div>
   <h1>Privacy, Permission &amp; Photo Use</h1>
 </div>
-<div class=”wrap”>
-  <div class=”card”>
+<div class="wrap">
+  <div class="card">
     <h2>Our commitment to you</h2>
     <p>We want Greeks of the Riverland to be a respectful and trusted community history project.</p>
     <p>Information and photographs submitted to us will not automatically be published. We will review material before it appears on the website and will only publish information that is appropriate for a public historical record.</p>
     <p>Please only submit photographs, stories or personal information that you have the right to share. If a photograph includes living people, we ask that you consider whether they would be comfortable having the image published online.</p>
     <p>We will avoid publishing sensitive personal information about living people, such as current addresses, phone numbers, email addresses, dates of birth, financial information or other private details.</p>
 
-    <h2 style=”margin-top:24px”>How we store your information</h2>
+    <h2 style="margin-top:24px">How we store your information</h2>
     <p>Information submitted through our online forms will be stored in password-protected Google systems, with access limited to authorised project administrators. Private records will not be made publicly accessible through the website.</p>
     <p>While no online system can guarantee absolute security, we will take reasonable steps to protect information and limit access to it.</p>
 
-    <h2 style=”margin-top:24px”>Corrections and removal</h2>
+    <h2 style="margin-top:24px">Corrections and removal</h2>
     <p>If you believe information or a photograph relating to you or your family should be corrected, updated or removed, please contact us and we will review the request.</p>
 
-    <div class=”aim”>
+    <div class="aim">
       <p>Our aim is simple: to preserve the history, stories and photographs of the Greek families of the Riverland while respecting the privacy and wishes of the people whose history we are recording.</p>
     </div>
   </div>
-  <a class=”back” href=”https://sites.google.com/view/greeksoftheriverland”>&larr; Back to Greeks of the Riverland</a>
+  <a class="back" href="https://sites.google.com/view/greeksoftheriverland">&larr; Back to Greeks of the Riverland</a>
 </div>
 </body></html>`;
