@@ -35,13 +35,17 @@ a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
 <script>
 var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
 function load(prep, main) {
-  var tries = 0;
+  var tries = 0, ld = document.createElement('div');
+  ld.textContent = 'Loading…';
+  ld.style.cssText = 'position:fixed;left:10px;top:8px;z-index:9999;font:italic 15px Lora,Georgia,serif;color:#5f5b53';
+  setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
   (function go() {
     fetch(API + '?page=data', { credentials: 'omit' })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (d) { main(prep ? prep(d) : d); })
+      .then(function (d) { ld.done = true; if (ld.parentNode) ld.remove(); main(prep ? prep(d) : d); })
       .catch(function () {
         if (++tries < 3) return setTimeout(go, 1500 * tries);
+        ld.done = true; if (ld.parentNode) ld.remove();
         var p = document.createElement('p');
         p.style.cssText = 'font:16px Lora,Georgia,serif;color:#5f5b53;padding:12px';
         p.innerHTML = 'Sorry, this could not be loaded just now. <a href="" target="_self" onclick="location.reload();return false">Try again</a>.';
