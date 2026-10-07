@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Families — Greeks of the Riverland</title>
+<base target="_blank">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:transparent;font:16px/1.38 Lora,Georgia,serif;color:#000}
+h2{margin:0;font:700 22.67px/1.38 'Libre Baskerville',Georgia,serif;color:#1f3a5f}
+h3{margin:0;font:700 17.33px/1.38 'Libre Baskerville',Georgia,serif;color:#1f3a5f}
+p{margin:8px 0 0}
+ul{list-style:none;margin:8px 0 0;padding:0}
+li{margin:0 0 4px}
+a{color:#1f3a5f;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+a:hover,a:focus{color:#b8914a}
+b{font-weight:700}
+.muted{color:#5f5b53}
+.cta{margin-top:18px}
+.cta a{font-weight:400}
+</style></head>
+<body>
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
+function load(prep, main) {
+  var tries = 0;
+  (function go() {
+    fetch(API + '?page=data', { credentials: 'omit' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) { main(prep ? prep(d) : d); })
+      .catch(function () {
+        if (++tries < 3) return setTimeout(go, 1500 * tries);
+        var p = document.createElement('p');
+        p.style.cssText = 'font:16px Lora,Georgia,serif;color:#5f5b53;padding:12px';
+        p.innerHTML = 'Sorry, this could not be loaded just now. <a href="" target="_self" onclick="location.reload();return false">Try again</a>.';
+        document.body.appendChild(p);
+      });
+  })();
+}
+</script>
+<div id="out" style="padding-left:6px"></div>
+<script>
+function main(DATA){
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function norm(s){return String(s||'').toLowerCase().replace(/[^a-z]/g,'')}
+function link(u){u=String(u||'').trim();if(!u)return '';return /^https?:/.test(u)?u:DATA.site+u.replace(/^\/?/,'/')}
+var T = esc(DATA.town), f = DATA.families || [];
+var h = '<h3>Families</h3>';
+if (f.length) {
+  h += '<ul>' + f.map(function (x) {
+    var u = link(x.url), name = esc(x.family) + ' Family';
+    var also = String(x.towns||'').split(/\s*,\s*/).filter(function(t){return t && norm(t)!==norm(DATA.town)});
+    var extra = [x.detail ? esc(x.detail) : '', also.length ? 'also ' + esc(also.join(', ')) : ''].filter(String).join(' · ');
+    return '<li>' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + name + '</a>' : '<b>' + name + '</b>') +
+      (extra ? ' <span class="muted">— ' + extra + '</span>' : '') + '</li>';
+  }).join('') + '</ul>';
+} else {
+  h += '<p><em>No families listed yet.</em></p>';
+}
+h += '<p class="cta"><b>Did your family live in ' + T + '?</b> Please share what you know on the <a href="' + esc(DATA.site) + '/add-your-family" target="_blank" rel="noopener">Add Your Family</a> page.</p>';
+document.getElementById('out').innerHTML = h;
+}
+load(function (D) {
+  var q = new URLSearchParams(location.search).get('t') || '';
+  var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+  var t = D.towns.filter(function (x) { return norm(x.name) === norm(q); })[0];
+  var town = t ? t.name : q.trim().slice(0, 40);
+  var fams = D.families.filter(function (f) {
+    return String(f.towns).split(/\s*,\s*/).map(norm).indexOf(norm(town)) >= 0;
+  }).sort(function (a, b) { return a.family.localeCompare(b.family); });
+  return { site: D.site, town: town, families: fams };
+}, main);
+</script></body></html>

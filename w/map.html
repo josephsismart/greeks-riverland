@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Explore the Riverland — Greeks of the Riverland</title>
+<base target="_blank">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1b365d;--navy2:#24497a;--cream:#fbf8f1;--pale:#eaf1f8}
+html,body{margin:0;height:100%;background:var(--cream);font-family:Lora,Georgia,serif}
+#map{position:absolute;inset:0;border-radius:14px;overflow:hidden;background:#e9eef2}
+.leaflet-container{font-family:Lora,Georgia,serif}
+.leaflet-tile-pane{filter:sepia(.14) saturate(1.25) contrast(1.06)}
+.ln{position:absolute;height:2px;background:var(--navy);transform-origin:0 50%;z-index:690;pointer-events:none;opacity:.75}
+.leaflet-container a.lbl{color:var(--navy)}
+.leaflet-container a.lbl:hover,.leaflet-container a.lbl:focus{color:#fff}
+.lbl{position:absolute;white-space:nowrap;background:#fff;color:var(--navy);font:700 17px/1 'Libre Baskerville',Georgia,serif;
+ padding:9px 13px;border-radius:10px;border:2px solid var(--navy);box-shadow:0 3px 10px rgba(16,36,64,.22);text-decoration:none;
+ transform:translate(var(--tx),var(--ty));transition:background .15s,color .15s}
+.lbl:hover,.lbl:focus{background:var(--navy);color:#fff;outline:none}
+.lbl .n{display:block;font:600 12px/1.2 Lora,Georgia,serif;margin-top:4px;color:#5a6b80}
+.lbl:hover .n,.lbl:focus .n{color:#dfe8f3}
+.hidden{visibility:hidden}
+.dot{width:18px;height:18px;border-radius:50%;background:var(--navy);border:4px solid #fff;box-shadow:0 0 0 2px var(--navy),0 2px 6px rgba(0,0,0,.35);box-sizing:border-box;cursor:pointer}
+.hint{position:absolute;right:12px;top:12px;z-index:800;background:rgba(255,255,255,.95);color:var(--navy);padding:8px 13px;border-radius:999px;
+ font:600 14px Lora,Georgia,serif;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.leaflet-popup-content{font:15px/1.45 Lora,Georgia,serif;color:#24323f;margin:14px 16px}
+.pop b{font:700 18px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.pop a.go{display:inline-block;margin-top:10px;background:var(--navy);color:#fff;text-decoration:none;padding:10px 16px;border-radius:9px;font-weight:600}
+.small .lbl{font-size:13px;padding:6px 9px;border-width:1.5px}
+.small .lbl .n{display:none}
+.small .hint{display:none}
+.pick{display:none;position:absolute;right:8px;top:8px;z-index:900;font:600 15px Lora,Georgia,serif;color:#fff;background:var(--navy);border:0;border-radius:10px;padding:9px 10px;max-width:60%}
+.small .pick{display:block}
+.small .dot{width:15px;height:15px;border-width:3px}
+.leaflet-control-zoom a{width:38px!important;height:38px!important;line-height:38px!important;font-size:22px!important}
+</style></head>
+<body>
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
+function load(prep, main) {
+  var tries = 0;
+  (function go() {
+    fetch(API + '?page=data', { credentials: 'omit' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) { main(prep ? prep(d) : d); })
+      .catch(function () {
+        if (++tries < 3) return setTimeout(go, 1500 * tries);
+        var p = document.createElement('p');
+        p.style.cssText = 'font:16px Lora,Georgia,serif;color:#5f5b53;padding:12px';
+        p.innerHTML = 'Sorry, this could not be loaded just now. <a href="" target="_self" onclick="location.reload();return false">Try again</a>.';
+        document.body.appendChild(p);
+      });
+  })();
+}
+</script>
+
+<div id="map" role="application" aria-label="Map of Riverland towns. Choose a town to open its page."></div>
+<div class="hint">Click a town to explore</div>
+<select class="pick" id="pick" aria-label="Choose a town"><option value="">Choose a town &#9662;</option></select>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+function main(DATA){
+var small = innerWidth < 560; if (small) document.body.classList.add('small');
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function norm(s){return String(s||'').toLowerCase().replace(/[^a-z]/g,'')}
+function link(p){p=String(p||'');return /^https?:/.test(p)?p:DATA.site+p}
+function famsOf(t){return DATA.families.filter(function(f){return String(f.towns).split(/\s*,\s*/).map(norm).indexOf(norm(t))>=0}).map(function(f){return f.family}).sort()}
+
+var map = L.map('map', {zoomControl:false, scrollWheelZoom:false, dragging:!L.Browser.mobile, tap:true, zoomSnap:0.25, attributionControl:true});
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom:15, minZoom:7,
+  attribution: small ? '&copy; Esri, OSM' : 'Map: Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+L.control.zoom({position: small ? 'bottomright' : 'bottomleft'}).addTo(map);
+map.attributionControl.setPrefix(false);
+DATA.towns.slice().sort(function(a,b){return a.name.localeCompare(b.name)}).forEach(function(t){var o=document.createElement('option');o.value=link(t.path);o.textContent=t.name;document.getElementById('pick').appendChild(o)});
+document.getElementById('pick').onchange=function(){if(this.value)window.open(this.value,'_blank');this.value=''};
+var bounds = L.latLngBounds(DATA.towns.map(function(t){return [t.lat,t.lng]}));
+map.fitBounds(bounds, {padding: small ? [18,18] : [60,80]});
+map.setMaxBounds(bounds.pad(1.2));
+
+var pane = map.getPanes().markerPane, items = [];
+DATA.towns.forEach(function (t, i) {
+  var fam = famsOf(t.name);
+  var m = L.marker([t.lat,t.lng], {icon:L.divIcon({className:'',html:'<div class="dot" title="'+esc(t.name)+'"></div>',iconSize:[18,18],iconAnchor:[9,9]}), keyboard:false}).addTo(map);
+  m.bindPopup('<div class="pop"><b>'+esc(t.name)+'</b>'+(fam.length?'<div>Families: '+esc(fam.join(', '))+'</div>':'')+
+    '<a class="go" href="'+esc(link(t.path))+'" target="_blank" rel="noopener">Open '+esc(t.name)+' page &rarr;</a></div>');
+  var a = document.createElement('a');
+  a.className = 'lbl'; a.href = link(t.path); a.target = '_blank'; a.rel = 'noopener';
+  a.innerHTML = esc(t.name) + (fam.length ? '<span class="n">' + fam.length + ' famil' + (fam.length===1?'y':'ies') + '</span>' : '');
+  a.setAttribute('aria-label', 'Open the ' + t.name + ' page');
+  map.getContainer().appendChild(a); a.style.zIndex = 700;
+  items.push({t:t, el:a});
+});
+
+/* Place every label next to its town without overlaps: try close positions first, then further out with a leader line. */
+var lines = items.map(function(){var d=document.createElement('div');d.className='ln';map.getContainer().appendChild(d);return d});
+function rectOf(el){var b=el.getBoundingClientRect(),c=map.getContainer().getBoundingClientRect();return {l:b.left-c.left,t:b.top-c.top,r:b.right-c.left,b:b.bottom-c.top}}
+function place() {
+  var cont = map.getContainer().getBoundingClientRect(), placed = [];
+  ['.leaflet-control-zoom','.hint','.pick','.leaflet-control-attribution'].forEach(function(q){var e=document.querySelector(q);if(e&&e.offsetParent!==null&&getComputedStyle(e).display!=='none')placed.push(rectOf(e))});
+  var dots = items.map(function(o){return map.latLngToContainerPoint([o.t.lat,o.t.lng])});
+  var order = items.map(function(it,i){return i}).sort(function(a,b){
+    var ca=dots.filter(function(d){return Math.abs(d.x-dots[a].x)<90&&Math.abs(d.y-dots[a].y)<70}).length;
+    var cb=dots.filter(function(d){return Math.abs(d.x-dots[b].x)<90&&Math.abs(d.y-dots[b].y)<70}).length; return cb-ca});
+  order.forEach(function (i) {
+    var it = items[i], p = dots[i], ln = lines[i];
+    it.el.classList.remove('hidden'); it.el.style.left = p.x + 'px'; it.el.style.top = p.y + 'px';
+    var w = it.el.offsetWidth, h = it.el.offsetHeight, ok = false, g0 = small ? 9 : 13;
+    var rings = small ? [g0, 22] : [g0, 30, 52, 76, 100];
+    for (var ri = 0; ri < rings.length && !ok; ri++) {
+      var g = rings[ri];
+      var opts = [[g,-h/2],[-w-g,-h/2],[-w/2,-h-g],[-w/2,g],[g*.75,-h-g*.75],[g*.75,g*.75],[-w-g*.75,-h-g*.75],[-w-g*.75,g*.75]];
+      for (var k = 0; k < opts.length && !ok; k++) {
+        var r = {l:p.x+opts[k][0], t:p.y+opts[k][1]}; r.r = r.l + w; r.b = r.t + h;
+        if (r.l < 4 || r.t < 4 || r.r > cont.width-4 || r.b > cont.height-4) continue;
+        var hit = placed.some(function(q){return !(r.r<q.l-5||r.l>q.r+5||r.b<q.t-5||r.t>q.b+5)}) ||
+          dots.some(function(d){return d.x>r.l-10&&d.x<r.r+10&&d.y>r.t-10&&d.y<r.b+10});
+        if (hit) continue;
+        ok = true; placed.push(r);
+        it.el.style.setProperty('--tx', opts[k][0]+'px'); it.el.style.setProperty('--ty', opts[k][1]+'px');
+        if (ri > 0) { // leader line from the dot to the nearest edge of the label
+          var cx = Math.max(r.l, Math.min(p.x, r.r)), cy = Math.max(r.t, Math.min(p.y, r.b));
+          var dx = cx - p.x, dy = cy - p.y, len = Math.sqrt(dx*dx+dy*dy);
+          ln.style.display = 'block'; ln.style.left = p.x + 'px'; ln.style.top = (p.y-1) + 'px'; ln.style.width = len + 'px';
+          ln.style.transform = 'rotate(' + Math.atan2(dy, dx) + 'rad)';
+        } else ln.style.display = 'none';
+      }
+    }
+    if (!ok) { it.el.classList.add('hidden'); ln.style.display = 'none'; }
+  });
+}
+map.on('zoom move resize', place); setTimeout(place, 50); addEventListener('load', place);
+}
+load(null, main);
+</script></body></html>

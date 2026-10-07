@@ -165,6 +165,7 @@ function doGet(e) {
   if (pg === 'find') return findPage_();
   if (pg === 'privacy') return privacyPage_();
   if (pg === 'town') return townPage_(e.parameter.t);
+  if (pg === 'data') return dataJson_(e);
   if (pg === 'oldmap') return mapPage_();
   const t = HtmlService.createTemplate(UPLOAD_HTML);
   t.maxPhotos = CONFIG.MAX_PHOTOS;
@@ -173,6 +174,20 @@ function doGet(e) {
     .setTitle('Share Family Photos — Greeks of the Riverland')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+/** Photo upload calls from the upload page hosted on GitHub Pages (same three steps as google.script.run). */
+function doPost(e) {
+  let out;
+  try {
+    const req = JSON.parse(e.postData.contents);
+    const fns = { startUpload: startUpload, uploadPhoto: uploadPhoto, finishUpload: finishUpload };
+    if (!fns[req.fn]) throw new Error('Unknown request');
+    out = { ok: true, result: fns[req.fn].apply(null, req.args || []) };
+  } catch (err) {
+    out = { ok: false, error: String(err && err.message || err) };
+  }
+  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
 }
 
 /** Step 1: create a folder for this submission. */
@@ -1108,6 +1123,22 @@ function townsMapPage_() {
 function findPage_() {
   const data = { site: CONFIG.SITE_URL, families: publicFamilies_() };
   return widgetOut_(FIND_HTML.replace('__DATA__', function () { return jsonForHtml_(data); }), 'Find a Family');
+}
+
+/** ?page=data — the same public data as JSON, for the widgets hosted outside Apps Script (GitHub Pages).
+ *  Those load in every browser, including Brave/Safari, which block the cookies Apps Script embeds need. */
+function dataJson_(e) {
+  const cache = CacheService.getScriptCache();
+  let json = cache.get('publicData');
+  if (!json) {
+    json = JSON.stringify({ site: CONFIG.SITE_URL, towns: RIVERLAND_TOWNS, families: publicFamilies_() });
+    try { cache.put('publicData', json, 60); } catch (err) {}
+  }
+  const cb = e && e.parameter && e.parameter.callback;
+  if (cb && /^[A-Za-z_$][\w$]{0,40}$/.test(cb)) {
+    return ContentService.createTextOutput(cb + '(' + json + ');').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
 }
 
 /** ?page=town&t=Berri — the families list embedded on each town page. */

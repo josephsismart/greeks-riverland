@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Find a Family — Greeks of the Riverland</title>
+<base target="_blank">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1b365d;--pale:#eef4fa;--line:#c9d7e8;--ink:#24323f}
+*{box-sizing:border-box}
+html,body{margin:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
+.box{background:var(--pale);border:1px solid var(--line);border-radius:16px;padding:16px;min-height:100vh}
+.ttl{margin:2px 2px 2px;font:700 27px/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.sub{margin:0 2px 14px;font-size:17px;color:#41526a}
+.search{position:relative}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%)}
+input{width:100%;font:italic 18px Lora,Georgia,serif;padding:15px 14px 15px 46px;border:2px solid #9fb5cf;border-radius:12px;background:#fff;color:var(--ink)}
+input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,54,93,.15)}
+.az{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:14px}
+.az button{font:700 18px 'Libre Baskerville',Georgia,serif;color:var(--navy);background:#fff;border:1.5px solid #9fb5cf;border-radius:9px;height:46px;cursor:pointer}
+.az button:hover,.az button:focus{background:var(--navy);color:#fff;border-color:var(--navy);outline:none}
+.note{font-size:14px;color:#56667a;margin:12px 2px 0;line-height:1.4}
+.res{display:none;margin-top:12px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.bar h3{margin:0;font:700 17px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.back{font:600 15px Lora,Georgia,serif;background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:9px;padding:9px 12px;cursor:pointer}
+.list{max-height:calc(100vh - 250px);overflow:auto;padding-right:4px}
+.item{display:block;background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;text-decoration:none;color:var(--ink)}
+a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
+.item b{font:700 18px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.item small{display:block;font-size:14px;color:#5a6b80;margin-top:3px}
+.empty{background:#fff;border:1px dashed #9fb5cf;border-radius:11px;padding:14px;font-size:15px;line-height:1.5}
+.empty a{color:var(--navy);font-weight:600}
+</style></head>
+<body>
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
+function load(prep, main) {
+  var tries = 0;
+  (function go() {
+    fetch(API + '?page=data', { credentials: 'omit' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) { main(prep ? prep(d) : d); })
+      .catch(function () {
+        if (++tries < 3) return setTimeout(go, 1500 * tries);
+        var p = document.createElement('p');
+        p.style.cssText = 'font:16px Lora,Georgia,serif;color:#5f5b53;padding:12px';
+        p.innerHTML = 'Sorry, this could not be loaded just now. <a href="" target="_self" onclick="location.reload();return false">Try again</a>.';
+        document.body.appendChild(p);
+      });
+  })();
+}
+</script>
+<div class="box">
+<h2 class="ttl">Find a Family</h2><p class="sub">Search by surname or browse A&ndash;Z.</p>
+<div class="search">
+ <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b365d" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+ <input id="q" type="search" placeholder="Search surname..." aria-label="Search surname" autocomplete="off">
+</div>
+<div id="az" class="az" role="group" aria-label="Browse surnames A to Z"></div>
+<div id="res" class="res"><div class="bar"><h3 id="ttl"></h3><button class="back" id="back" type="button">&larr; A&ndash;Z</button></div><div class="list" id="list"></div></div>
+<p class="note" id="note">Family names are added as records are submitted and verified.</p>
+</div>
+<script>
+function main(DATA){
+var $ = function(id){return document.getElementById(id)};
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fold(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
+function link(u){u=String(u||'').trim();if(!u)return '';return /^https?:/.test(u)?u:DATA.site+u.replace(/^\/?/,'/')}
+var fams = DATA.families.slice().sort(function(a,b){return a.family.localeCompare(b.family)});
+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(L){var b=document.createElement('button');b.type='button';b.textContent=L;b.setAttribute('aria-label','Surnames starting with '+L);b.onclick=function(){show(L,fams.filter(function(f){return fold(f.family).charAt(0)===L.toLowerCase()}),'Surnames starting with '+L)};$('az').appendChild(b)});
+function show(key, list, title){
+  $('az').style.display='none'; $('note').style.display='none'; $('res').style.display='block'; $('ttl').textContent=title;
+  $('list').innerHTML = list.length ? list.map(function(f){var u=link(f.url);var inner='<b>'+esc(f.family)+'</b>'+((f.towns||f.alt)?'<small>'+esc([f.towns,f.alt&&('Also spelt: '+f.alt)].filter(String).join(' · '))+'</small>':'')+(u?'':'<small>Family page coming soon</small>');
+    return u?'<a class="item" href="'+esc(u)+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="item">'+inner+'</div>'}).join('')
+   : '<div class="empty">No family names '+(key.length===1?'under <b>'+esc(key)+'</b>':'match <b>'+esc(key)+'</b>')+' yet. Family names are added as records are submitted and verified.<br><a href="'+esc(DATA.site)+'/add-your-family" target="_blank" rel="noopener">Add your family to the history &rarr;</a></div>';
+}
+function reset(){ $('q').value=''; $('az').style.display=''; $('note').style.display=''; $('res').style.display='none'; }
+$('back').onclick=reset;
+$('q').addEventListener('input',function(){var v=fold(this.value.trim()); if(!v){reset();return;}
+  show(this.value.trim(), fams.filter(function(f){return fold(f.family).indexOf(v)>=0||fold(f.alt).indexOf(v)>=0}), 'Results for “'+this.value.trim()+'”');});
+}
+load(null, main);
+</script></body></html>
