@@ -37,7 +37,7 @@ var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO
 function load(prep, main) {
   var tries = 0, ld = document.createElement('div');
   ld.textContent = 'Loading…';
-  ld.style.cssText = 'position:fixed;left:10px;top:8px;z-index:9999;font:italic 15px Lora,Georgia,serif;color:#5f5b53';
+  ld.style.cssText = 'position:fixed;right:12px;bottom:8px;z-index:9999;font:italic 14px Lora,Georgia,serif;color:#5f5b53';
   setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
   (function go() {
     fetch(API + '?page=data', { credentials: 'omit' })
