@@ -20,7 +20,9 @@ const CONFIG = {
   MAX_MB: 20,
   UPLOAD_FOLDER: 'Website Uploads',
   KEEP_BACKUPS: 12,
-  UPLOAD_URL: 'https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec'
+  UPLOAD_URL: 'https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec',
+  // Public photo upload page (GitHub Pages copy — works in every browser, including Brave/Safari)
+  PHOTO_PAGE_URL: 'https://josephsismart.github.io/greeks-riverland/w/upload.html'
 };
 
 /* ============================ SETUP ============================ */
@@ -37,7 +39,7 @@ function setupAll() {
 
 /** Run AFTER the web app is deployed: puts the upload link into the Form's Photographs section. */
 function linkUploadPageInForm() {
-  const url = CONFIG.UPLOAD_URL || ScriptApp.getService().getUrl();
+  const url = CONFIG.PHOTO_PAGE_URL || CONFIG.UPLOAD_URL || ScriptApp.getService().getUrl();
   if (!url) throw new Error('Deploy the web app first (Deploy › New deployment › Web app).');
   const form = FormApp.openById(CONFIG.FORM_ID);
   form.getItems(FormApp.ItemType.PAGE_BREAK).forEach(function (it) {
