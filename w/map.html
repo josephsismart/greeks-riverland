@@ -43,8 +43,11 @@ function load(prep, main) {
   ld.textContent = 'Loading…';
   ld.style.cssText = 'position:fixed;right:12px;bottom:8px;z-index:9999;font:italic 14px Lora,Georgia,serif;color:#5f5b53';
   setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
+  // Fast path: data.json on GitHub Pages (refreshed every 10 minutes from the Sheet).
+  // Fallback: ask the Apps Script web app directly.
   (function go() {
-    fetch(API + '?page=data', { credentials: 'omit' })
+    var src = tries === 0 ? 'data.json?v=' + Math.floor(Date.now() / 300000) : API + '?page=data';
+    fetch(src, { credentials: 'omit' })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (d) { ld.done = true; if (ld.parentNode) ld.remove(); main(prep ? prep(d) : d); })
       .catch(function () {

@@ -1,0 +1,49 @@
+# Copies the published family list from the Apps Script web app into w/data.json every 10 minutes,
+# so the site widgets load instantly from GitHub Pages. Commits only when the list changed
+# (plus a monthly heartbeat so GitHub keeps this schedule running).
+name: Refresh family data
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: refresh-data
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch data
+        run: |
+          set -e
+          API=$(grep -o '"https://script.google.com/macros/s/[^"]*/exec"' w/map.html | head -1 | tr -d '"')
+          curl -sSfL --retry 3 --max-time 60 "$API?page=data" -o /tmp/new.json
+          python3 - <<'PY'
+          import json, datetime, os
+          new = json.load(open('/tmp/new.json'))
+          assert isinstance(new.get('families'), list) and isinstance(new.get('towns'), list) and new['towns']
+          old = {}
+          if os.path.exists('w/data.json'):
+              try: old = json.load(open('w/data.json'))
+              except Exception: old = {}
+          today = datetime.date.today()
+          strip = lambda d: {k: v for k, v in d.items() if k != 'updated'}
+          last = old.get('updated', '2000-01-01')
+          stale = (today - datetime.date.fromisoformat(last)).days >= 30
+          if strip(old) != strip(new) or stale:
+              new['updated'] = today.isoformat()
+              json.dump(new, open('w/data.json', 'w'), ensure_ascii=False, separators=(',', ':'))
+              print('changed')
+          else:
+              print('no change')
+          PY
+      - name: Commit
+        run: |
+          if [ -n "$(git status --porcelain w/data.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add w/data.json
+            git commit -m "Refresh family data"
+            git push
+          fi
