@@ -1351,32 +1351,41 @@ const FIND_HTML = String.raw`<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
 <style>
+/* Sizes are in rem and the root size follows the frame width, because Google Sites keeps an embed's
+   height proportional to its width. Very short frames (phones) switch to a compact one-row layout. */
 :root{--navy:#1b365d;--pale:#eef4fa;--line:#c9d7e8;--ink:#24323f}
 *{box-sizing:border-box}
+html{font-size:clamp(13px,1.55vw,20px)}
 html,body{margin:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
-.box{background:var(--pale);border:1px solid var(--line);border-radius:16px;padding:16px;min-height:100vh}
-.ttl{margin:0 2px 2px;font:700 25px/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
-.sub{margin:0 2px 12px;font-size:16px;color:#41526a}
+.box{background:var(--pale);border:1px solid var(--line);border-radius:.9rem;padding:.9rem 1rem;min-height:100vh}
+.ttl{margin:0 .1rem .1rem;font:700 1.55rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.sub{margin:0 .1rem .7rem;font-size:1rem;color:#41526a}
 .search{position:relative}
-.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%)}
-input{width:100%;font:italic 18px Lora,Georgia,serif;padding:15px 14px 15px 46px;border:2px solid #9fb5cf;border-radius:12px;background:#fff;color:var(--ink)}
+.search svg{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);width:1.3rem;height:1.3rem}
+input{width:100%;font:italic 1.1rem Lora,Georgia,serif;padding:.75rem .9rem .75rem 2.8rem;border:2px solid #9fb5cf;border-radius:.7rem;background:#fff;color:var(--ink)}
 input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,54,93,.15)}
-.az{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:6px;margin-top:12px}
+.az{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:.35rem;margin-top:.7rem}
 @media(min-width:640px){.az{grid-template-columns:repeat(13,1fr)}}
-.az button{font:700 17px 'Libre Baskerville',Georgia,serif;color:var(--navy);background:#fff;border:1.5px solid #9fb5cf;border-radius:9px;height:40px;cursor:pointer;padding:0}
+.az button{font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy);background:#fff;border:1.5px solid #9fb5cf;border-radius:.55rem;height:2.4rem;cursor:pointer;padding:0}
 .az button:hover,.az button:focus{background:var(--navy);color:#fff;border-color:var(--navy);outline:none}
-.note{font-size:14px;color:#56667a;margin:12px 2px 0;line-height:1.4}
-.res{display:none;margin-top:12px}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
-.bar h3{margin:0;font:700 17px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
-.back{font:600 15px Lora,Georgia,serif;background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:9px;padding:9px 12px;cursor:pointer}
-.list{max-height:max(130px,calc(100vh - 230px));overflow:auto;padding-right:4px}
-.item{display:block;background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;text-decoration:none;color:var(--ink)}
+.note{font-size:.85rem;color:#56667a;margin:.6rem .1rem 0;line-height:1.4}
+.res{display:none;margin-top:.7rem}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem}
+.bar h3{margin:0;font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.back{font:600 .9rem Lora,Georgia,serif;background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:.55rem;padding:.4rem .7rem;cursor:pointer}
+.list{max-height:calc(100vh - 12.5rem);min-height:4rem;overflow:auto;padding-right:.25rem}
+.item{display:block;background:#fff;border:1px solid var(--line);border-radius:.65rem;padding:.6rem .85rem;margin-bottom:.45rem;text-decoration:none;color:var(--ink)}
 a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
-.item b{font:700 18px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
-.item small{display:block;font-size:14px;color:#5a6b80;margin-top:3px}
-.empty{background:#fff;border:1px dashed #9fb5cf;border-radius:11px;padding:14px;font-size:15px;line-height:1.5}
+.item b{font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.item small{display:block;font-size:.85rem;color:#5a6b80;margin-top:.15rem}
+.empty{background:#fff;border:1px dashed #9fb5cf;border-radius:.65rem;padding:.8rem;font-size:.9rem;line-height:1.5}
 .empty a{color:var(--navy);font-weight:600}
+@media(max-height:230px){
+ .box{padding:.5rem .6rem}.ttl,.sub,.note{display:none}
+ input{padding-top:.55rem;padding-bottom:.55rem}
+ .az{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:2.4rem;overflow-x:auto;margin-top:.45rem;padding-bottom:.3rem}
+ .res{margin-top:.4rem}.list{max-height:calc(100vh - 6.5rem)}
+}
 </style></head>
 <body><div class="box">
 <h2 class="ttl">Find a Family</h2><p class="sub">Search by surname or browse A&ndash;Z.</p>
