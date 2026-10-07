@@ -1355,21 +1355,22 @@ const FIND_HTML = String.raw`<!DOCTYPE html>
 *{box-sizing:border-box}
 html,body{margin:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
 .box{background:var(--pale);border:1px solid var(--line);border-radius:16px;padding:16px;min-height:100vh}
-.ttl{margin:2px 2px 2px;font:700 27px/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
-.sub{margin:0 2px 14px;font-size:17px;color:#41526a}
+.ttl{margin:0 2px 2px;font:700 25px/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.sub{margin:0 2px 12px;font-size:16px;color:#41526a}
 .search{position:relative}
 .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%)}
 input{width:100%;font:italic 18px Lora,Georgia,serif;padding:15px 14px 15px 46px;border:2px solid #9fb5cf;border-radius:12px;background:#fff;color:var(--ink)}
 input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,54,93,.15)}
-.az{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:14px}
-.az button{font:700 18px 'Libre Baskerville',Georgia,serif;color:var(--navy);background:#fff;border:1.5px solid #9fb5cf;border-radius:9px;height:46px;cursor:pointer}
+.az{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:6px;margin-top:12px}
+@media(min-width:640px){.az{grid-template-columns:repeat(13,1fr)}}
+.az button{font:700 17px 'Libre Baskerville',Georgia,serif;color:var(--navy);background:#fff;border:1.5px solid #9fb5cf;border-radius:9px;height:40px;cursor:pointer;padding:0}
 .az button:hover,.az button:focus{background:var(--navy);color:#fff;border-color:var(--navy);outline:none}
 .note{font-size:14px;color:#56667a;margin:12px 2px 0;line-height:1.4}
 .res{display:none;margin-top:12px}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .bar h3{margin:0;font:700 17px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
 .back{font:600 15px Lora,Georgia,serif;background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:9px;padding:9px 12px;cursor:pointer}
-.list{max-height:calc(100vh - 250px);overflow:auto;padding-right:4px}
+.list{max-height:max(130px,calc(100vh - 230px));overflow:auto;padding-right:4px}
 .item{display:block;background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;text-decoration:none;color:var(--ink)}
 a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
 .item b{font:700 18px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
