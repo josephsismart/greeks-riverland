@@ -305,7 +305,7 @@ button.go:disabled{opacity:.5;cursor:default}
       <div><label>Phone <small>(optional)</small></label><input type="tel" id="phone" autocomplete="tel"></div>
       <div><label>Family surname *</label><input type="text" id="surname" placeholder="e.g. Savaidis"></div>
       <div><label>Riverland town <small>(optional)</small></label>
-        <select id="town"><option value=""></option><option>Barmera</option><option>Berri</option><option>Blanchetown</option><option>Cobdogla</option><option>Glossop</option><option>Loveday</option><option>Loxton</option><option>Monash</option><option>Morgan</option><option>Paringa</option><option>Renmark</option><option>Waikerie</option><option>Other</option></select></div>
+        <select id="town"><option value=""></option><option>Barmera</option><option>Berri</option><option>Loxton</option><option>Renmark</option><option>Waikerie</option><option>Cobdogla</option><option>Glossop</option><option>Kingston-on-Murray</option><option>Loveday</option><option>Lyrup</option><option>Monash</option><option>Moorook</option><option>Paringa</option><option>Winkie</option><option>Other</option></select></div>
     </div>
     <label class="consent" style="font-weight:400;color:inherit;margin-top:14px"><input type="checkbox" id="contact" checked> You may contact me about these photos.</label>
   </div>
@@ -545,7 +545,7 @@ const REG = {
   TAB: 'Family Register',
   RAW_TAB: 'Form Responses (raw)',
   FAMILY_FOLDER: 'Family Submissions',
-  TOWNS: ['Barmera', 'Berri', 'Blanchetown', 'Cobdogla', 'Glossop', 'Loveday', 'Loxton', 'Monash', 'Morgan', 'Paringa', 'Renmark', 'Waikerie'],
+  TOWNS: ['Barmera', 'Berri', 'Loxton', 'Renmark', 'Waikerie', 'Cobdogla', 'Glossop', 'Kingston-on-Murray', 'Loveday', 'Lyrup', 'Monash', 'Moorook', 'Paringa', 'Winkie'],
   PERM: [
     'I give Greeks of the Riverland permission to use the family history information I have provided on the Greeks of the Riverland website and project.',
     'If I have uploaded photographs or documents, I give permission for them to be displayed as part of the project.',
@@ -1001,7 +1001,7 @@ function testFormSubmission() {
   r.withItemResponse(need(Q.connection).asTextItem().createResponse('Test only - please delete'));
   r.withItemResponse(need(Q.mayContact).asMultipleChoiceItem().createResponse('No'));
   r.withItemResponse(need(Q.surname).asTextItem().createResponse(TEST_SURNAME));
-  r.withItemResponse(need(Q.towns).asCheckboxItem().createResponse(['Morgan', 'Glossop']));
+  r.withItemResponse(need(Q.towns).asCheckboxItem().createResponse(['Monash', 'Glossop']));
   r.withItemResponse(need(Q.firstYear).asTextItem().createResponse('1955'));
   r.withItemResponse(need(Q.people).asParagraphTextItem().createResponse('Test Person - father - deceased 1990\nTest Child - daughter'));
   r.withItemResponse(need(Q.story).asParagraphTextItem().createResponse('Automated test of the Add Your Family form. Safe to delete.'));
@@ -1074,16 +1074,21 @@ function removeTestSubmissions() {
  */
 
 const RIVERLAND_TOWNS = [
-  { name: 'Blanchetown', lat: -34.3517492, lng: 139.6117093, path: '/towns/blanchetown' },
-  { name: 'Morgan',      lat: -34.0340563, lng: 139.6679620, path: '/towns/morgan' },
-  { name: 'Waikerie',    lat: -34.1815175, lng: 139.9855992, path: '/towns/waikerie' },
-  { name: 'Barmera',     lat: -34.2532589, lng: 140.4579655, path: '/towns/barmera' },
-  { name: 'Glossop',     lat: -34.2700936, lng: 140.5279132, path: '/towns/glossop' },
-  { name: 'Monash',      lat: -34.2376497, lng: 140.5575459, path: '/towns/monash' },
-  { name: 'Berri',       lat: -34.2854741, lng: 140.6017385, path: '/towns/berri' },
-  { name: 'Loxton',      lat: -34.4511348, lng: 140.5696644, path: '/towns/loxton' },
-  { name: 'Renmark',     lat: -34.1743516, lng: 140.7468863, path: '/towns/renmark' },
-  { name: 'Paringa',     lat: -34.1786264, lng: 140.7861587, path: '/towns/paringa' }
+  // Nick's town list (8 Oct 2026): major towns, then smaller towns & settlements. Coordinates: OpenStreetMap / Nominatim.
+  { name: 'Barmera',            lat: -34.2532589, lng: 140.4579655, path: '/towns/barmera',            major: true },
+  { name: 'Berri',              lat: -34.2854741, lng: 140.6017385, path: '/towns/berri',              major: true },
+  { name: 'Loxton',             lat: -34.4511348, lng: 140.5696644, path: '/towns/loxton',             major: true },
+  { name: 'Renmark',            lat: -34.1743516, lng: 140.7468863, path: '/towns/renmark',            major: true },
+  { name: 'Waikerie',           lat: -34.1815175, lng: 139.9855992, path: '/towns/waikerie',           major: true },
+  { name: 'Cobdogla',           lat: -34.2430364, lng: 140.4046258, path: '/towns/cobdogla' },
+  { name: 'Glossop',            lat: -34.2700936, lng: 140.5279132, path: '/towns/glossop' },
+  { name: 'Kingston-on-Murray', lat: -34.2228977, lng: 140.3455236, path: '/towns/kingston-on-murray' },
+  { name: 'Loveday',            lat: -34.2980491, lng: 140.4184991, path: '/towns/loveday' },
+  { name: 'Lyrup',              lat: -34.2564905, lng: 140.6463209, path: '/towns/lyrup' },
+  { name: 'Monash',             lat: -34.2376497, lng: 140.5575459, path: '/towns/monash' },
+  { name: 'Moorook',            lat: -34.2762687, lng: 140.3091801, path: '/towns/moorook' },
+  { name: 'Paringa',            lat: -34.1786264, lng: 140.7861587, path: '/towns/paringa' },
+  { name: 'Winkie',             lat: -34.3209288, lng: 140.5533907, path: '/towns/winkie' }
 ];
 
 function widgetOut_(html, title) {
@@ -1422,43 +1427,43 @@ $('q').addEventListener('input',function(){var v=fold(this.value.trim()); if(!v)
 const TOWN_HTML = String.raw`<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><base target="_blank">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
+/* Town page: "Greek Families of <town>" as a grid of name tiles (Nick's town mock-up, 8 Oct 2026).
+   Google Sites keeps an embed's height proportional to its width, so short frames (phones) get one sideways-scrolling row. */
 *{box-sizing:border-box}
-html,body{margin:0;padding:0;background:transparent;font:16px/1.38 Lora,Georgia,serif;color:#000}
-h2{margin:0;font:700 22.67px/1.38 'Libre Baskerville',Georgia,serif;color:#1f3a5f}
-h3{margin:0;font:700 17.33px/1.38 'Libre Baskerville',Georgia,serif;color:#1f3a5f}
-p{margin:8px 0 0}
-ul{list-style:none;margin:8px 0 0;padding:0}
-li{margin:0 0 4px}
-a{color:#1f3a5f;font-weight:700;text-decoration:underline;text-underline-offset:2px}
-a:hover,a:focus{color:#b8914a}
-b{font-weight:700}
-.muted{color:#5f5b53}
-.cta{margin-top:18px}
-.cta a{font-weight:400}
+html{font-size:clamp(13px,1.35vw,17px)}
+html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:#24323f}
+h2{margin:.2rem .1rem .8rem;font:700 1.75rem/1.2 'Libre Baskerville',Georgia,serif;color:#1b365d}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.55rem}
+.t{display:flex;align-items:center;justify-content:center;text-align:center;min-height:2.9rem;padding:.4rem .6rem;background:#eaf1f8;border:1px solid #d3deeb;
+ border-radius:.35rem;font:600 1rem/1.25 'Libre Baskerville',Georgia,serif;color:#1b365d;text-decoration:none}
+a.t:hover,a.t:focus{background:#1b365d;color:#fff;border-color:#1b365d;outline:none}
+.t.more{font-family:Lora,Georgia,serif;font-weight:600}
+.empty{grid-column:1/-1;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;font-style:italic;color:#5f5b53;padding:.2rem .1rem}
+.empty a{font-style:normal}
+@media(max-height:110px){
+ h2{font-size:1.25rem;margin:.1rem .1rem .45rem}
+ .grid{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:max-content;overflow-x:auto;padding-bottom:.3rem}
+ .t{min-height:2.4rem;white-space:nowrap}
+ .empty{grid-column:auto;flex-wrap:nowrap;white-space:nowrap}
+}
 </style></head>
-<body><div id="out" style="padding-left:6px"></div>
+<body><div id="out"></div>
 <script>
 var DATA = __DATA__;
 function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function norm(s){return String(s||'').toLowerCase().replace(/[^a-z]/g,'')}
 function link(u){u=String(u||'').trim();if(!u)return '';return /^https?:/.test(u)?u:DATA.site+u.replace(/^\/?/,'/')}
-var T = esc(DATA.town), f = DATA.families || [];
-var h = '<h3>Families</h3>';
-if (f.length) {
-  h += '<ul>' + f.map(function (x) {
-    var u = link(x.url), name = esc(x.family) + ' Family';
-    var also = String(x.towns||'').split(/\s*,\s*/).filter(function(t){return t && norm(t)!==norm(DATA.town)});
-    var extra = [x.detail ? esc(x.detail) : '', also.length ? 'also ' + esc(also.join(', ')) : ''].filter(String).join(' · ');
-    return '<li>' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + name + '</a>' : '<b>' + name + '</b>') +
-      (extra ? ' <span class="muted">— ' + extra + '</span>' : '') + '</li>';
-  }).join('') + '</ul>';
-} else {
-  h += '<p><em>No families listed yet.</em></p>';
-}
-h += '<p class="cta"><b>Did your family live in ' + T + '?</b> Please share what you know on the <a href="' + esc(DATA.site) + '/add-your-family" target="_blank" rel="noopener">Add Your Family</a> page.</p>';
-document.getElementById('out').innerHTML = h;
+var f = DATA.families || [];
+var h = '<h2>Greek Families of ' + esc(DATA.town) + '</h2><div class="grid">';
+f.forEach(function (x) {
+  var u = link(x.url), tip = x.detail ? ' title="' + esc(x.detail) + '"' : '';
+  h += u ? '<a class="t" href="' + esc(u) + '" target="_blank" rel="noopener"' + tip + '>' + esc(x.family) + '</a>'
+         : '<span class="t"' + tip + '>' + esc(x.family) + '</span>';
+});
+if (f.length) h += '<a class="t more" href="' + esc(DATA.site) + '/families" target="_blank" rel="noopener">Other Families</a>';
+else h += '<div class="empty">No families listed yet. <a class="t more" href="' + esc(DATA.site) + '/add-your-family" target="_blank" rel="noopener">Add your family &rarr;</a></div>';
+document.getElementById('out').innerHTML = h + '</div>';
 </script></body></html>`;
 
 const PRIVACY_HTML = String.raw`<!DOCTYPE html>
