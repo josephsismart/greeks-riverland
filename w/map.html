@@ -39,26 +39,35 @@ html,body{margin:0;height:100%;background:var(--cream);font-family:Lora,Georgia,
 <script>
 var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
 function load(prep, main) {
-  var tries = 0, ld = document.createElement('div');
+  var ld = document.createElement('div');
   ld.textContent = 'Loading…';
   ld.style.cssText = 'position:fixed;right:12px;bottom:8px;z-index:9999;font:italic 14px Lora,Georgia,serif;color:#5f5b53';
   setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
-  // Fast path: data.json on GitHub Pages (refreshed every 10 minutes from the Sheet).
-  // Fallback: ask the Apps Script web app directly.
-  (function go() {
-    var src = tries === 0 ? 'data.json?v=' + Math.floor(Date.now() / 300000) : API + '?page=data';
-    fetch(src, { credentials: 'omit' })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (d) { ld.done = true; if (ld.parentNode) ld.remove(); main(prep ? prep(d) : d); })
-      .catch(function () {
-        if (++tries < 3) return setTimeout(go, 1500 * tries);
-        ld.done = true; if (ld.parentNode) ld.remove();
-        var p = document.createElement('p');
-        p.style.cssText = 'font:16px Lora,Georgia,serif;color:#5f5b53;padding:12px';
-        p.innerHTML = 'Sorry, this could not be loaded just now. <a href="" target="_self" onclick="location.reload();return false">Try again</a>.';
-        document.body.appendChild(p);
-      });
-  })();
+  // Two sources, fetched together: data.json on GitHub Pages (fast, refreshed every few hours) and the
+  // Apps Script web app (live from the Sheet, a little slower). The live copy is used when it answers within
+  // a couple of seconds, so a family or photo marked Published shows straight away; otherwise data.json.
+  var used = false, cached = null, live = null, timer = null;
+  function use(d) {
+    if (used) return; used = true; clearTimeout(timer);
+    ld.done = true; if (ld.parentNode) ld.remove();
+    main(prep ? prep(d) : d);
+  }
+  function getJson(src) {
+    return fetch(src, { credentials: 'omit' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  getJson(API + '?page=data').then(function (d) { live = d; use(d); }).catch(function () { live = false; if (cached) use(cached); });
+  getJson('data.json?v=' + Math.floor(Date.now() / 300000)).then(function (d) {
+    cached = d;
+    if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 2500);
+  }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 9000); });
+  function fail() {
+    if (used) return; used = true;
+    ld.done = true; if (ld.parentNode) ld.remove();
+    var p = document.createElement('p');
+    p.style.cssText = 'font:16px Lora,Georgia,serif;color:#5f5b53;padding:12px';
+    p.innerHTML = 'Sorry, this could not be loaded just now. <a href="" target="_self" onclick="location.reload();return false">Try again</a>.';
+    document.body.appendChild(p);
+  }
 }
 </script>
 

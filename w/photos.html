@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Photographs and Memories — Greeks of the Riverland</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_blank">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* Shared photographs with their descriptions (Nick's change list #11).
+   ?t=<Town> shows one town; ?f=<Family> one family; no parameter shows everything. */
+*{box-sizing:border-box}
+html{font-size:clamp(13px,1.3vw,16px)}
+html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:#24323f}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:1rem;padding:.2rem}
+.card{background:#fff;border:1px solid #e3ddd0;border-radius:.4rem;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;text-align:left;padding:0;font:inherit;color:inherit}
+.card:hover,.card:focus{border-color:#1b365d;outline:none;box-shadow:0 2px 10px rgba(27,54,93,.15)}
+.ph{aspect-ratio:4/3;background:#efe9dc center/cover no-repeat}
+.cap{padding:.65rem .75rem .8rem;line-height:1.4}
+.who{font:700 1rem/1.3 'Libre Baskerville',Georgia,serif;color:#1b365d}
+.meta{font-size:.9rem;color:#5f5b53;margin-top:.15rem}
+.about{font-size:.95rem;margin-top:.35rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.fam{font-size:.85rem;color:#7a5c2e;margin-top:.4rem;font-style:italic}
+.empty{font-style:italic;color:#5f5b53;padding:.4rem .2rem;line-height:1.5}
+.box{position:fixed;inset:0;background:rgba(15,25,38,.92);display:none;align-items:center;justify-content:center;z-index:10;padding:1rem}
+.box.on{display:flex}
+.inner{display:flex;gap:1.2rem;max-width:72rem;width:100%;max-height:100%;align-items:center;flex-wrap:wrap;justify-content:center;overflow:auto}
+.inner img{max-width:min(100%,46rem);max-height:80vh;border-radius:.3rem;background:#222}
+.txt{color:#f3efe6;max-width:22rem;line-height:1.5}
+.txt .who{color:#fff;font-size:1.2rem}.txt .meta{color:#d8d2c4}.txt .fam{color:#e9c98e}
+.txt .about{display:block;-webkit-line-clamp:unset;white-space:pre-line}
+.x,.nav{position:fixed;background:none;border:0;color:#fff;font-size:2rem;cursor:pointer;padding:.4rem .8rem}
+.x{top:.3rem;right:.4rem}.prev{left:.2rem;top:50%}.next{right:.2rem;top:50%}
+</style></head><body>
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
+function load(prep, main) {
+  var ld = document.createElement('div');
+  ld.textContent = 'Loading…';
+  ld.style.cssText = 'position:fixed;right:12px;bottom:8px;z-index:9999;font:italic 14px Lora,Georgia,serif;color:#5f5b53';
+  setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
+  // Two sources, fetched together: data.json on GitHub Pages (fast, refreshed every few hours) and the
+  // Apps Script web app (live from the Sheet, a little slower). The live copy is used when it answers within
+  // a couple of seconds, so a family or photo marked Published shows straight away; otherwise data.json.
+  var used = false, cached = null, live = null, timer = null;
+  function use(d) {
+    if (used) return; used = true; clearTimeout(timer);
+    ld.done = true; if (ld.parentNode) ld.remove();
+    main(prep ? prep(d) : d);
+  }
+  function getJson(src) {
+    return fetch(src, { credentials: 'omit' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  getJson(API + '?page=data').then(function (d) { live = d; use(d); }).catch(function () { live = false; if (cached) use(cached); });
+  getJson('data.json?v=' + Math.floor(Date.now() / 300000)).then(function (d) {
+    cached = d;
+    if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 2500);
+  }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 9000); });
+  function fail() {
+    if (used) return; used = true;
+    ld.done = true; if (ld.parentNode) ld.remove();
+    var p = document.createElement('p');
+    p.style.cssText = 'font:16px Lora,Georgia,serif;color:#5f5b53;padding:12px';
+    p.innerHTML = 'Sorry, this could not be loaded just now. <a href="" target="_self" onclick="location.reload();return false">Try again</a>.';
+    document.body.appendChild(p);
+  }
+}
+</script>
+
+<div class="grid" id="grid"></div>
+<div class="box" id="box"><button class="x" id="x" aria-label="Close">&times;</button><button class="nav prev" id="prev" aria-label="Previous">&#8249;</button>
+<div class="inner"><img id="big" alt=""><div class="txt" id="txt"></div></div><button class="nav next" id="next" aria-label="Next">&#8250;</button></div>
+<script>
+function main(DATA){
+var q = new URLSearchParams(location.search);
+var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+var esc = function (s) { return String(s || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var img = function (id, w) { return 'https://lh3.googleusercontent.com/d/' + id + '=w' + w; };
+var town = q.get('t'), fam = q.get('f');
+var list = (DATA.photos || []).filter(function (p) {
+  if (town && String(p.town).split(/\s*,\s*/).map(norm).indexOf(norm(town)) < 0) return false;
+  if (fam && norm(p.family) !== norm(fam)) return false;
+  return true;
+});
+function title(p) { return p.people || ('The ' + p.family + ' family'); }
+function meta(p) { return [p.year, p.place].filter(Boolean).map(esc).join(' · '); }
+function famLine(p) { return 'The ' + esc(p.family) + ' family' + (p.town ? ', ' + esc(p.town) : ''); }
+var grid = document.getElementById('grid');
+if (!list.length) {
+  grid.innerHTML = '<div class="empty">Photographs ' + (town ? 'from ' + esc(town) + ' ' : '') + 'will appear here as families share them. ' +
+    '<a href="upload.html">Share your photos and memories &rarr;</a></div>';
+} else {
+  grid.innerHTML = list.map(function (p, i) {
+    return '<button class="card" data-i="' + i + '"><div class="ph" style="background-image:url(\'' + img(p.id, 700) + '\')"></div><div class="cap">' +
+      '<div class="who">' + esc(title(p)) + '</div>' + (meta(p) ? '<div class="meta">' + meta(p) + '</div>' : '') +
+      (p.about ? '<div class="about">' + esc(p.about) + '</div>' : '') + '<div class="fam">' + famLine(p) + '</div></div></button>';
+  }).join('');
+}
+var box = document.getElementById('box'), cur = 0;
+function open(i) {
+  cur = (i + list.length) % list.length; var p = list[cur];
+  document.getElementById('big').src = img(p.id, 1600);
+  document.getElementById('txt').innerHTML = '<div class="who">' + esc(title(p)) + '</div>' + (meta(p) ? '<div class="meta">' + meta(p) + '</div>' : '') +
+    (p.about ? '<div class="about">' + esc(p.about) + '</div>' : '') + '<div class="fam">' + famLine(p) + '</div>';
+  box.classList.add('on');
+}
+grid.addEventListener('click', function (e) { var c = e.target.closest('.card'); if (c) open(+c.dataset.i); });
+document.getElementById('x').onclick = function () { box.classList.remove('on'); };
+document.getElementById('prev').onclick = function () { open(cur - 1); };
+document.getElementById('next').onclick = function () { open(cur + 1); };
+box.addEventListener('click', function (e) { if (e.target === box) box.classList.remove('on'); });
+document.addEventListener('keydown', function (e) {
+  if (!box.classList.contains('on')) return;
+  if (e.key === 'Escape') box.classList.remove('on'); if (e.key === 'ArrowLeft') open(cur - 1); if (e.key === 'ArrowRight') open(cur + 1);
+});
+}
+load(null, main);
+</script></body></html>

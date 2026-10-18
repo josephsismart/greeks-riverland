@@ -528,6 +528,499 @@ window.addEventListener('resize',function(){if(cur)place(cur)});
 </body></html>
 `;
 /**
+ * Greeks of the Riverland — homepage widgets (served by the same web app)
+ *   ?page=map   Geographically accurate Riverland map (OpenStreetMap data). Click a town → its page.
+ *   ?page=find  Find a Family: surname search + A–Z, from published families only.
+ *   ?page=town&t=Berri  Families of one town (embedded on each town page).
+ *
+ * Town positions are the official OpenStreetMap / Nominatim coordinates (checked 3 Oct 2026).
+ * To add a town later: add a line to RIVERLAND_TOWNS (name, lat, lng, page path).
+ */
+
+const RIVERLAND_TOWNS = [
+  // Nick's town list (8 Oct 2026): major towns, then smaller towns & settlements. Coordinates: OpenStreetMap / Nominatim.
+  { name: 'Barmera',            lat: -34.2532589, lng: 140.4579655, path: '/towns/barmera',            major: true },
+  { name: 'Berri',              lat: -34.2854741, lng: 140.6017385, path: '/towns/berri',              major: true },
+  { name: 'Loxton',             lat: -34.4511348, lng: 140.5696644, path: '/towns/loxton',             major: true },
+  { name: 'Renmark',            lat: -34.1743516, lng: 140.7468863, path: '/towns/renmark',            major: true },
+  { name: 'Waikerie',           lat: -34.1815175, lng: 139.9855992, path: '/towns/waikerie',           major: true },
+  { name: 'Cobdogla',           lat: -34.2430364, lng: 140.4046258, path: '/towns/cobdogla' },
+  { name: 'Glossop',            lat: -34.2700936, lng: 140.5279132, path: '/towns/glossop' },
+  { name: 'Kingston-on-Murray', lat: -34.2228977, lng: 140.3455236, path: '/towns/kingston-on-murray' },
+  { name: 'Loveday',            lat: -34.2980491, lng: 140.4184991, path: '/towns/loveday' },
+  { name: 'Lyrup',              lat: -34.2564905, lng: 140.6463209, path: '/towns/lyrup' },
+  { name: 'Monash',             lat: -34.2376497, lng: 140.5575459, path: '/towns/monash' },
+  { name: 'Moorook',            lat: -34.2762687, lng: 140.3091801, path: '/towns/moorook' },
+  { name: 'Paringa',            lat: -34.1786264, lng: 140.7861587, path: '/towns/paringa' },
+  { name: 'Winkie',             lat: -34.3209288, lng: 140.5533907, path: '/towns/winkie' }
+];
+
+function widgetOut_(html, title) {
+  return HtmlService.createHtmlOutput(html).setTitle(title + ' — Greeks of the Riverland')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+function jsonForHtml_(o) { return JSON.stringify(o).replace(/</g, '\\u003c'); }
+
+/** Families that may be shown publicly: Register rows marked Published + the Map Families tab. */
+function publicFamilies_() {
+  const out = [];
+  try {
+    const sh = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(REG.TAB);
+    if (sh && sh.getLastRow() >= 3) {
+      const H = regHeaders_();
+      const ix = function (n) { return H.indexOf(n); };
+      sh.getRange(3, 1, sh.getLastRow() - 2, H.length).getValues().forEach(function (r) {
+        if (String(r[ix('Website Status')]).trim() !== 'Published' || !String(r[ix('Family Surname')]).trim()) return;
+        if (String(r[ix('Permission to Publish')]).trim() === 'No') return;
+        out.push({ family: String(r[ix('Family Surname')]).trim(), alt: String(r[ix('Other Surname Spellings')]).trim(),
+          towns: String(r[ix('Riverland Towns / Areas')]).trim(), url: String(r[ix('Website Page Link')]).trim() });
+      });
+    }
+  } catch (e) {}
+  mapFamilies_().forEach(function (f) {
+    const ex = out.filter(function (o) { return o.family.toLowerCase() === f.family.toLowerCase(); })[0];
+    if (ex) { if (ex.towns.indexOf(f.town) < 0) ex.towns = ex.towns ? ex.towns + ', ' + f.town : f.town; if (!ex.url) ex.url = f.url; if (!ex.detail) ex.detail = f.detail; }
+    else out.push({ family: f.family, alt: '', towns: f.town, url: f.url, detail: f.detail || '' });
+  });
+  return out;
+}
+
+function townsMapPage_() {
+  const data = { site: CONFIG.SITE_URL, towns: RIVERLAND_TOWNS, families: publicFamilies_() };
+  return widgetOut_(TOWNS_MAP_HTML.replace('__DATA__', function () { return jsonForHtml_(data); }), 'Explore the Riverland');
+}
+
+function findPage_() {
+  const data = { site: CONFIG.SITE_URL, families: publicFamilies_() };
+  return widgetOut_(FIND_HTML.replace('__DATA__', function () { return jsonForHtml_(data); }), 'Find a Family');
+}
+
+/** ?page=data — the same public data as JSON, for the widgets hosted outside Apps Script (GitHub Pages).
+ *  Those load in every browser, including Brave/Safari, which block the cookies Apps Script embeds need. */
+function dataJson_(e) {
+  const cache = CacheService.getScriptCache();
+  let json = cache.get('publicData');
+  if (!json) {
+    let photos = [];
+    try { photos = publicPhotos_(); } catch (err) {}
+    json = JSON.stringify({ site: CONFIG.SITE_URL, towns: RIVERLAND_TOWNS, families: publicFamilies_(), photos: photos });
+    try { cache.put('publicData', json, 60); } catch (err) {}
+  }
+  const cb = e && e.parameter && e.parameter.callback;
+  if (cb && /^[A-Za-z_$][\w$]{0,40}$/.test(cb)) {
+    return ContentService.createTextOutput(cb + '(' + json + ');').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
+}
+
+/** ?page=town&t=Berri — the families list embedded on each town page. */
+function townPage_(name) {
+  const t = RIVERLAND_TOWNS.filter(function (x) { return x.name.toLowerCase() === String(name || '').trim().toLowerCase(); })[0];
+  const town = t ? t.name : String(name || '').trim().slice(0, 40);
+  const norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+  const fams = publicFamilies_().filter(function (f) {
+    return String(f.towns).split(/\s*,\s*/).map(norm).indexOf(norm(town)) >= 0;
+  }).sort(function (a, b) { return a.family.localeCompare(b.family); });
+  const data = { site: CONFIG.SITE_URL, town: town, families: fams };
+  return widgetOut_(TOWN_HTML.replace('__DATA__', function () { return jsonForHtml_(data); }), (town || 'Town') + ' families');
+}
+
+/* =================== SAMPLE DATA (demo only) =================== */
+/*
+ * seedSampleData()   adds demonstration families to the Family Register (marked Published) so the
+ *                    map, Find a Family and town pages can be seen working. Safe to run again.
+ * removeSampleData() deletes every SAMPLE-xx row. Run this before the site goes public with real data.
+ */
+const SAMPLE_FAMILIES = [
+  ['Andreou', '', 'Berri, Barmera', 'Kythera', 'Greece', '1951', 'Fruit block and packing shed work'],
+  ['Christodoulou', '', 'Renmark', 'Kastellorizo', 'Greece', '1949', 'Market garden and later a fruit shop'],
+  ['Dimitriou', '', 'Loxton', 'Florina', 'Greece', '1956', 'Irrigation channel work and vineyard'],
+  ['Georgiou', '', 'Waikerie', 'Lefkada', 'Greece', '1954', 'Citrus growing'],
+  ['Karamanos', '', 'Morgan', 'Ithaca', 'Greece', '1938', 'River trade and general store'],
+  ['Konstantinidis', 'Constantinidis', 'Monash, Glossop', 'Kozani', 'Greece', '1960', 'Dried fruit block'],
+  ['Lambrou', '', 'Paringa, Renmark', 'Nicosia', 'Cyprus', '1958', 'Winery and cellar work'],
+  ['Papadopoulos', '', 'Barmera', 'Kalamata', 'Greece', '1952', 'Cafe on the main street'],
+  ['Vlahos', 'Vlachos', 'Blanchetown', 'Chios', 'Greece', '1947', 'Fishing and boat building']
+];
+const SAMPLE_NOTE = 'SAMPLE DATA - for demonstration only. Delete by running removeSampleData() in Apps Script.';
+
+function seedSampleData() {
+  removeSampleData();
+  const sh = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(REG.TAB);
+  if (!sh) throw new Error('Run setupRegister() first.');
+  const H = regHeaders_();
+  const rows = SAMPLE_FAMILIES.map(function (f, i) {
+    const v = {
+      'Submission ID': 'SAMPLE-' + ('0' + (i + 1)).slice(-2), 'Date Submitted': new Date(),
+      'Family Surname': f[0], 'Other Surname Spellings': f[1], 'Riverland Towns / Areas': f[2],
+      'Place of Origin': f[3], 'Region / Country': f[4], 'Year Arrived in Australia': f[5], 'Work / Occupations': f[6],
+      'Family Story': 'Sample entry used to demonstrate the website. Not a real family record.',
+      'Permission to Publish': 'Yes', 'Photo Permission': 'No', 'Contributor Name': 'Sample data', 'May Contact?': 'No',
+      'Photos / Documents Supplied': 'No', 'Website Status': 'Published', 'Priority': 'Low',
+      'Needs Editing': 'No', 'Needs Fact Check': 'No', 'Needs Photo Caption': 'No', 'Ready to Publish': 'Yes',
+      'Follow-up Needed': 'No', 'Follow-up Notes': SAMPLE_NOTE
+    };
+    return H.map(function (h) { return v[h] === undefined ? '' : v[h]; });
+  });
+  const r = Math.max(sh.getLastRow() + 1, 3);
+  sh.getRange(r, 1, rows.length, H.length).setValues(rows);
+  return 'Sample families added: ' + rows.length;
+}
+
+function removeSampleData() {
+  const sh = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(REG.TAB);
+  if (!sh || sh.getLastRow() < 3) return 'Sample rows removed: 0';
+  const ids = sh.getRange(3, 1, sh.getLastRow() - 2, 1).getValues();
+  let n = 0;
+  for (let i = ids.length - 1; i >= 0; i--) {
+    if (/^SAMPLE-/.test(String(ids[i][0]))) { sh.deleteRow(i + 3); n++; }
+  }
+  return 'Sample rows removed: ' + n;
+}
+
+/** Quick self-check: run from the editor; every line should read OK. */
+function selfTest() {
+  const out = [];
+  const fams = publicFamilies_();
+  out.push('OK public families: ' + fams.length);
+  RIVERLAND_TOWNS.forEach(function (t) {
+    const html = townPage_(t.name).getContent();
+    out.push((html.indexOf('__DATA__') < 0 ? 'OK ' : 'FAIL ') + 'town widget ' + t.name);
+  });
+  out.push((townsMapPage_().getContent().indexOf('__DATA__') < 0 ? 'OK' : 'FAIL') + ' map');
+  out.push((findPage_().getContent().indexOf('__DATA__') < 0 ? 'OK' : 'FAIL') + ' find');
+  Logger.log(out.join('\n'));
+  return out.join('\n');
+}
+
+function privacyPage_() {
+  return widgetOut_(PRIVACY_HTML, 'Privacy, Permission and Photo Use');
+}
+
+/* ------------------------------------------------------------------ */
+
+const TOWNS_MAP_HTML = String.raw`<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><base target="_blank">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1b365d;--navy2:#24497a;--cream:#fbf8f1;--pale:#eaf1f8}
+html,body{margin:0;height:100%;background:var(--cream);font-family:Lora,Georgia,serif}
+#map{position:absolute;inset:0;border-radius:14px;overflow:hidden;background:#e9eef2}
+.leaflet-container{font-family:Lora,Georgia,serif}
+.leaflet-tile-pane{filter:sepia(.14) saturate(1.25) contrast(1.06)}
+.ln{position:absolute;height:2px;background:var(--navy);transform-origin:0 50%;z-index:690;pointer-events:none;opacity:.75}
+.leaflet-container a.lbl{color:var(--navy)}
+.leaflet-container a.lbl:hover,.leaflet-container a.lbl:focus{color:#fff}
+.lbl{position:absolute;white-space:nowrap;background:#fff;color:var(--navy);font:700 17px/1 'Libre Baskerville',Georgia,serif;
+ padding:9px 13px;border-radius:10px;border:2px solid var(--navy);box-shadow:0 3px 10px rgba(16,36,64,.22);text-decoration:none;
+ transform:translate(var(--tx),var(--ty));transition:background .15s,color .15s}
+.lbl:hover,.lbl:focus{background:var(--navy);color:#fff;outline:none}
+.lbl .n{display:block;font:600 12px/1.2 Lora,Georgia,serif;margin-top:4px;color:#5a6b80}
+.lbl:hover .n,.lbl:focus .n{color:#dfe8f3}
+.hidden{visibility:hidden}
+.dot{width:18px;height:18px;border-radius:50%;background:var(--navy);border:4px solid #fff;box-shadow:0 0 0 2px var(--navy),0 2px 6px rgba(0,0,0,.35);box-sizing:border-box;cursor:pointer}
+.hint{position:absolute;right:12px;top:12px;z-index:800;background:rgba(255,255,255,.95);color:var(--navy);padding:8px 13px;border-radius:999px;
+ font:600 14px Lora,Georgia,serif;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.leaflet-popup-content{font:15px/1.45 Lora,Georgia,serif;color:#24323f;margin:14px 16px}
+.pop b{font:700 18px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.pop a.go{display:inline-block;margin-top:10px;background:var(--navy);color:#fff;text-decoration:none;padding:10px 16px;border-radius:9px;font-weight:600}
+.small .lbl{font-size:13px;padding:6px 9px;border-width:1.5px}
+.small .lbl .n{display:none}
+.small .hint{display:none}
+.pick{display:none;position:absolute;right:8px;top:8px;z-index:900;font:600 15px Lora,Georgia,serif;color:#fff;background:var(--navy);border:0;border-radius:10px;padding:9px 10px;max-width:60%}
+.small .pick{display:block}
+.small .dot{width:15px;height:15px;border-width:3px}
+.leaflet-control-zoom a{width:38px!important;height:38px!important;line-height:38px!important;font-size:22px!important}
+</style></head>
+<body>
+<div id="map" role="application" aria-label="Map of Riverland towns. Choose a town to open its page."></div>
+<div class="hint">Click a town to explore</div>
+<select class="pick" id="pick" aria-label="Choose a town"><option value="">Choose a town &#9662;</option></select>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+var DATA = __DATA__;
+var small = innerWidth < 560; if (small) document.body.classList.add('small');
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function norm(s){return String(s||'').toLowerCase().replace(/[^a-z]/g,'')}
+function link(p){p=String(p||'');return /^https?:/.test(p)?p:DATA.site+p}
+function famsOf(t){return DATA.families.filter(function(f){return String(f.towns).split(/\s*,\s*/).map(norm).indexOf(norm(t))>=0}).map(function(f){return f.family}).sort()}
+
+var map = L.map('map', {zoomControl:false, scrollWheelZoom:false, dragging:!L.Browser.mobile, tap:true, zoomSnap:0.25, attributionControl:true});
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom:15, minZoom:7,
+  attribution: small ? '&copy; Esri, OSM' : 'Map: Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+L.control.zoom({position: small ? 'bottomright' : 'bottomleft'}).addTo(map);
+map.attributionControl.setPrefix(false);
+DATA.towns.slice().sort(function(a,b){return a.name.localeCompare(b.name)}).forEach(function(t){var o=document.createElement('option');o.value=link(t.path);o.textContent=t.name;document.getElementById('pick').appendChild(o)});
+document.getElementById('pick').onchange=function(){if(this.value)window.open(this.value,'_blank');this.value=''};
+var bounds = L.latLngBounds(DATA.towns.map(function(t){return [t.lat,t.lng]}));
+map.fitBounds(bounds, {padding: small ? [18,18] : [60,80]});
+map.setMaxBounds(bounds.pad(1.2));
+
+var pane = map.getPanes().markerPane, items = [];
+DATA.towns.forEach(function (t, i) {
+  var fam = famsOf(t.name);
+  var m = L.marker([t.lat,t.lng], {icon:L.divIcon({className:'',html:'<div class="dot" title="'+esc(t.name)+'"></div>',iconSize:[18,18],iconAnchor:[9,9]}), keyboard:false}).addTo(map);
+  m.bindPopup('<div class="pop"><b>'+esc(t.name)+'</b>'+(fam.length?'<div>Families: '+esc(fam.join(', '))+'</div>':'')+
+    '<a class="go" href="'+esc(link(t.path))+'" target="_blank" rel="noopener">Open '+esc(t.name)+' page &rarr;</a></div>');
+  var a = document.createElement('a');
+  a.className = 'lbl'; a.href = link(t.path); a.target = '_blank'; a.rel = 'noopener';
+  a.innerHTML = esc(t.name) + (fam.length ? '<span class="n">' + fam.length + ' famil' + (fam.length===1?'y':'ies') + '</span>' : '');
+  a.setAttribute('aria-label', 'Open the ' + t.name + ' page');
+  map.getContainer().appendChild(a); a.style.zIndex = 700;
+  items.push({t:t, el:a});
+});
+
+/* Place every label next to its town without overlaps: try close positions first, then further out with a leader line. */
+var lines = items.map(function(){var d=document.createElement('div');d.className='ln';map.getContainer().appendChild(d);return d});
+function rectOf(el){var b=el.getBoundingClientRect(),c=map.getContainer().getBoundingClientRect();return {l:b.left-c.left,t:b.top-c.top,r:b.right-c.left,b:b.bottom-c.top}}
+function place() {
+  var cont = map.getContainer().getBoundingClientRect(), placed = [];
+  ['.leaflet-control-zoom','.hint','.pick','.leaflet-control-attribution'].forEach(function(q){var e=document.querySelector(q);if(e&&e.offsetParent!==null&&getComputedStyle(e).display!=='none')placed.push(rectOf(e))});
+  var dots = items.map(function(o){return map.latLngToContainerPoint([o.t.lat,o.t.lng])});
+  var order = items.map(function(it,i){return i}).sort(function(a,b){
+    var ca=dots.filter(function(d){return Math.abs(d.x-dots[a].x)<90&&Math.abs(d.y-dots[a].y)<70}).length;
+    var cb=dots.filter(function(d){return Math.abs(d.x-dots[b].x)<90&&Math.abs(d.y-dots[b].y)<70}).length; return cb-ca});
+  order.forEach(function (i) {
+    var it = items[i], p = dots[i], ln = lines[i];
+    it.el.classList.remove('hidden'); it.el.style.left = p.x + 'px'; it.el.style.top = p.y + 'px';
+    var w = it.el.offsetWidth, h = it.el.offsetHeight, ok = false, g0 = small ? 9 : 13;
+    var rings = small ? [g0, 22] : [g0, 30, 52, 76, 100];
+    for (var ri = 0; ri < rings.length && !ok; ri++) {
+      var g = rings[ri];
+      var opts = [[g,-h/2],[-w-g,-h/2],[-w/2,-h-g],[-w/2,g],[g*.75,-h-g*.75],[g*.75,g*.75],[-w-g*.75,-h-g*.75],[-w-g*.75,g*.75]];
+      for (var k = 0; k < opts.length && !ok; k++) {
+        var r = {l:p.x+opts[k][0], t:p.y+opts[k][1]}; r.r = r.l + w; r.b = r.t + h;
+        if (r.l < 4 || r.t < 4 || r.r > cont.width-4 || r.b > cont.height-4) continue;
+        var hit = placed.some(function(q){return !(r.r<q.l-5||r.l>q.r+5||r.b<q.t-5||r.t>q.b+5)}) ||
+          dots.some(function(d){return d.x>r.l-10&&d.x<r.r+10&&d.y>r.t-10&&d.y<r.b+10});
+        if (hit) continue;
+        ok = true; placed.push(r);
+        it.el.style.setProperty('--tx', opts[k][0]+'px'); it.el.style.setProperty('--ty', opts[k][1]+'px');
+        if (ri > 0) { // leader line from the dot to the nearest edge of the label
+          var cx = Math.max(r.l, Math.min(p.x, r.r)), cy = Math.max(r.t, Math.min(p.y, r.b));
+          var dx = cx - p.x, dy = cy - p.y, len = Math.sqrt(dx*dx+dy*dy);
+          ln.style.display = 'block'; ln.style.left = p.x + 'px'; ln.style.top = (p.y-1) + 'px'; ln.style.width = len + 'px';
+          ln.style.transform = 'rotate(' + Math.atan2(dy, dx) + 'rad)';
+        } else ln.style.display = 'none';
+      }
+    }
+    if (!ok) { it.el.classList.add('hidden'); ln.style.display = 'none'; }
+  });
+}
+map.on('zoom move resize', place); setTimeout(place, 50); addEventListener('load', place);
+</script></body></html>`;
+
+/* ------------------------------------------------------------------ */
+
+const FIND_HTML = String.raw`<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><base target="_blank">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Sizes are in rem and the root size follows the frame width, because Google Sites keeps an embed's
+   height proportional to its width. Very short frames (phones) switch to a compact one-row layout. */
+:root{--navy:#1b365d;--pale:#eef4fa;--line:#c9d7e8;--ink:#24323f}
+*{box-sizing:border-box}
+html{font-size:clamp(13px,1.55vw,20px)}
+html,body{margin:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
+.box{background:var(--pale);border:1px solid var(--line);border-radius:.9rem;padding:.9rem 1rem;min-height:100vh}
+.ttl{margin:0 .1rem .1rem;font:700 1.55rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.sub{margin:0 .1rem .7rem;font-size:1rem;color:#41526a}
+.search{position:relative}
+.search svg{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);width:1.3rem;height:1.3rem}
+input{width:100%;font:italic 1.1rem Lora,Georgia,serif;padding:.75rem .9rem .75rem 2.8rem;border:2px solid #9fb5cf;border-radius:.7rem;background:#fff;color:var(--ink)}
+input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,54,93,.15)}
+.az{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:.35rem;margin-top:.7rem}
+@media(min-width:640px){.az{grid-template-columns:repeat(13,1fr)}}
+.az button{font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy);background:#fff;border:1.5px solid #9fb5cf;border-radius:.55rem;height:2.4rem;cursor:pointer;padding:0}
+.az button:hover,.az button:focus{background:var(--navy);color:#fff;border-color:var(--navy);outline:none}
+.note{font-size:.85rem;color:#56667a;margin:.6rem .1rem 0;line-height:1.4}
+.res{display:none;margin-top:.7rem}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem}
+.bar h3{margin:0;font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.back{font:600 .9rem Lora,Georgia,serif;background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:.55rem;padding:.4rem .7rem;cursor:pointer}
+.list{max-height:calc(100vh - 12.5rem);min-height:4rem;overflow:auto;padding-right:.25rem}
+.item{display:block;background:#fff;border:1px solid var(--line);border-radius:.65rem;padding:.6rem .85rem;margin-bottom:.45rem;text-decoration:none;color:var(--ink)}
+a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
+.item b{font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.item small{display:block;font-size:.85rem;color:#5a6b80;margin-top:.15rem}
+.empty{background:#fff;border:1px dashed #9fb5cf;border-radius:.65rem;padding:.8rem;font-size:.9rem;line-height:1.5}
+.empty a{color:var(--navy);font-weight:600}
+@media(max-height:230px){
+ .box{padding:.5rem .6rem}.ttl,.sub,.note{display:none}
+ input{padding-top:.55rem;padding-bottom:.55rem}
+ .az{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:2.4rem;overflow-x:auto;margin-top:.45rem;padding-bottom:.3rem}
+ .res{margin-top:.4rem}.list{max-height:calc(100vh - 6.5rem)}
+}
+</style></head>
+<body><div class="box">
+<h2 class="ttl">Find a Family</h2><p class="sub">Search by surname or browse A&ndash;Z.</p>
+<div class="search">
+ <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b365d" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+ <input id="q" type="search" placeholder="Search surname..." aria-label="Search surname" autocomplete="off">
+</div>
+<div id="az" class="az" role="group" aria-label="Browse surnames A to Z"></div>
+<div id="res" class="res"><div class="bar"><h3 id="ttl"></h3><button class="back" id="back" type="button">&larr; A&ndash;Z</button></div><div class="list" id="list"></div></div>
+<p class="note" id="note">Family names are added as records are submitted and verified.</p>
+</div>
+<script>
+var DATA = __DATA__;
+var $ = function(id){return document.getElementById(id)};
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fold(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
+function link(u){u=String(u||'').trim();if(!u)return '';return /^https?:/.test(u)?u:DATA.site+u.replace(/^\/?/,'/')}
+var fams = DATA.families.slice().sort(function(a,b){return a.family.localeCompare(b.family)});
+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(L){var b=document.createElement('button');b.type='button';b.textContent=L;b.setAttribute('aria-label','Surnames starting with '+L);b.onclick=function(){show(L,fams.filter(function(f){return fold(f.family).charAt(0)===L.toLowerCase()}),'Surnames starting with '+L)};$('az').appendChild(b)});
+function show(key, list, title){
+  $('az').style.display='none'; $('note').style.display='none'; $('res').style.display='block'; $('ttl').textContent=title;
+  $('list').innerHTML = list.length ? list.map(function(f){var u=link(f.url);var inner='<b>'+esc(f.family)+'</b>'+((f.towns||f.alt)?'<small>'+esc([f.towns,f.alt&&('Also spelt: '+f.alt)].filter(String).join(' · '))+'</small>':'')+(u?'':'<small>Family page coming soon</small>');
+    return u?'<a class="item" href="'+esc(u)+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="item">'+inner+'</div>'}).join('')
+   : '<div class="empty">No family names '+(key.length===1?'under <b>'+esc(key)+'</b>':'match <b>'+esc(key)+'</b>')+' yet. Family names are added as records are submitted and verified.<br><a href="'+esc(DATA.site)+'/add-your-family" target="_blank" rel="noopener">Add your family to the history &rarr;</a></div>';
+}
+function reset(){ $('q').value=''; $('az').style.display=''; $('note').style.display=''; $('res').style.display='none'; }
+$('back').onclick=reset;
+$('q').addEventListener('input',function(){var v=fold(this.value.trim()); if(!v){reset();return;}
+  show(this.value.trim(), fams.filter(function(f){return fold(f.family).indexOf(v)>=0||fold(f.alt).indexOf(v)>=0}), 'Results for “'+this.value.trim()+'”');});
+</script></body></html>`;
+
+/* ------------------------------------------------------------------ */
+
+const TOWN_HTML = String.raw`<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><base target="_blank">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* Town page: "Greek Families of <town>" as a grid of name tiles (Nick's town mock-up, 8 Oct 2026).
+   Google Sites keeps an embed's height proportional to its width, so short frames (phones) get one sideways-scrolling row. */
+*{box-sizing:border-box}
+html{font-size:clamp(13px,1.35vw,17px)}
+html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:#24323f}
+h2{margin:.2rem .1rem .8rem;font:700 1.75rem/1.2 'Libre Baskerville',Georgia,serif;color:#1b365d}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.55rem}
+.t{display:flex;align-items:center;justify-content:center;text-align:center;min-height:2.9rem;padding:.4rem .6rem;background:#eaf1f8;border:1px solid #d3deeb;
+ border-radius:.35rem;font:600 1rem/1.25 'Libre Baskerville',Georgia,serif;color:#1b365d;text-decoration:none}
+a.t:hover,a.t:focus{background:#1b365d;color:#fff;border-color:#1b365d;outline:none}
+.t.more{font-family:Lora,Georgia,serif;font-weight:600}
+.empty{grid-column:1/-1;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;font-style:italic;color:#5f5b53;padding:.2rem .1rem}
+.empty a{font-style:normal}
+@media(max-height:110px){
+ h2{font-size:1.25rem;margin:.1rem .1rem .45rem}
+ .grid{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:max-content;overflow-x:auto;padding-bottom:.3rem}
+ .t{min-height:2.4rem;white-space:nowrap}
+ .empty{grid-column:auto;flex-wrap:nowrap;white-space:nowrap}
+}
+</style></head>
+<body><div id="out"></div>
+<script>
+var DATA = __DATA__;
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function link(u){u=String(u||'').trim();if(!u)return '';return /^https?:/.test(u)?u:DATA.site+u.replace(/^\/?/,'/')}
+var f = DATA.families || [];
+var h = '<h2>Greek Families of ' + esc(DATA.town) + '</h2><div class="grid">';
+f.forEach(function (x) {
+  var u = link(x.url), tip = x.detail ? ' title="' + esc(x.detail) + '"' : '';
+  h += u ? '<a class="t" href="' + esc(u) + '" target="_blank" rel="noopener"' + tip + '>' + esc(x.family) + '</a>'
+         : '<span class="t"' + tip + '>' + esc(x.family) + '</span>';
+});
+if (f.length) h += '<a class="t more" href="' + esc(DATA.site) + '/families" target="_blank" rel="noopener">Other Families</a>';
+else h += '<div class="empty">No families listed yet. <a class="t more" href="' + esc(DATA.site) + '/add-your-family" target="_blank" rel="noopener">Add your family &rarr;</a></div>';
+document.getElementById('out').innerHTML = h + '</div>';
+</script></body></html>`;
+
+const PRIVACY_HTML = String.raw`<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><base target="_top">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--navy:#1b365d;--olive:#5E6B3A;--gold:#B8914A;--cream:#F6F1E6;--line:#e4d9c3;--ink:#2f2a24}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fbf8f1;font-family:Lora,Georgia,serif;color:var(--ink);line-height:1.7}
+.top{background:linear-gradient(135deg,#1f3a5f,#26466b 60%,#3d4f3a);color:#fff;padding:34px 18px 30px;text-align:center;position:relative}
+.top:after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;opacity:.4;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Cpath d='M0 13h6V5h8v4h-4V7H8v6h12V1H2' fill='none' stroke='%23E2C48E' stroke-width='1.6'/%3E%3C/svg%3E") repeat-x}
+.eyebrow{letter-spacing:4px;font-size:12px;color:#E2C48E;font-weight:600;text-transform:uppercase}
+h1{font-family:'Libre Baskerville',serif;font-weight:400;font-size:clamp(24px,5vw,36px);margin:8px 0 0}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 26px;box-shadow:0 2px 10px rgba(31,58,95,.06)}
+h2{font-family:'Libre Baskerville',serif;color:var(--navy);font-weight:700;font-size:22px;margin:0 0 18px;line-height:1.3}
+p{margin:0 0 14px;font-size:16px}
+p:last-child{margin-bottom:0}
+.aim{background:var(--cream);border-left:4px solid var(--olive);padding:16px 18px;border-radius:10px;margin-top:18px;font-style:italic;font-size:15px}
+.aim p{margin:0}
+.back{display:inline-block;margin-top:22px;font:600 15px Lora,Georgia,serif;color:var(--navy);text-decoration:none}
+.back:hover{text-decoration:underline}
+</style></head>
+<body>
+<div class="top">
+  <div class="eyebrow"><i class="fa-solid fa-shield-halved"></i> &nbsp;Privacy</div>
+  <h1>Privacy, Permission &amp; Photo Use</h1>
+</div>
+<div class="wrap">
+  <div class="card">
+    <h2>Our commitment to you</h2>
+    <p>We want Greeks of the Riverland to be a respectful and trusted community history project.</p>
+    <p>Information and photographs submitted to us will not automatically be published. We will review material before it appears on the website and will only publish information that is appropriate for a public historical record.</p>
+    <p>Please only submit photographs, stories or personal information that you have the right to share. If a photograph includes living people, we ask that you consider whether they would be comfortable having the image published online.</p>
+    <p>We will avoid publishing sensitive personal information about living people, such as current addresses, phone numbers, email addresses, dates of birth, financial information or other private details.</p>
+
+    <h2 style="margin-top:24px">How we store your information</h2>
+    <p>Information submitted through our online forms will be stored in password-protected Google systems, with access limited to authorised project administrators. Private records will not be made publicly accessible through the website.</p>
+    <p>While no online system can guarantee absolute security, we will take reasonable steps to protect information and limit access to it.</p>
+
+    <h2 style="margin-top:24px">Corrections and removal</h2>
+    <p>If you believe information or a photograph relating to you or your family should be corrected, updated or removed, please contact us and we will review the request.</p>
+
+    <div class="aim">
+      <p>Our aim is simple: to preserve the history, stories and photographs of the Greek families of the Riverland while respecting the privacy and wishes of the people whose history we are recording.</p>
+    </div>
+  </div>
+  <a class="back" href="https://sites.google.com/view/greeksoftheriverland">&larr; Back to Greeks of the Riverland</a>
+</div>
+</body></html>`;
+
+/** Photos for the website: rows in the Photo Uploads tab whose Review Status is "Published".
+ *  Each photo's People / Year / Place / About come from what the contributor typed on the upload page
+ *  (saved as the Drive file description). Publishing a row makes its photo files viewable by link so the
+ *  site can show them; contributor names, emails and phone numbers are never included. */
+function publicPhotos_() {
+  const sh = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName('Photo Uploads');
+  if (!sh || sh.getLastRow() < 2) return [];
+  const rows = sh.getRange(2, 1, sh.getLastRow() - 1, 15).getValues();
+  const out = [];
+  rows.forEach(function (r) {
+    if (String(r[12]).trim().toLowerCase() !== 'published') return;
+    const m = /folders\/([\w-]+)/.exec(String(r[11]));
+    if (!m) return;
+    let folder;
+    try { folder = DriveApp.getFolderById(m[1]); } catch (e) { return; }
+    const list = [];
+    const it = folder.getFiles();
+    while (it.hasNext()) {
+      const f = it.next();
+      if (!/^image\//.test(f.getMimeType())) continue;
+      try {
+        if (f.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK) f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      } catch (e) { continue; }
+      const d = {};
+      String(f.getDescription() || '').split('\n').forEach(function (l) {
+        const i = l.indexOf(':');
+        if (i > 0) d[l.slice(0, i).trim().toLowerCase()] = l.slice(i + 1).trim();
+      });
+      list.push({ id: f.getId(), t: f.getDateCreated().getTime(), people: d.people || '', year: d.year || '', place: d.place || '', about: d.about || '' });
+    }
+    list.sort(function (a, b) { return a.t - b.t; });
+    list.forEach(function (p) {
+      out.push({ id: p.id, family: String(r[1]).trim(), town: String(r[2]).trim(), people: p.people, year: p.year, place: p.place, about: p.about });
+    });
+  });
+  return out;
+}
+/**
  * Greeks of the Riverland — "Add Your Family" Form + Family Register
  * ------------------------------------------------------------------
  * rebuildForm()      Rebuilds the Google Form to match the approved questionnaire
@@ -1063,456 +1556,3 @@ function removeTestSubmissions() {
   Logger.log(out.join('\n'));
   return out.join('\n');
 }
-/**
- * Greeks of the Riverland — homepage widgets (served by the same web app)
- *   ?page=map   Geographically accurate Riverland map (OpenStreetMap data). Click a town → its page.
- *   ?page=find  Find a Family: surname search + A–Z, from published families only.
- *   ?page=town&t=Berri  Families of one town (embedded on each town page).
- *
- * Town positions are the official OpenStreetMap / Nominatim coordinates (checked 3 Oct 2026).
- * To add a town later: add a line to RIVERLAND_TOWNS (name, lat, lng, page path).
- */
-
-const RIVERLAND_TOWNS = [
-  // Nick's town list (8 Oct 2026): major towns, then smaller towns & settlements. Coordinates: OpenStreetMap / Nominatim.
-  { name: 'Barmera',            lat: -34.2532589, lng: 140.4579655, path: '/towns/barmera',            major: true },
-  { name: 'Berri',              lat: -34.2854741, lng: 140.6017385, path: '/towns/berri',              major: true },
-  { name: 'Loxton',             lat: -34.4511348, lng: 140.5696644, path: '/towns/loxton',             major: true },
-  { name: 'Renmark',            lat: -34.1743516, lng: 140.7468863, path: '/towns/renmark',            major: true },
-  { name: 'Waikerie',           lat: -34.1815175, lng: 139.9855992, path: '/towns/waikerie',           major: true },
-  { name: 'Cobdogla',           lat: -34.2430364, lng: 140.4046258, path: '/towns/cobdogla' },
-  { name: 'Glossop',            lat: -34.2700936, lng: 140.5279132, path: '/towns/glossop' },
-  { name: 'Kingston-on-Murray', lat: -34.2228977, lng: 140.3455236, path: '/towns/kingston-on-murray' },
-  { name: 'Loveday',            lat: -34.2980491, lng: 140.4184991, path: '/towns/loveday' },
-  { name: 'Lyrup',              lat: -34.2564905, lng: 140.6463209, path: '/towns/lyrup' },
-  { name: 'Monash',             lat: -34.2376497, lng: 140.5575459, path: '/towns/monash' },
-  { name: 'Moorook',            lat: -34.2762687, lng: 140.3091801, path: '/towns/moorook' },
-  { name: 'Paringa',            lat: -34.1786264, lng: 140.7861587, path: '/towns/paringa' },
-  { name: 'Winkie',             lat: -34.3209288, lng: 140.5533907, path: '/towns/winkie' }
-];
-
-function widgetOut_(html, title) {
-  return HtmlService.createHtmlOutput(html).setTitle(title + ' — Greeks of the Riverland')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-function jsonForHtml_(o) { return JSON.stringify(o).replace(/</g, '\\u003c'); }
-
-/** Families that may be shown publicly: Register rows marked Published + the Map Families tab. */
-function publicFamilies_() {
-  const out = [];
-  try {
-    const sh = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(REG.TAB);
-    if (sh && sh.getLastRow() >= 3) {
-      const H = regHeaders_();
-      const ix = function (n) { return H.indexOf(n); };
-      sh.getRange(3, 1, sh.getLastRow() - 2, H.length).getValues().forEach(function (r) {
-        if (String(r[ix('Website Status')]).trim() !== 'Published' || !String(r[ix('Family Surname')]).trim()) return;
-        if (String(r[ix('Permission to Publish')]).trim() === 'No') return;
-        out.push({ family: String(r[ix('Family Surname')]).trim(), alt: String(r[ix('Other Surname Spellings')]).trim(),
-          towns: String(r[ix('Riverland Towns / Areas')]).trim(), url: String(r[ix('Website Page Link')]).trim() });
-      });
-    }
-  } catch (e) {}
-  mapFamilies_().forEach(function (f) {
-    const ex = out.filter(function (o) { return o.family.toLowerCase() === f.family.toLowerCase(); })[0];
-    if (ex) { if (ex.towns.indexOf(f.town) < 0) ex.towns = ex.towns ? ex.towns + ', ' + f.town : f.town; if (!ex.url) ex.url = f.url; if (!ex.detail) ex.detail = f.detail; }
-    else out.push({ family: f.family, alt: '', towns: f.town, url: f.url, detail: f.detail || '' });
-  });
-  return out;
-}
-
-function townsMapPage_() {
-  const data = { site: CONFIG.SITE_URL, towns: RIVERLAND_TOWNS, families: publicFamilies_() };
-  return widgetOut_(TOWNS_MAP_HTML.replace('__DATA__', function () { return jsonForHtml_(data); }), 'Explore the Riverland');
-}
-
-function findPage_() {
-  const data = { site: CONFIG.SITE_URL, families: publicFamilies_() };
-  return widgetOut_(FIND_HTML.replace('__DATA__', function () { return jsonForHtml_(data); }), 'Find a Family');
-}
-
-/** ?page=data — the same public data as JSON, for the widgets hosted outside Apps Script (GitHub Pages).
- *  Those load in every browser, including Brave/Safari, which block the cookies Apps Script embeds need. */
-function dataJson_(e) {
-  const cache = CacheService.getScriptCache();
-  let json = cache.get('publicData');
-  if (!json) {
-    json = JSON.stringify({ site: CONFIG.SITE_URL, towns: RIVERLAND_TOWNS, families: publicFamilies_() });
-    try { cache.put('publicData', json, 60); } catch (err) {}
-  }
-  const cb = e && e.parameter && e.parameter.callback;
-  if (cb && /^[A-Za-z_$][\w$]{0,40}$/.test(cb)) {
-    return ContentService.createTextOutput(cb + '(' + json + ');').setMimeType(ContentService.MimeType.JAVASCRIPT);
-  }
-  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
-}
-
-/** ?page=town&t=Berri — the families list embedded on each town page. */
-function townPage_(name) {
-  const t = RIVERLAND_TOWNS.filter(function (x) { return x.name.toLowerCase() === String(name || '').trim().toLowerCase(); })[0];
-  const town = t ? t.name : String(name || '').trim().slice(0, 40);
-  const norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
-  const fams = publicFamilies_().filter(function (f) {
-    return String(f.towns).split(/\s*,\s*/).map(norm).indexOf(norm(town)) >= 0;
-  }).sort(function (a, b) { return a.family.localeCompare(b.family); });
-  const data = { site: CONFIG.SITE_URL, town: town, families: fams };
-  return widgetOut_(TOWN_HTML.replace('__DATA__', function () { return jsonForHtml_(data); }), (town || 'Town') + ' families');
-}
-
-/* =================== SAMPLE DATA (demo only) =================== */
-/*
- * seedSampleData()   adds demonstration families to the Family Register (marked Published) so the
- *                    map, Find a Family and town pages can be seen working. Safe to run again.
- * removeSampleData() deletes every SAMPLE-xx row. Run this before the site goes public with real data.
- */
-const SAMPLE_FAMILIES = [
-  ['Andreou', '', 'Berri, Barmera', 'Kythera', 'Greece', '1951', 'Fruit block and packing shed work'],
-  ['Christodoulou', '', 'Renmark', 'Kastellorizo', 'Greece', '1949', 'Market garden and later a fruit shop'],
-  ['Dimitriou', '', 'Loxton', 'Florina', 'Greece', '1956', 'Irrigation channel work and vineyard'],
-  ['Georgiou', '', 'Waikerie', 'Lefkada', 'Greece', '1954', 'Citrus growing'],
-  ['Karamanos', '', 'Morgan', 'Ithaca', 'Greece', '1938', 'River trade and general store'],
-  ['Konstantinidis', 'Constantinidis', 'Monash, Glossop', 'Kozani', 'Greece', '1960', 'Dried fruit block'],
-  ['Lambrou', '', 'Paringa, Renmark', 'Nicosia', 'Cyprus', '1958', 'Winery and cellar work'],
-  ['Papadopoulos', '', 'Barmera', 'Kalamata', 'Greece', '1952', 'Cafe on the main street'],
-  ['Vlahos', 'Vlachos', 'Blanchetown', 'Chios', 'Greece', '1947', 'Fishing and boat building']
-];
-const SAMPLE_NOTE = 'SAMPLE DATA - for demonstration only. Delete by running removeSampleData() in Apps Script.';
-
-function seedSampleData() {
-  removeSampleData();
-  const sh = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(REG.TAB);
-  if (!sh) throw new Error('Run setupRegister() first.');
-  const H = regHeaders_();
-  const rows = SAMPLE_FAMILIES.map(function (f, i) {
-    const v = {
-      'Submission ID': 'SAMPLE-' + ('0' + (i + 1)).slice(-2), 'Date Submitted': new Date(),
-      'Family Surname': f[0], 'Other Surname Spellings': f[1], 'Riverland Towns / Areas': f[2],
-      'Place of Origin': f[3], 'Region / Country': f[4], 'Year Arrived in Australia': f[5], 'Work / Occupations': f[6],
-      'Family Story': 'Sample entry used to demonstrate the website. Not a real family record.',
-      'Permission to Publish': 'Yes', 'Photo Permission': 'No', 'Contributor Name': 'Sample data', 'May Contact?': 'No',
-      'Photos / Documents Supplied': 'No', 'Website Status': 'Published', 'Priority': 'Low',
-      'Needs Editing': 'No', 'Needs Fact Check': 'No', 'Needs Photo Caption': 'No', 'Ready to Publish': 'Yes',
-      'Follow-up Needed': 'No', 'Follow-up Notes': SAMPLE_NOTE
-    };
-    return H.map(function (h) { return v[h] === undefined ? '' : v[h]; });
-  });
-  const r = Math.max(sh.getLastRow() + 1, 3);
-  sh.getRange(r, 1, rows.length, H.length).setValues(rows);
-  return 'Sample families added: ' + rows.length;
-}
-
-function removeSampleData() {
-  const sh = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName(REG.TAB);
-  if (!sh || sh.getLastRow() < 3) return 'Sample rows removed: 0';
-  const ids = sh.getRange(3, 1, sh.getLastRow() - 2, 1).getValues();
-  let n = 0;
-  for (let i = ids.length - 1; i >= 0; i--) {
-    if (/^SAMPLE-/.test(String(ids[i][0]))) { sh.deleteRow(i + 3); n++; }
-  }
-  return 'Sample rows removed: ' + n;
-}
-
-/** Quick self-check: run from the editor; every line should read OK. */
-function selfTest() {
-  const out = [];
-  const fams = publicFamilies_();
-  out.push('OK public families: ' + fams.length);
-  RIVERLAND_TOWNS.forEach(function (t) {
-    const html = townPage_(t.name).getContent();
-    out.push((html.indexOf('__DATA__') < 0 ? 'OK ' : 'FAIL ') + 'town widget ' + t.name);
-  });
-  out.push((townsMapPage_().getContent().indexOf('__DATA__') < 0 ? 'OK' : 'FAIL') + ' map');
-  out.push((findPage_().getContent().indexOf('__DATA__') < 0 ? 'OK' : 'FAIL') + ' find');
-  Logger.log(out.join('\n'));
-  return out.join('\n');
-}
-
-function privacyPage_() {
-  return widgetOut_(PRIVACY_HTML, 'Privacy, Permission and Photo Use');
-}
-
-/* ------------------------------------------------------------------ */
-
-const TOWNS_MAP_HTML = String.raw`<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><base target="_blank">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
-<style>
-:root{--navy:#1b365d;--navy2:#24497a;--cream:#fbf8f1;--pale:#eaf1f8}
-html,body{margin:0;height:100%;background:var(--cream);font-family:Lora,Georgia,serif}
-#map{position:absolute;inset:0;border-radius:14px;overflow:hidden;background:#e9eef2}
-.leaflet-container{font-family:Lora,Georgia,serif}
-.leaflet-tile-pane{filter:sepia(.14) saturate(1.25) contrast(1.06)}
-.ln{position:absolute;height:2px;background:var(--navy);transform-origin:0 50%;z-index:690;pointer-events:none;opacity:.75}
-.leaflet-container a.lbl{color:var(--navy)}
-.leaflet-container a.lbl:hover,.leaflet-container a.lbl:focus{color:#fff}
-.lbl{position:absolute;white-space:nowrap;background:#fff;color:var(--navy);font:700 17px/1 'Libre Baskerville',Georgia,serif;
- padding:9px 13px;border-radius:10px;border:2px solid var(--navy);box-shadow:0 3px 10px rgba(16,36,64,.22);text-decoration:none;
- transform:translate(var(--tx),var(--ty));transition:background .15s,color .15s}
-.lbl:hover,.lbl:focus{background:var(--navy);color:#fff;outline:none}
-.lbl .n{display:block;font:600 12px/1.2 Lora,Georgia,serif;margin-top:4px;color:#5a6b80}
-.lbl:hover .n,.lbl:focus .n{color:#dfe8f3}
-.hidden{visibility:hidden}
-.dot{width:18px;height:18px;border-radius:50%;background:var(--navy);border:4px solid #fff;box-shadow:0 0 0 2px var(--navy),0 2px 6px rgba(0,0,0,.35);box-sizing:border-box;cursor:pointer}
-.hint{position:absolute;right:12px;top:12px;z-index:800;background:rgba(255,255,255,.95);color:var(--navy);padding:8px 13px;border-radius:999px;
- font:600 14px Lora,Georgia,serif;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.leaflet-popup-content{font:15px/1.45 Lora,Georgia,serif;color:#24323f;margin:14px 16px}
-.pop b{font:700 18px 'Libre Baskerville',Georgia,serif;color:var(--navy)}
-.pop a.go{display:inline-block;margin-top:10px;background:var(--navy);color:#fff;text-decoration:none;padding:10px 16px;border-radius:9px;font-weight:600}
-.small .lbl{font-size:13px;padding:6px 9px;border-width:1.5px}
-.small .lbl .n{display:none}
-.small .hint{display:none}
-.pick{display:none;position:absolute;right:8px;top:8px;z-index:900;font:600 15px Lora,Georgia,serif;color:#fff;background:var(--navy);border:0;border-radius:10px;padding:9px 10px;max-width:60%}
-.small .pick{display:block}
-.small .dot{width:15px;height:15px;border-width:3px}
-.leaflet-control-zoom a{width:38px!important;height:38px!important;line-height:38px!important;font-size:22px!important}
-</style></head>
-<body>
-<div id="map" role="application" aria-label="Map of Riverland towns. Choose a town to open its page."></div>
-<div class="hint">Click a town to explore</div>
-<select class="pick" id="pick" aria-label="Choose a town"><option value="">Choose a town &#9662;</option></select>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script>
-var DATA = __DATA__;
-var small = innerWidth < 560; if (small) document.body.classList.add('small');
-function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function norm(s){return String(s||'').toLowerCase().replace(/[^a-z]/g,'')}
-function link(p){p=String(p||'');return /^https?:/.test(p)?p:DATA.site+p}
-function famsOf(t){return DATA.families.filter(function(f){return String(f.towns).split(/\s*,\s*/).map(norm).indexOf(norm(t))>=0}).map(function(f){return f.family}).sort()}
-
-var map = L.map('map', {zoomControl:false, scrollWheelZoom:false, dragging:!L.Browser.mobile, tap:true, zoomSnap:0.25, attributionControl:true});
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom:15, minZoom:7,
-  attribution: small ? '&copy; Esri, OSM' : 'Map: Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
-L.control.zoom({position: small ? 'bottomright' : 'bottomleft'}).addTo(map);
-map.attributionControl.setPrefix(false);
-DATA.towns.slice().sort(function(a,b){return a.name.localeCompare(b.name)}).forEach(function(t){var o=document.createElement('option');o.value=link(t.path);o.textContent=t.name;document.getElementById('pick').appendChild(o)});
-document.getElementById('pick').onchange=function(){if(this.value)window.open(this.value,'_blank');this.value=''};
-var bounds = L.latLngBounds(DATA.towns.map(function(t){return [t.lat,t.lng]}));
-map.fitBounds(bounds, {padding: small ? [18,18] : [60,80]});
-map.setMaxBounds(bounds.pad(1.2));
-
-var pane = map.getPanes().markerPane, items = [];
-DATA.towns.forEach(function (t, i) {
-  var fam = famsOf(t.name);
-  var m = L.marker([t.lat,t.lng], {icon:L.divIcon({className:'',html:'<div class="dot" title="'+esc(t.name)+'"></div>',iconSize:[18,18],iconAnchor:[9,9]}), keyboard:false}).addTo(map);
-  m.bindPopup('<div class="pop"><b>'+esc(t.name)+'</b>'+(fam.length?'<div>Families: '+esc(fam.join(', '))+'</div>':'')+
-    '<a class="go" href="'+esc(link(t.path))+'" target="_blank" rel="noopener">Open '+esc(t.name)+' page &rarr;</a></div>');
-  var a = document.createElement('a');
-  a.className = 'lbl'; a.href = link(t.path); a.target = '_blank'; a.rel = 'noopener';
-  a.innerHTML = esc(t.name) + (fam.length ? '<span class="n">' + fam.length + ' famil' + (fam.length===1?'y':'ies') + '</span>' : '');
-  a.setAttribute('aria-label', 'Open the ' + t.name + ' page');
-  map.getContainer().appendChild(a); a.style.zIndex = 700;
-  items.push({t:t, el:a});
-});
-
-/* Place every label next to its town without overlaps: try close positions first, then further out with a leader line. */
-var lines = items.map(function(){var d=document.createElement('div');d.className='ln';map.getContainer().appendChild(d);return d});
-function rectOf(el){var b=el.getBoundingClientRect(),c=map.getContainer().getBoundingClientRect();return {l:b.left-c.left,t:b.top-c.top,r:b.right-c.left,b:b.bottom-c.top}}
-function place() {
-  var cont = map.getContainer().getBoundingClientRect(), placed = [];
-  ['.leaflet-control-zoom','.hint','.pick','.leaflet-control-attribution'].forEach(function(q){var e=document.querySelector(q);if(e&&e.offsetParent!==null&&getComputedStyle(e).display!=='none')placed.push(rectOf(e))});
-  var dots = items.map(function(o){return map.latLngToContainerPoint([o.t.lat,o.t.lng])});
-  var order = items.map(function(it,i){return i}).sort(function(a,b){
-    var ca=dots.filter(function(d){return Math.abs(d.x-dots[a].x)<90&&Math.abs(d.y-dots[a].y)<70}).length;
-    var cb=dots.filter(function(d){return Math.abs(d.x-dots[b].x)<90&&Math.abs(d.y-dots[b].y)<70}).length; return cb-ca});
-  order.forEach(function (i) {
-    var it = items[i], p = dots[i], ln = lines[i];
-    it.el.classList.remove('hidden'); it.el.style.left = p.x + 'px'; it.el.style.top = p.y + 'px';
-    var w = it.el.offsetWidth, h = it.el.offsetHeight, ok = false, g0 = small ? 9 : 13;
-    var rings = small ? [g0, 22] : [g0, 30, 52, 76, 100];
-    for (var ri = 0; ri < rings.length && !ok; ri++) {
-      var g = rings[ri];
-      var opts = [[g,-h/2],[-w-g,-h/2],[-w/2,-h-g],[-w/2,g],[g*.75,-h-g*.75],[g*.75,g*.75],[-w-g*.75,-h-g*.75],[-w-g*.75,g*.75]];
-      for (var k = 0; k < opts.length && !ok; k++) {
-        var r = {l:p.x+opts[k][0], t:p.y+opts[k][1]}; r.r = r.l + w; r.b = r.t + h;
-        if (r.l < 4 || r.t < 4 || r.r > cont.width-4 || r.b > cont.height-4) continue;
-        var hit = placed.some(function(q){return !(r.r<q.l-5||r.l>q.r+5||r.b<q.t-5||r.t>q.b+5)}) ||
-          dots.some(function(d){return d.x>r.l-10&&d.x<r.r+10&&d.y>r.t-10&&d.y<r.b+10});
-        if (hit) continue;
-        ok = true; placed.push(r);
-        it.el.style.setProperty('--tx', opts[k][0]+'px'); it.el.style.setProperty('--ty', opts[k][1]+'px');
-        if (ri > 0) { // leader line from the dot to the nearest edge of the label
-          var cx = Math.max(r.l, Math.min(p.x, r.r)), cy = Math.max(r.t, Math.min(p.y, r.b));
-          var dx = cx - p.x, dy = cy - p.y, len = Math.sqrt(dx*dx+dy*dy);
-          ln.style.display = 'block'; ln.style.left = p.x + 'px'; ln.style.top = (p.y-1) + 'px'; ln.style.width = len + 'px';
-          ln.style.transform = 'rotate(' + Math.atan2(dy, dx) + 'rad)';
-        } else ln.style.display = 'none';
-      }
-    }
-    if (!ok) { it.el.classList.add('hidden'); ln.style.display = 'none'; }
-  });
-}
-map.on('zoom move resize', place); setTimeout(place, 50); addEventListener('load', place);
-</script></body></html>`;
-
-/* ------------------------------------------------------------------ */
-
-const FIND_HTML = String.raw`<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><base target="_blank">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
-<style>
-/* Sizes are in rem and the root size follows the frame width, because Google Sites keeps an embed's
-   height proportional to its width. Very short frames (phones) switch to a compact one-row layout. */
-:root{--navy:#1b365d;--pale:#eef4fa;--line:#c9d7e8;--ink:#24323f}
-*{box-sizing:border-box}
-html{font-size:clamp(13px,1.55vw,20px)}
-html,body{margin:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
-.box{background:var(--pale);border:1px solid var(--line);border-radius:.9rem;padding:.9rem 1rem;min-height:100vh}
-.ttl{margin:0 .1rem .1rem;font:700 1.55rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
-.sub{margin:0 .1rem .7rem;font-size:1rem;color:#41526a}
-.search{position:relative}
-.search svg{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);width:1.3rem;height:1.3rem}
-input{width:100%;font:italic 1.1rem Lora,Georgia,serif;padding:.75rem .9rem .75rem 2.8rem;border:2px solid #9fb5cf;border-radius:.7rem;background:#fff;color:var(--ink)}
-input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,54,93,.15)}
-.az{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:.35rem;margin-top:.7rem}
-@media(min-width:640px){.az{grid-template-columns:repeat(13,1fr)}}
-.az button{font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy);background:#fff;border:1.5px solid #9fb5cf;border-radius:.55rem;height:2.4rem;cursor:pointer;padding:0}
-.az button:hover,.az button:focus{background:var(--navy);color:#fff;border-color:var(--navy);outline:none}
-.note{font-size:.85rem;color:#56667a;margin:.6rem .1rem 0;line-height:1.4}
-.res{display:none;margin-top:.7rem}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem}
-.bar h3{margin:0;font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
-.back{font:600 .9rem Lora,Georgia,serif;background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:.55rem;padding:.4rem .7rem;cursor:pointer}
-.list{max-height:calc(100vh - 12.5rem);min-height:4rem;overflow:auto;padding-right:.25rem}
-.item{display:block;background:#fff;border:1px solid var(--line);border-radius:.65rem;padding:.6rem .85rem;margin-bottom:.45rem;text-decoration:none;color:var(--ink)}
-a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
-.item b{font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
-.item small{display:block;font-size:.85rem;color:#5a6b80;margin-top:.15rem}
-.empty{background:#fff;border:1px dashed #9fb5cf;border-radius:.65rem;padding:.8rem;font-size:.9rem;line-height:1.5}
-.empty a{color:var(--navy);font-weight:600}
-@media(max-height:230px){
- .box{padding:.5rem .6rem}.ttl,.sub,.note{display:none}
- input{padding-top:.55rem;padding-bottom:.55rem}
- .az{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:2.4rem;overflow-x:auto;margin-top:.45rem;padding-bottom:.3rem}
- .res{margin-top:.4rem}.list{max-height:calc(100vh - 6.5rem)}
-}
-</style></head>
-<body><div class="box">
-<h2 class="ttl">Find a Family</h2><p class="sub">Search by surname or browse A&ndash;Z.</p>
-<div class="search">
- <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b365d" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
- <input id="q" type="search" placeholder="Search surname..." aria-label="Search surname" autocomplete="off">
-</div>
-<div id="az" class="az" role="group" aria-label="Browse surnames A to Z"></div>
-<div id="res" class="res"><div class="bar"><h3 id="ttl"></h3><button class="back" id="back" type="button">&larr; A&ndash;Z</button></div><div class="list" id="list"></div></div>
-<p class="note" id="note">Family names are added as records are submitted and verified.</p>
-</div>
-<script>
-var DATA = __DATA__;
-var $ = function(id){return document.getElementById(id)};
-function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function fold(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
-function link(u){u=String(u||'').trim();if(!u)return '';return /^https?:/.test(u)?u:DATA.site+u.replace(/^\/?/,'/')}
-var fams = DATA.families.slice().sort(function(a,b){return a.family.localeCompare(b.family)});
-'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(L){var b=document.createElement('button');b.type='button';b.textContent=L;b.setAttribute('aria-label','Surnames starting with '+L);b.onclick=function(){show(L,fams.filter(function(f){return fold(f.family).charAt(0)===L.toLowerCase()}),'Surnames starting with '+L)};$('az').appendChild(b)});
-function show(key, list, title){
-  $('az').style.display='none'; $('note').style.display='none'; $('res').style.display='block'; $('ttl').textContent=title;
-  $('list').innerHTML = list.length ? list.map(function(f){var u=link(f.url);var inner='<b>'+esc(f.family)+'</b>'+((f.towns||f.alt)?'<small>'+esc([f.towns,f.alt&&('Also spelt: '+f.alt)].filter(String).join(' · '))+'</small>':'')+(u?'':'<small>Family page coming soon</small>');
-    return u?'<a class="item" href="'+esc(u)+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="item">'+inner+'</div>'}).join('')
-   : '<div class="empty">No family names '+(key.length===1?'under <b>'+esc(key)+'</b>':'match <b>'+esc(key)+'</b>')+' yet. Family names are added as records are submitted and verified.<br><a href="'+esc(DATA.site)+'/add-your-family" target="_blank" rel="noopener">Add your family to the history &rarr;</a></div>';
-}
-function reset(){ $('q').value=''; $('az').style.display=''; $('note').style.display=''; $('res').style.display='none'; }
-$('back').onclick=reset;
-$('q').addEventListener('input',function(){var v=fold(this.value.trim()); if(!v){reset();return;}
-  show(this.value.trim(), fams.filter(function(f){return fold(f.family).indexOf(v)>=0||fold(f.alt).indexOf(v)>=0}), 'Results for “'+this.value.trim()+'”');});
-</script></body></html>`;
-
-/* ------------------------------------------------------------------ */
-
-const TOWN_HTML = String.raw`<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><base target="_blank">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<style>
-/* Town page: "Greek Families of <town>" as a grid of name tiles (Nick's town mock-up, 8 Oct 2026).
-   Google Sites keeps an embed's height proportional to its width, so short frames (phones) get one sideways-scrolling row. */
-*{box-sizing:border-box}
-html{font-size:clamp(13px,1.35vw,17px)}
-html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:#24323f}
-h2{margin:.2rem .1rem .8rem;font:700 1.75rem/1.2 'Libre Baskerville',Georgia,serif;color:#1b365d}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.55rem}
-.t{display:flex;align-items:center;justify-content:center;text-align:center;min-height:2.9rem;padding:.4rem .6rem;background:#eaf1f8;border:1px solid #d3deeb;
- border-radius:.35rem;font:600 1rem/1.25 'Libre Baskerville',Georgia,serif;color:#1b365d;text-decoration:none}
-a.t:hover,a.t:focus{background:#1b365d;color:#fff;border-color:#1b365d;outline:none}
-.t.more{font-family:Lora,Georgia,serif;font-weight:600}
-.empty{grid-column:1/-1;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;font-style:italic;color:#5f5b53;padding:.2rem .1rem}
-.empty a{font-style:normal}
-@media(max-height:110px){
- h2{font-size:1.25rem;margin:.1rem .1rem .45rem}
- .grid{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:max-content;overflow-x:auto;padding-bottom:.3rem}
- .t{min-height:2.4rem;white-space:nowrap}
- .empty{grid-column:auto;flex-wrap:nowrap;white-space:nowrap}
-}
-</style></head>
-<body><div id="out"></div>
-<script>
-var DATA = __DATA__;
-function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function link(u){u=String(u||'').trim();if(!u)return '';return /^https?:/.test(u)?u:DATA.site+u.replace(/^\/?/,'/')}
-var f = DATA.families || [];
-var h = '<h2>Greek Families of ' + esc(DATA.town) + '</h2><div class="grid">';
-f.forEach(function (x) {
-  var u = link(x.url), tip = x.detail ? ' title="' + esc(x.detail) + '"' : '';
-  h += u ? '<a class="t" href="' + esc(u) + '" target="_blank" rel="noopener"' + tip + '>' + esc(x.family) + '</a>'
-         : '<span class="t"' + tip + '>' + esc(x.family) + '</span>';
-});
-if (f.length) h += '<a class="t more" href="' + esc(DATA.site) + '/families" target="_blank" rel="noopener">Other Families</a>';
-else h += '<div class="empty">No families listed yet. <a class="t more" href="' + esc(DATA.site) + '/add-your-family" target="_blank" rel="noopener">Add your family &rarr;</a></div>';
-document.getElementById('out').innerHTML = h + '</div>';
-</script></body></html>`;
-
-const PRIVACY_HTML = String.raw`<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><base target="_top">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<style>
-:root{--navy:#1b365d;--olive:#5E6B3A;--gold:#B8914A;--cream:#F6F1E6;--line:#e4d9c3;--ink:#2f2a24}
-*{box-sizing:border-box}
-html,body{margin:0;background:#fbf8f1;font-family:Lora,Georgia,serif;color:var(--ink);line-height:1.7}
-.top{background:linear-gradient(135deg,#1f3a5f,#26466b 60%,#3d4f3a);color:#fff;padding:34px 18px 30px;text-align:center;position:relative}
-.top:after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;opacity:.4;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Cpath d='M0 13h6V5h8v4h-4V7H8v6h12V1H2' fill='none' stroke='%23E2C48E' stroke-width='1.6'/%3E%3C/svg%3E") repeat-x}
-.eyebrow{letter-spacing:4px;font-size:12px;color:#E2C48E;font-weight:600;text-transform:uppercase}
-h1{font-family:'Libre Baskerville',serif;font-weight:400;font-size:clamp(24px,5vw,36px);margin:8px 0 0}
-.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
-.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 26px;box-shadow:0 2px 10px rgba(31,58,95,.06)}
-h2{font-family:'Libre Baskerville',serif;color:var(--navy);font-weight:700;font-size:22px;margin:0 0 18px;line-height:1.3}
-p{margin:0 0 14px;font-size:16px}
-p:last-child{margin-bottom:0}
-.aim{background:var(--cream);border-left:4px solid var(--olive);padding:16px 18px;border-radius:10px;margin-top:18px;font-style:italic;font-size:15px}
-.aim p{margin:0}
-.back{display:inline-block;margin-top:22px;font:600 15px Lora,Georgia,serif;color:var(--navy);text-decoration:none}
-.back:hover{text-decoration:underline}
-</style></head>
-<body>
-<div class="top">
-  <div class="eyebrow"><i class="fa-solid fa-shield-halved"></i> &nbsp;Privacy</div>
-  <h1>Privacy, Permission &amp; Photo Use</h1>
-</div>
-<div class="wrap">
-  <div class="card">
-    <h2>Our commitment to you</h2>
-    <p>We want Greeks of the Riverland to be a respectful and trusted community history project.</p>
-    <p>Information and photographs submitted to us will not automatically be published. We will review material before it appears on the website and will only publish information that is appropriate for a public historical record.</p>
-    <p>Please only submit photographs, stories or personal information that you have the right to share. If a photograph includes living people, we ask that you consider whether they would be comfortable having the image published online.</p>
-    <p>We will avoid publishing sensitive personal information about living people, such as current addresses, phone numbers, email addresses, dates of birth, financial information or other private details.</p>
-
-    <h2 style="margin-top:24px">How we store your information</h2>
-    <p>Information submitted through our online forms will be stored in password-protected Google systems, with access limited to authorised project administrators. Private records will not be made publicly accessible through the website.</p>
-    <p>While no online system can guarantee absolute security, we will take reasonable steps to protect information and limit access to it.</p>
-
-    <h2 style="margin-top:24px">Corrections and removal</h2>
-    <p>If you believe information or a photograph relating to you or your family should be corrected, updated or removed, please contact us and we will review the request.</p>
-
-    <div class="aim">
-      <p>Our aim is simple: to preserve the history, stories and photographs of the Greek families of the Riverland while respecting the privacy and wishes of the people whose history we are recording.</p>
-    </div>
-  </div>
-  <a class="back" href="https://sites.google.com/view/greeksoftheriverland">&larr; Back to Greeks of the Riverland</a>
-</div>
-</body></html>`;
