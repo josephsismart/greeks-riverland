@@ -19,6 +19,8 @@ html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,ser
 .meta{font-size:.9rem;color:#5f5b53;margin-top:.15rem}
 .about{font-size:.95rem;margin-top:.35rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .fam{font-size:.85rem;color:#7a5c2e;margin-top:.4rem;font-style:italic}
+.hd{margin:.2rem .2rem .3rem;font:700 1.75rem/1.2 'Libre Baskerville',Georgia,serif;color:#1b365d}
+.sub{margin:0 .2rem 1rem;color:#5f5b53;line-height:1.5}
 .empty{font-style:italic;color:#5f5b53;padding:.4rem .2rem;line-height:1.5}
 .box{position:fixed;inset:0;background:rgba(15,25,38,.92);display:none;align-items:center;justify-content:center;z-index:10;padding:1rem}
 .box.on{display:flex}
@@ -65,7 +67,7 @@ function load(prep, main) {
 }
 </script>
 
-<div class="grid" id="grid"></div>
+<div id="head"></div><div class="grid" id="grid"></div>
 <div class="box" id="box"><button class="x" id="x" aria-label="Close">&times;</button><button class="nav prev" id="prev" aria-label="Previous">&#8249;</button>
 <div class="inner"><img id="big" alt=""><div class="txt" id="txt"></div></div><button class="nav next" id="next" aria-label="Next">&#8250;</button></div>
 <script>
@@ -83,6 +85,8 @@ var list = (DATA.photos || []).filter(function (p) {
 function title(p) { return p.people || ('The ' + p.family + ' family'); }
 function meta(p) { return [p.year, p.place].filter(Boolean).map(esc).join(' · '); }
 function famLine(p) { return 'The ' + esc(p.family) + ' family' + (p.town ? ', ' + esc(p.town) : ''); }
+if (q.get('h')) document.getElementById('head').innerHTML = '<div class="hd">' + esc(q.get('h')) + '</div>' +
+  (q.get('s') ? '<p class="sub">' + esc(q.get('s')) + '</p>' : '');
 var grid = document.getElementById('grid');
 if (!list.length) {
   grid.innerHTML = '<div class="empty">Photographs ' + (town ? 'from ' + esc(town) + ' ' : '') + 'will appear here as families share them. ' +
