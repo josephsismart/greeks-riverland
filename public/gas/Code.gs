@@ -1081,6 +1081,7 @@ const Q = {
   photoYear: 'About what year was it taken or created?',
   photoWhere: 'Where was it taken?',
   photoStory: 'Is there a story connected with it?',
+  photoDesc: 'Please describe your photos',
   anything: 'Is there anything else about the family that you think should be remembered?',
   notPublish: 'Is there anything in your submission that you would prefer us not to publish?',
   perms: 'Before submitting, please confirm:',
@@ -1381,6 +1382,8 @@ function onFamilySubmit(e) {
     const deceased = people.split(/\n/).filter(function (l) { return /deceased|died|passed|d\.\s?\d{4}|late /i.test(l); }).join('\n');
     const photoNotes = [['Who/what', get('photoWho')], ['Year', get('photoYear')], ['Where', get('photoWhere')], ['Story', get('photoStory')]]
       .filter(function (p) { return p[1]; }).map(function (p) { return p[0] + ': ' + p[1]; }).join('\n');
+    const photoDesc = get('photoDesc');
+    const hasPhotos = !!photoDesc || get('wantsUpload') === 'Yes';
 
     const v = {
       'Submission ID': id,
@@ -1404,8 +1407,8 @@ function onFamilySubmit(e) {
       'Family Story': get('story'),
       'Important Memory / Story': get('memory'),
       'Anything Else to Remember': get('anything'),
-      'Photos / Documents Supplied': get('wantsUpload') === 'Yes' ? 'Yes' : 'No',
-      'Photo / Document Notes': photoNotes,
+      'Photos / Documents Supplied': hasPhotos ? 'Yes' : 'No',
+      'Photo / Document Notes': photoDesc || photoNotes,
       'Drive Folder Link': folder.getUrl(),
       'Permission to Publish': perms.indexOf(REG.PERM[0]) >= 0 ? 'Yes' : 'No',
       'Photo Permission': perms.indexOf(REG.PERM[1]) >= 0 ? 'Yes' : 'No',
@@ -1419,7 +1422,7 @@ function onFamilySubmit(e) {
       'Priority': 'Normal',
       'Needs Editing': 'Yes',
       'Needs Fact Check': 'Yes',
-      'Needs Photo Caption': get('wantsUpload') === 'Yes' ? 'Yes' : 'No',
+      'Needs Photo Caption': hasPhotos ? 'Yes' : 'No',
       'Ready to Publish': 'No',
       'Follow-up Needed': get('notPublish') ? 'Yes' : 'No'
     };
@@ -1436,7 +1439,7 @@ function onFamilySubmit(e) {
       subject: 'New family submission ' + id + ' — ' + (surname || '(no surname)') + ' (Greeks of the Riverland)',
       htmlBody: '<p><b>' + esc_(get('name')) + '</b>' + (get('connection') ? ' (' + esc_(get('connection')) + ')' : '') +
         ' submitted the <b>' + esc_(surname) + '</b> family' + (get('towns') ? ' — ' + esc_(get('towns')) : '') + '.</p>' +
-        (get('wantsUpload') === 'Yes' ? '<p>They said they would upload photographs or documents.</p>' : '') +
+        (hasPhotos ? '<p>They described photographs: ' + esc_(photoDesc || 'yes') + '</p>' : '') +
         '<p>Nothing has been published. <a href="' + sheetUrl + '">Open the Family Register</a> · ' +
         '<a href="' + folder.getUrl() + '">Family folder</a></p>',
       name: 'Greeks of the Riverland'
@@ -1503,7 +1506,6 @@ function testFormSubmission() {
   r.withItemResponse(need(Q.firstYear).asTextItem().createResponse('1955'));
   r.withItemResponse(need(Q.people).asParagraphTextItem().createResponse('Test Person - father - deceased 1990\nTest Child - daughter'));
   r.withItemResponse(need(Q.story).asParagraphTextItem().createResponse('Automated test of the Add Your Family form. Safe to delete.'));
-  r.withItemResponse(need(Q.wantsUpload).asMultipleChoiceItem().createResponse('No'));
   r.withItemResponse(need(Q.perms).asCheckboxItem().createResponse(REG.PERM));
   r.withItemResponse(need(Q.confirmName).asTextItem().createResponse('TEST entry (automated check)'));
   r.submit();
@@ -1560,4 +1562,45 @@ function removeTestSubmissions() {
   out.push('Raw response rows removed: ' + j);
   Logger.log(out.join('\n'));
   return out.join('\n');
+}
+
+/**
+ * Nick's comments (19 Oct 2026): one long form instead of 10 pages, five questions removed,
+ * and one "Please describe your photos" box instead of the four photo questions.
+ * Turns every page break into a section heading (same title), so the whole form is one page.
+ * Past responses stay in the Family Register. Safe to run again.
+ */
+function simplifyForm() {
+  const form = FormApp.openById(CONFIG.FORM_ID);
+  const drop = [Q.spellings, Q.business, Q.businessAbout, Q.memory, Q.anything, Q.wantsUpload,
+    Q.photoWho, Q.photoYear, Q.photoWhere, Q.photoStory];
+  const log = [];
+  form.getItems().forEach(function (it) {
+    if (drop.indexOf(it.getTitle()) >= 0) { log.push('removed: ' + it.getTitle()); form.deleteItem(it); }
+  });
+  form.getItems(FormApp.ItemType.PAGE_BREAK).forEach(function (pb) {
+    let title = pb.getTitle(), help = pb.getHelpText(), idx = pb.getIndex();
+    if (/^Upload your photographs/i.test(title) || /^7\./.test(title)) {
+      title = '7. Photographs';
+      help = 'Old photographs are an important part of this project. To send photos, open our photo page (no Google account needed):\n' +
+        CONFIG.PHOTO_PAGE_URL + '\n\nPlease use the same family surname and email as on this form.';
+    }
+    const h = form.addSectionHeaderItem().setTitle(title);
+    if (help) h.setHelpText(help);
+    form.moveItem(h.getIndex(), idx);
+    form.deleteItem(pb);
+    log.push('page → heading: ' + title);
+  });
+  // Remove a duplicate "7." heading if both photo pages became headings.
+  const heads = form.getItems(FormApp.ItemType.SECTION_HEADER).filter(function (x) { return x.getTitle() === '7. Photographs'; });
+  for (let i = 1; i < heads.length; i++) form.deleteItem(heads[i]);
+  if (!form.getItems().some(function (it) { return it.getTitle() === Q.photoDesc; })) {
+    const head = form.getItems(FormApp.ItemType.SECTION_HEADER).filter(function (x) { return x.getTitle() === '7. Photographs'; })[0];
+    const d = form.addParagraphTextItem().setTitle(Q.photoDesc)
+      .setHelpText('Optional. Who is in each photo, and roughly when and where it was taken.');
+    if (head) form.moveItem(d.getIndex(), head.getIndex() + 1);
+    log.push('added: ' + Q.photoDesc);
+  }
+  form.setProgressBar(false);
+  return log.join('\n') + '\nItems now: ' + form.getItems().length;
 }
