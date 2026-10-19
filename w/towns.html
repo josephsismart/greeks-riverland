@@ -17,6 +17,13 @@ a.t span{display:block;margin-top:4px;font:400 16px Lora,Georgia,serif;color:#5f
 a.t:hover,a.t:focus{background:#1b365d;color:#fff;border-color:#1b365d;outline:none}
 a.t:hover span,a.t:focus span{color:#e2c48e}
 .major a.t{background:#eaf1f8}
+/* Phones: Google Sites gives the frame a short height, so pack the 14 towns into two tight columns. */
+@media(max-width:560px){
+ h2{font-size:17px;margin:2px 0 6px}h2 small{display:none}
+ .grid{grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+ a.t{min-height:44px;padding:8px 10px;font-size:17px;border-radius:9px}
+ a.t span{display:none}
+}
 </style></head><body>
 <script>
 var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
