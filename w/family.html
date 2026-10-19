@@ -40,9 +40,18 @@ button.go:disabled{opacity:.55;cursor:default}
 #status{font-weight:700;color:var(--navy);margin-top:12px}
 .done{text-align:center;padding:40px 20px}
 .done .tick{font-size:64px;color:var(--olive)}
+.top{display:none;background:#1f3a5f;color:#fff;padding:26px 18px 24px;text-align:center;margin:-4px -4px 20px;border-radius:0 0 16px 16px}
+.top h1{font-family:'Libre Baskerville',serif;font-size:clamp(28px,5vw,40px);margin:4px 0 8px}
+.top p{margin:0;font-size:20px}.top a{color:#e2c48e;font-size:18px}
+body.standalone{background:#fbf8f1}body.standalone .top{display:block}
+.full{display:none;background:#fff7e0;border:3px solid #b8914a;border-radius:14px;padding:16px;margin:0 0 18px;text-align:center}
+.full a{display:inline-block;background:#1f3a5f;color:#fff;text-decoration:none;border-radius:14px;padding:16px 22px;font-weight:700;font-size:22px;margin-top:8px}
+body.squeezed .full{display:block}
 .done a.btn{display:inline-block;margin-top:14px;background:var(--navy);color:#fff;padding:16px 26px;border-radius:14px;text-decoration:none;font-weight:700}
 </style></head><body>
+<div class="top"><h1>Add Your Family</h1><p>Four easy steps. Share as much or as little as you know.</p><div style="margin-top:12px"><a href="https://sites.google.com/view/greeksoftheriverland">&larr; Back to the website</a></div></div>
 <div class="wrap" id="app">
+  <div class="full">This form is easier to read on a full page.<br><a href="family.html" target="_top">Open the form full screen &rarr;</a></div>
   <div class="card">
     <h2><span class="n">1</span> About you</h2>
     <p class="help">So we can thank you and ask a question if we need to. Your email and phone are never shown on the website.</p>
@@ -99,6 +108,8 @@ var PHOTO = 'upload.html';
 var TOWNS = ["Barmera","Berri","Loxton","Renmark","Waikerie","Cobdogla","Glossop","Kingston-on-Murray","Loveday","Lyrup","Monash","Moorook","Paringa","Winkie"];
 var PERM = ["I give Greeks of the Riverland permission to use the family history information I have provided on the Greeks of the Riverland website and project.","If I have uploaded photographs or documents, I give permission for them to be displayed as part of the project.","I understand that my email address and phone number will not be published.","I understand that the wording may be lightly edited for spelling, grammar and clarity before publication."];
 var $ = function (id) { return document.getElementById(id); };
+if (window.top === window) document.body.classList.add('standalone');
+else if (window.innerWidth < 700) document.body.classList.add('squeezed');
 $('towns').innerHTML = TOWNS.map(function (t) { return '<label class="chip"><input type="checkbox" value="' + t + '"> ' + t + '</label>'; }).join('');
 document.querySelectorAll('.chip input').forEach(function (c) { c.onchange = function () { c.parentNode.classList.toggle('on', c.checked); }; });
 document.querySelectorAll('.radio input').forEach(function (r) { r.onchange = function () {
