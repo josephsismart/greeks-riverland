@@ -18,11 +18,16 @@ a.t:hover,a.t:focus{background:#1b365d;color:#fff;border-color:#1b365d;outline:n
 a.t:hover span,a.t:focus span{color:#e2c48e}
 .major a.t{background:#eaf1f8}
 /* Phones: Google Sites gives the frame a short height, so pack the 14 towns into two tight columns. */
+.pick{display:none;gap:8px;margin-bottom:12px}
+.pick select{flex:1;min-width:0;font:600 18px Lora,Georgia,serif;padding:12px;border:2px solid #1b365d;border-radius:10px;background:#fff;color:#1b365d}
+.pick button{font:700 18px Lora,Georgia,serif;background:#1b365d;color:#fff;border:0;border-radius:10px;padding:12px 16px}
 @media(max-width:560px){
+ .pick{display:flex}
  h2{font-size:17px;margin:2px 0 6px}h2 small{display:none}
  .grid{grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
  a.t{min-height:44px;padding:8px 10px;font-size:17px;border-radius:9px}
  a.t span{display:none}
+ .small-section{display:none}
 }
 </style></head><body>
 <script>
@@ -77,9 +82,16 @@ function tile(t) {
 var towns = (DATA.towns || []).map(function (t) { return typeof t === 'string' ? { name: t } : t; });
 var isMajor = function (t) { return t.major === true || MAJOR.indexOf(t.name) >= 0; };
 var major = towns.filter(isMajor), small = towns.filter(function (t) { return !isMajor(t); });
+function href(t) { return t.path ? (/^https?:/.test(t.path) ? t.path : SITE + String(t.path).replace(/^\//, '')) : SITE + 'towns/' + norm(t.name); }
 document.getElementById('out').innerHTML =
+  '<div class="pick"><select id="sel" aria-label="Choose a town"><option value="">Choose a town…</option>' +
+    towns.map(function (t) { return '<option value="' + esc(href(t)) + '">' + esc(t.name) + (isMajor(t) ? '' : ' (small town)') + '</option>'; }).join('') +
+  '</select><button type="button" id="go">Open</button></div>' +
   '<h2>Major towns <small>tap a town to see its families and photos</small></h2><div class="grid major">' + major.map(tile).join('') + '</div>' +
-  '<h2>Smaller towns and settlements</h2><div class="grid">' + small.map(tile).join('') + '</div>';
+  '<div class="small-section"><h2>Smaller towns and settlements</h2><div class="grid">' + small.map(tile).join('') + '</div></div>';
+var sel = document.getElementById('sel');
+function openSel() { if (sel.value) window.top.location.href = sel.value; }
+document.getElementById('go').onclick = openSel; sel.onchange = openSel;
 }
 load(null, main);
 </script></body></html>
