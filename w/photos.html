@@ -8,7 +8,7 @@
 /* Shared photographs with their descriptions (Nick's change list #11).
    ?t=<Town> shows one town; ?f=<Family> one family; no parameter shows everything. */
 *{box-sizing:border-box}
-html{font-size:clamp(13px,1.3vw,16px)}
+html{font-size:clamp(15px,1.6vw,18px)}
 html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:#24323f}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:1rem;padding:.2rem}
 .card{background:#fff;border:1px solid #e3ddd0;border-radius:.4rem;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;text-align:left;padding:0;font:inherit;color:inherit}
@@ -29,8 +29,9 @@ html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,ser
 .txt{color:#f3efe6;max-width:22rem;line-height:1.5}
 .txt .who{color:#fff;font-size:1.2rem}.txt .meta{color:#d8d2c4}.txt .fam{color:#e9c98e}
 .txt .about{display:block;-webkit-line-clamp:unset;white-space:pre-line}
-.x,.nav{position:fixed;background:none;border:0;color:#fff;font-size:2rem;cursor:pointer;padding:.4rem .8rem}
-.x{top:.3rem;right:.4rem}.prev{left:.2rem;top:50%}.next{right:.2rem;top:50%}
+.x,.nav{position:fixed;background:rgba(255,255,255,.92);border:0;color:#1b365d;font:700 1.1rem Lora,Georgia,serif;cursor:pointer;padding:.55rem 1rem;border-radius:999px}
+.nav{font-size:2rem;line-height:1;padding:.35rem .9rem}
+.x{top:.6rem;right:.6rem}.prev{left:.2rem;top:50%}.next{right:.2rem;top:50%}
 </style></head><body>
 <script>
 var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
@@ -68,7 +69,7 @@ function load(prep, main) {
 </script>
 
 <div id="head"></div><div class="grid" id="grid"></div>
-<div class="box" id="box"><button class="x" id="x" aria-label="Close">&times;</button><button class="nav prev" id="prev" aria-label="Previous">&#8249;</button>
+<div class="box" id="box"><button class="x" id="x" aria-label="Close">&times; Close</button><button class="nav prev" id="prev" aria-label="Previous">&#8249;</button>
 <div class="inner"><img id="big" alt=""><div class="txt" id="txt"></div></div><button class="nav next" id="next" aria-label="Next">&#8250;</button></div>
 <script>
 function main(DATA){

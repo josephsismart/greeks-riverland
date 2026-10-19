@@ -60,7 +60,7 @@ function load(prep, main) {
 <div class="bar"><button id="more" type="button">&#8635; Show other photos</button><a href="https://sites.google.com/view/greeksoftheriverland/stories-photos">View all photos &rarr;</a></div>
 <script>
 function main(DATA){
-var ARCHIVE = [{"src":"../public/m/arch-family-community.jpg","title":"Family & Community"},{"src":"../public/m/arch-work-everyday.jpg","title":"Work & Everyday Life"},{"src":"../public/m/arch-school-sporting.jpg","title":"School & Sporting Life"}];
+var ARCHIVE = [{"src":"../public/m/intro-1950s.jpg","title":"Greek families of the Riverland"},{"src":"../public/m/arch-family-community.jpg","title":"Family & Community"},{"src":"../public/m/arch-work-everyday.jpg","title":"Work & Everyday Life"},{"src":"../public/m/arch-school-sporting.jpg","title":"School & Sporting Life"}];
 var esc = function (s) { return String(s || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 var pool = ARCHIVE.map(function (a) { return { src: a.src, t: a.title, s: a.sub || '' }; }).concat((DATA.photos || []).map(function (p) {
   return { src: 'https://lh3.googleusercontent.com/d/' + p.id + '=w800', t: 'The ' + p.family + ' family',

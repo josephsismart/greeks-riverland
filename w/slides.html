@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Photographs — Greeks of the Riverland</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_blank">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* Slideshow: photos change every few seconds, with the family name and description underneath.
+   No parameter: home page (archive photos + every published photo).  ?f=Savaidis: one family's photos (up to 5). */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:transparent;font-family:Lora,Georgia,serif;color:#24323f}
+.show{display:flex;flex-direction:column;height:100%}
+.stage{position:relative;flex:1;min-height:0;border-radius:6px;overflow:hidden;background:#efe9dc}
+.slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease;background:#efe9dc center/cover no-repeat}
+.slide.fit{background-size:contain;background-color:#2b2a27}
+.slide.on{opacity:1}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.88);color:#1b365d;
+ font-size:28px;line-height:44px;text-align:center;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.25);padding:0}
+.nav:hover{background:#fff}.prev{left:8px}.next{right:8px}
+.cap{text-align:center;padding:.5rem .4rem 0;min-height:3.6rem}
+.t{font:700 clamp(15px,2.4vw,20px)/1.3 'Libre Baskerville',Georgia,serif;color:#1b365d}
+.s{font-size:clamp(13px,1.9vw,16px);color:#5f5b53;line-height:1.35;margin-top:.15rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dots{display:flex;justify-content:center;gap:8px;margin-top:.35rem}
+.dots button{width:12px;height:12px;border-radius:50%;border:2px solid #1b365d;background:transparent;padding:0;cursor:pointer}
+.dots button.on{background:#1b365d}
+.empty{display:flex;align-items:center;justify-content:center;height:100%;text-align:center;padding:1rem;font:italic 17px/1.5 Lora,Georgia,serif;color:#5f5b53;background:#f6f1e6;border-radius:6px}
+.empty a{font-style:normal;color:#1b365d;font-weight:600}
+</style></head><body>
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
+function load(prep, main) {
+  var ld = document.createElement('div');
+  ld.textContent = 'Loading…';
+  ld.style.cssText = 'position:fixed;right:12px;bottom:8px;z-index:9999;font:italic 14px Lora,Georgia,serif;color:#5f5b53';
+  setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
+  // Two sources, fetched together: data.json on GitHub Pages (fast, refreshed every few hours) and the
+  // Apps Script web app (live from the Sheet, a little slower). The live copy is used when it answers within
+  // a couple of seconds, so a family or photo marked Published shows straight away; otherwise data.json.
+  var used = false, cached = null, live = null, timer = null;
+  function use(d) {
+    if (used) return; used = true; clearTimeout(timer);
+    ld.done = true; if (ld.parentNode) ld.remove();
+    main(prep ? prep(d) : d);
+  }
+  function getJson(src) {
+    return fetch(src, { credentials: 'omit' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  getJson(API + '?page=data').then(function (d) { live = d; use(d); }).catch(function () { live = false; if (cached) use(cached); });
+  getJson('data.json?v=' + Math.floor(Date.now() / 300000)).then(function (d) {
+    cached = d;
+    if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 2500);
+  }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 9000); });
+  function fail() {
+    if (used) return; used = true;
+    ld.done = true; if (ld.parentNode) ld.remove();
+    var p = document.createElement('p');
+    p.style.cssText = 'font:16px Lora,Georgia,serif;color:#5f5b53;padding:12px';
+    p.innerHTML = 'Sorry, this could not be loaded just now. <a href="" target="_self" onclick="location.reload();return false">Try again</a>.';
+    document.body.appendChild(p);
+  }
+}
+</script>
+
+<div class="show" id="show"></div>
+<script>
+function main(DATA){
+var ARCHIVE = [{"src":"../public/m/intro-1950s.jpg","title":"Greek families of the Riverland"},{"src":"../public/m/arch-family-community.jpg","title":"Family & Community"},{"src":"../public/m/arch-work-everyday.jpg","title":"Work & Everyday Life"},{"src":"../public/m/arch-school-sporting.jpg","title":"School & Sporting Life"}];
+var q = new URLSearchParams(location.search);
+var fam = q.get('f'), max = +(q.get('n') || (fam ? 5 : 12)), fit = q.get('fit') === '1';
+var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+var esc = function (s) { return String(s || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var photos = (DATA.photos || []).filter(function (p) { return !fam || norm(p.family) === norm(fam); }).map(function (p) {
+  return { src: 'https://lh3.googleusercontent.com/d/' + p.id + '=w1400', t: 'The ' + p.family + ' family',
+    s: [p.people, p.about, [p.year, p.place].filter(Boolean).join(', ')].filter(Boolean).join(' · ') };
+});
+var pool = fam ? photos : ARCHIVE.map(function (a) { return { src: a.src, t: a.title, s: a.sub || '' }; }).concat(photos);
+for (var i = pool.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+pool = pool.slice(0, max);
+var box = document.getElementById('show');
+if (!pool.length) {
+  box.innerHTML = '<div class="empty"><div>Photographs of the ' + esc(fam || '') + ' family will appear here once they are shared.<br>' +
+    '<a href="upload.html">Share a photo &rarr;</a></div></div>';
+} else {
+  box.innerHTML = '<div class="stage" id="stage">' + pool.map(function (p, i) {
+    return '<div class="slide' + (fit ? ' fit' : '') + (i ? '' : ' on') + '" style="background-image:url(\'' + p.src + '\')" role="img" aria-label="' + esc(p.t) + '"></div>';
+  }).join('') + (pool.length > 1 ? '<button class="nav prev" id="prev" aria-label="Previous photo">&#8249;</button><button class="nav next" id="next" aria-label="Next photo">&#8250;</button>' : '') +
+    '</div><div class="cap"><div class="t" id="t"></div><div class="s" id="s"></div>' +
+    (pool.length > 1 ? '<div class="dots" id="dots">' + pool.map(function (p, i) { return '<button aria-label="Photo ' + (i + 1) + '"></button>'; }).join('') + '</div>' : '') + '</div>';
+  var cur = 0, slides = box.querySelectorAll('.slide'), dots = box.querySelectorAll('.dots button'), timer = null;
+  function go(n) {
+    slides[cur].classList.remove('on'); cur = (n + pool.length) % pool.length; slides[cur].classList.add('on');
+    document.getElementById('t').textContent = pool[cur].t; document.getElementById('s').textContent = pool[cur].s;
+    for (var k = 0; k < dots.length; k++) dots[k].classList.toggle('on', k === cur);
+  }
+  function start() { clearInterval(timer); if (pool.length > 1) timer = setInterval(function () { go(cur + 1); }, 6000); }
+  go(0); start();
+  if (pool.length > 1) {
+    document.getElementById('prev').onclick = function () { go(cur - 1); start(); };
+    document.getElementById('next').onclick = function () { go(cur + 1); start(); };
+    for (var k = 0; k < dots.length; k++) (function (k) { dots[k].onclick = function () { go(k); start(); }; })(k);
+  }
+}
+}
+load(null, main);
+</script></body></html>

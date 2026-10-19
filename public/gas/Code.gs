@@ -249,118 +249,123 @@ function esc_(s) { return String(s || '').replace(/[&<>"]/g, function (c) { retu
 /* ============================ PAGE ============================ */
 
 const UPLOAD_HTML = String.raw`<!DOCTYPE html>
-<html><head><base target="_top">
+<html lang="en"><head><base target="_top">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
-:root{--navy:#1F3A5F;--olive:#5E6B3A;--gold:#B8914A;--gold2:#E2C48E;--cream:#F6F1E6;--line:#e4d9c3;--muted:#6b6257}
-*{box-sizing:border-box}body{margin:0;background:#fbf8f1;color:#2f2a24;font:16px/1.6 Lora,Georgia,serif}
-.top{background:linear-gradient(135deg,#1f3a5f,#26466b 60%,#3d4f3a);color:#fff;padding:34px 18px 30px;text-align:center;position:relative}
-.top:after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;opacity:.4;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Cpath d='M0 13h6V5h8v4h-4V7H8v6h12V1H2' fill='none' stroke='%23E2C48E' stroke-width='1.6'/%3E%3C/svg%3E") repeat-x}
-.top a{color:var(--gold2);font-size:14px;text-decoration:none}
-.eyebrow{letter-spacing:4px;font-size:12px;color:var(--gold2);font-weight:600;text-transform:uppercase}
-h1{font-family:'Libre Baskerville',serif;font-weight:400;font-size:clamp(26px,5vw,38px);margin:8px 0}
-h2{font-family:'Libre Baskerville',serif;color:var(--navy);font-weight:400;font-size:22px;margin:0 0 12px}
-.wrap{max-width:820px;margin:0 auto;padding:24px 16px 60px}
-.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 2px 10px rgba(31,58,95,.06)}
-label{display:block;font-weight:600;font-size:14px;color:var(--navy);margin:12px 0 4px}
+/* Large, simple layout for older visitors: big text, big buttons, one box per photo, three numbered steps. */
+:root{--navy:#1F3A5F;--olive:#5E6B3A;--gold:#B8914A;--gold2:#E2C48E;--cream:#F6F1E6;--line:#d9ccb1;--muted:#5d554b}
+*{box-sizing:border-box}body{margin:0;background:#fbf8f1;color:#2a251f;font:20px/1.6 Lora,Georgia,serif}
+.top{background:#1f3a5f;color:#fff;padding:30px 18px 28px;text-align:center}
+.top a{color:var(--gold2);font-size:18px;text-decoration:underline}
+h1{font-family:'Libre Baskerville',serif;font-weight:700;font-size:clamp(28px,5vw,40px);margin:4px 0 8px}
+.top p{margin:0;font-size:20px}
+h2{font-family:'Libre Baskerville',serif;color:var(--navy);font-weight:700;font-size:26px;margin:0 0 6px;display:flex;align-items:center;gap:12px}
+h2 .n{flex:none;width:42px;height:42px;border-radius:50%;background:var(--navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:22px}
+.help{color:var(--muted);margin:0 0 14px}
+.wrap{max-width:760px;margin:0 auto;padding:24px 16px 70px}
+.card{background:#fff;border:2px solid var(--line);border-radius:16px;padding:24px;margin-bottom:22px}
+label{display:block;font-weight:700;color:var(--navy);margin:18px 0 6px}
 label small{font-weight:400;color:var(--muted)}
-input[type=text],input[type=email],input[type=tel],textarea,select{width:100%;padding:11px 12px;border:1px solid #d8ccb4;border-radius:10px;font:inherit;background:#fffdf8}
-textarea{min-height:64px;resize:vertical}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
-@media(max-width:600px){.grid{grid-template-columns:1fr}}
-.notice{display:flex;gap:10px;background:var(--cream);border-left:4px solid var(--olive);padding:12px 14px;border-radius:10px;font-size:14px}
-.notice i{color:var(--olive);margin-top:4px}
-.drop{border:2px dashed #cdbf9f;border-radius:14px;padding:26px;text-align:center;cursor:pointer;background:#fffdf8;transition:.2s}
-.drop:hover,.drop.over{border-color:var(--navy);background:#f3efe4}
-.drop i{font-size:34px;color:var(--gold)}
-.photo{display:grid;grid-template-columns:120px 1fr;gap:14px;border-top:1px dashed var(--line);padding-top:14px;margin-top:14px}
-.photo img{width:120px;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
-.photo .rm{background:none;border:0;color:#a33;cursor:pointer;font:inherit;font-size:13px;padding:0;margin-top:6px}
-@media(max-width:600px){.photo{grid-template-columns:1fr}.photo img{width:100%;height:200px}}
-.consent{display:flex;gap:10px;align-items:flex-start;font-size:14px}
-.consent input{margin-top:5px;width:18px;height:18px}
-button.go{background:var(--navy);color:#fff;border:0;border-radius:999px;padding:14px 26px;font:600 16px Lora,serif;cursor:pointer;display:inline-flex;gap:10px;align-items:center}
-button.go:disabled{opacity:.5;cursor:default}
-.bar{height:10px;background:#eee4cf;border-radius:10px;overflow:hidden;margin:14px 0 6px}
-.bar div{height:100%;width:0;background:linear-gradient(90deg,var(--olive),var(--gold));transition:width .3s}
-.err{color:#a33;font-size:14px;margin-top:8px}
+input[type=text],input[type=email],input[type=tel],textarea,select{width:100%;padding:14px 16px;border:2px solid #c9b994;border-radius:12px;font:inherit;background:#fffdf8;color:inherit;min-height:58px}
+input:focus,textarea:focus,select:focus{outline:3px solid var(--gold2);border-color:var(--navy)}
+textarea{min-height:120px;resize:vertical}
+.pick{width:100%;background:var(--olive);color:#fff;border:0;border-radius:14px;padding:22px;font:700 24px Lora,serif;cursor:pointer;display:flex;gap:14px;align-items:center;justify-content:center}
+.pick:hover{filter:brightness(1.1)}
+.pick small{display:block;font-weight:400;font-size:17px}
+.photo{border:2px solid var(--line);border-radius:14px;padding:16px;margin-top:18px;background:#fffdf8}
+.photo .num{font-weight:700;color:var(--navy);margin-bottom:8px}
+.photo img{display:block;width:100%;max-height:360px;object-fit:contain;background:#f1ebdd;border-radius:10px}
+.photo .rm{background:#fff;border:2px solid #b04a3c;color:#b04a3c;border-radius:10px;cursor:pointer;font:700 18px Lora,serif;padding:10px 16px;margin-top:12px}
+.check{display:flex;gap:14px;align-items:flex-start;font-weight:400;color:inherit;cursor:pointer;margin:14px 0 0}
+.check input{flex:none;width:30px;height:30px;margin-top:2px;accent-color:var(--navy)}
+.notice{background:var(--cream);border-left:6px solid var(--olive);padding:14px 16px;border-radius:10px;margin-top:18px}
+button.go{width:100%;background:var(--navy);color:#fff;border:0;border-radius:14px;padding:22px;font:700 26px Lora,serif;cursor:pointer;display:flex;gap:14px;align-items:center;justify-content:center;margin-top:20px}
+button.go:disabled{opacity:.55;cursor:default}
+.bar{height:18px;background:#eee4cf;border-radius:10px;overflow:hidden;margin:18px 0 8px}
+.bar div{height:100%;width:0;background:var(--olive);transition:width .3s}
+#status{font-weight:700;color:var(--navy)}
+.err{color:#a3271b;font-weight:700;margin-top:12px;font-size:21px}
 .done{text-align:center;padding:40px 20px}
-.done i{font-size:48px;color:var(--olive)}
+.done i{font-size:64px;color:var(--olive)}
+.done a.btn{display:inline-block;margin-top:14px;background:var(--navy);color:#fff;padding:16px 26px;border-radius:14px;text-decoration:none;font-weight:700}
 </style></head><body>
 <div class="top">
-  <div class="eyebrow"><i class="fa-solid fa-camera"></i> &nbsp;Share family photos</div>
-  <h1>Greeks of the Riverland</h1>
-  <div>Send up to <?= maxPhotos ?> photographs — no Google account needed.</div>
-  <div style="margin-top:10px"><a href="<?= siteUrl ?>"><i class="fa-solid fa-arrow-left"></i> Back to the website</a></div>
+  <h1>Share Your Family Photos</h1>
+  <p>Three easy steps. You can send up to <?= maxPhotos ?> photos at a time.</p>
+  <div style="margin-top:12px"><a href="<?= siteUrl ?>">&larr; Back to the website</a></div>
 </div>
 <div class="wrap" id="app">
   <div class="card">
-    <h2>About you</h2>
-    <div class="grid">
-      <div><label>Your name *</label><input type="text" id="name" autocomplete="name"></div>
-      <div><label>Your relationship to the family *</label><input type="text" id="relationship" placeholder="e.g. daughter, grandson, friend"></div>
-      <div><label>Email *</label><input type="email" id="email" autocomplete="email"></div>
-      <div><label>Phone <small>(optional)</small></label><input type="tel" id="phone" autocomplete="tel"></div>
-      <div><label>Family surname *</label><input type="text" id="surname" placeholder="e.g. Savaidis"></div>
-      <div><label>Riverland town <small>(optional)</small></label>
-        <select id="town"><option value=""></option><option>Barmera</option><option>Berri</option><option>Loxton</option><option>Renmark</option><option>Waikerie</option><option>Cobdogla</option><option>Glossop</option><option>Kingston-on-Murray</option><option>Loveday</option><option>Lyrup</option><option>Monash</option><option>Moorook</option><option>Paringa</option><option>Winkie</option><option>Other</option></select></div>
-    </div>
-    <label class="consent" style="font-weight:400;color:inherit;margin-top:14px"><input type="checkbox" id="contact" checked> You may contact me about these photos.</label>
+    <h2><span class="n">1</span> About you</h2>
+    <p class="help">So we know who sent the photos. Your email and phone are never shown on the website.</p>
+    <label for="name">Your name</label><input type="text" id="name" autocomplete="name">
+    <label for="email">Your email</label><input type="email" id="email" autocomplete="email">
+    <label for="phone">Your phone <small>(you can leave this empty)</small></label><input type="tel" id="phone" autocomplete="tel">
+    <label for="surname">The family's surname</label><input type="text" id="surname" placeholder="for example: Savaidis">
+    <label for="relationship">How are you connected to the family?</label><input type="text" id="relationship" placeholder="for example: son, daughter, grandchild, friend">
+    <label for="town">Which Riverland town? <small>(you can leave this empty)</small></label>
+    <select id="town"><option value=""></option><option>Barmera</option><option>Berri</option><option>Loxton</option><option>Renmark</option><option>Waikerie</option><option>Cobdogla</option><option>Glossop</option><option>Kingston-on-Murray</option><option>Loveday</option><option>Lyrup</option><option>Monash</option><option>Moorook</option><option>Paringa</option><option>Winkie</option><option>Other</option></select>
   </div>
 
   <div class="card">
-    <h2>Your photographs</h2>
-    <div class="drop" id="drop"><i class="fa-solid fa-images"></i><div><b>Tap to choose photos</b> or drag them here</div><div style="font-size:13px;color:var(--muted)">Up to <?= maxPhotos ?> photos · JPG or PNG</div></div>
+    <h2><span class="n">2</span> Choose your photos</h2>
+    <p class="help">Press the green button and pick the photos from your phone or computer. Then write a few words about each photo.</p>
+    <button type="button" class="pick" id="drop"><i class="fa-solid fa-images"></i><span>Choose photos<small>Up to <?= maxPhotos ?> photos</small></span></button>
     <input type="file" id="files" accept="image/*" multiple hidden>
     <div id="list"></div>
   </div>
 
   <div class="card">
-    <label class="consent" style="font-weight:400;color:inherit;margin:0"><input type="checkbox" id="consent">
-      <span><b>Consent *</b> — I confirm these photographs and details may be considered for publication on the Greeks of the Riverland website. I understand every submission is reviewed first and my contact details will never be published.</span></label>
-    <div class="notice" style="margin-top:14px"><i class="fa-solid fa-lock"></i><div>Your photos go privately to the project team. Nothing appears on the website automatically.</div></div>
+    <h2><span class="n">3</span> Send</h2>
+    <label class="check"><input type="checkbox" id="consent"><span>I agree that these photos and descriptions may be shown on the Greeks of the Riverland website after they are checked.</span></label>
+    <label class="check"><input type="checkbox" id="contact" checked><span>You may contact me about these photos.</span></label>
+    <div class="notice">Nothing appears on the website straight away. The project team checks every photo first.</div>
     <div class="bar" id="barWrap" style="display:none"><div id="bar"></div></div>
-    <div id="status" style="font-size:14px;color:var(--muted)"></div>
-    <div class="err" id="err"></div>
-    <div style="margin-top:16px"><button class="go" id="send"><i class="fa-solid fa-paper-plane"></i> Send photos</button></div>
+    <div id="status"></div>
+    <div class="err" id="err" role="alert"></div>
+    <button class="go" id="send"><i class="fa-solid fa-paper-plane"></i> Send my photos</button>
   </div>
 </div>
 <script>
 const MAX=<?= maxPhotos ?>; let photos=[];
 const $=id=>document.getElementById(id);
 $('drop').onclick=()=>$('files').click();
-['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('over')}));
-['dragleave','drop'].forEach(ev=>$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.remove('over')}));
-$('drop').addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>e.preventDefault()));
+$('drop').addEventListener('drop',e=>{e.preventDefault();addFiles(e.dataTransfer.files)});
 $('files').onchange=e=>{addFiles(e.target.files);e.target.value=''};
-function addFiles(fl){[...fl].forEach(f=>{if(!/^image\//.test(f.type)&&!/\.(jpe?g|png|heic|webp)$/i.test(f.name))return;if(photos.length>=MAX){$('err').textContent='You can send up to '+MAX+' photos at a time.';return;}photos.push({file:f,url:URL.createObjectURL(f),people:'',year:'',place:'',description:''});});render();}
-function render(){$('list').innerHTML=photos.map((p,i)=>'<div class="photo"><div><img src="'+p.url+'" alt=""><button class="rm" onclick="rm('+i+')"><i class="fa-solid fa-xmark"></i> Remove</button></div><div>'+
- '<label>Who is in the photo?</label><input type="text" data-i="'+i+'" data-k="people" value="'+esc(p.people)+'" placeholder="Names, left to right if you know them">'+
- '<div class="grid"><div><label>Approximate year</label><input type="text" data-i="'+i+'" data-k="year" value="'+esc(p.year)+'" placeholder="e.g. 1965"></div><div><label>Place</label><input type="text" data-i="'+i+'" data-k="place" value="'+esc(p.place)+'" placeholder="e.g. Monash packing shed"></div></div>'+
- '<label>Short description</label><textarea data-i="'+i+'" data-k="description" placeholder="What was happening?">'+esc(p.description)+'</textarea></div></div>').join('');
- document.querySelectorAll('[data-i]').forEach(el=>el.oninput=()=>{photos[+el.dataset.i][el.dataset.k]=el.value});}
+function addFiles(fl){$('err').textContent='';[...fl].forEach(f=>{if(!/^image\//.test(f.type)&&!/\.(jpe?g|png|heic|webp)$/i.test(f.name))return;if(photos.length>=MAX){$('err').textContent='You can send up to '+MAX+' photos at a time. Please send the others afterwards.';return;}photos.push({file:f,url:URL.createObjectURL(f),description:''});});render();}
+function render(){$('list').innerHTML=photos.map((p,i)=>'<div class="photo"><div class="num">Photo '+(i+1)+' of '+photos.length+'</div><img src="'+p.url+'" alt="">'+
+ '<label for="d'+i+'">Describe this photo <small>(who is in it, and roughly when and where)</small></label><textarea id="d'+i+'" data-i="'+i+'" placeholder="for example: Mum and Dad with my brother George at the packing shed in Monash, about 1965">'+esc(p.description)+'</textarea>'+
+ '<button type="button" class="rm" onclick="rm('+i+')"><i class="fa-solid fa-xmark"></i> Remove this photo</button></div>').join('');
+ $('drop').querySelector('span').firstChild.textContent=photos.length?'Add more photos':'Choose photos';
+ document.querySelectorAll('textarea[data-i]').forEach(el=>el.oninput=()=>{photos[+el.dataset.i].description=el.value});}
 function rm(i){photos.splice(i,1);render();}
 function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function shrink(file){return new Promise(res=>{const img=new Image();img.onload=()=>{const M=2400;let w=img.naturalWidth,h=img.naturalHeight;const s=Math.min(1,M/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.round(w*s);c.height=Math.round(h*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res({data:c.toDataURL('image/jpeg',0.88).split(',')[1],type:'image/jpeg',filename:file.name.replace(/\.[^.]+$/,'')+'.jpg'});};
  img.onerror=()=>{const r=new FileReader();r.onload=()=>res({data:String(r.result).split(',')[1],type:file.type||'image/jpeg',filename:file.name});r.readAsDataURL(file);};img.src=URL.createObjectURL(file);});}
 function call(fn,...a){return new Promise((ok,bad)=>google.script.run.withSuccessHandler(ok).withFailureHandler(bad)[fn](...a));}
+function need(id,msg){$('err').textContent=msg;$(id).focus();$(id).scrollIntoView({block:'center'});}
 $('send').onclick=async()=>{
  $('err').textContent='';
  const meta={name:$('name').value.trim(),relationship:$('relationship').value.trim(),email:$('email').value.trim(),phone:$('phone').value.trim(),surname:$('surname').value.trim(),town:$('town').value,contact:$('contact').checked,consent:$('consent').checked};
- if(!meta.name||!meta.relationship||!meta.email||!meta.surname){$('err').textContent='Please fill in the fields marked *.';return;}
- if(!photos.length){$('err').textContent='Please choose at least one photo.';return;}
- if(!meta.consent){$('err').textContent='Please tick the consent box.';return;}
+ if(!meta.name)return need('name','Please type your name (step 1).');
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(meta.email))return need('email','Please type your email address (step 1).');
+ if(!meta.surname)return need('surname','Please type the family surname (step 1).');
+ if(!meta.relationship)return need('relationship','Please say how you are connected to the family (step 1).');
+ if(!photos.length){$('err').textContent='Please choose at least one photo (step 2).';$('drop').scrollIntoView({block:'center'});return;}
+ if(!meta.consent){$('err').textContent='Please tick the box that says "I agree" (step 3).';return;}
  $('send').disabled=true;$('barWrap').style.display='block';
  try{
-  $('status').textContent='Preparing…';const folderId=await call('startUpload',meta);
-  for(let i=0;i<photos.length;i++){$('status').textContent='Sending photo '+(i+1)+' of '+photos.length+'…';const s=await shrink(photos[i].file);
-   await call('uploadPhoto',folderId,Object.assign(s,{people:photos[i].people,year:photos[i].year,place:photos[i].place,description:photos[i].description}));
+  $('status').textContent='Getting ready… please keep this page open.';const folderId=await call('startUpload',meta);
+  for(let i=0;i<photos.length;i++){$('status').textContent='Sending photo '+(i+1)+' of '+photos.length+'… please keep this page open.';const s=await shrink(photos[i].file);
+   await call('uploadPhoto',folderId,Object.assign(s,{people:'',year:'',place:'',description:photos[i].description}));
    $('bar').style.width=Math.round((i+1)/photos.length*100)+'%';}
-  await call('finishUpload',folderId,meta,photos.map(p=>({people:p.people,year:p.year,place:p.place,description:p.description})));
-  $('app').innerHTML='<div class="card done"><i class="fa-solid fa-circle-check"></i><h2 style="margin-top:12px">Thank you!</h2><p>Your photographs have been received and will be reviewed before anything is published.</p><p><a href="<?= siteUrl ?>">Back to Greeks of the Riverland</a></p></div>';
- }catch(e){$('err').textContent='Sorry — something went wrong: '+(e&&e.message?e.message:e)+'. Please try again.';$('send').disabled=false;}
+  await call('finishUpload',folderId,meta,photos.map(p=>({people:'',year:'',place:'',description:p.description})));
+  window.scrollTo(0,0);
+  $('app').innerHTML='<div class="card done"><i class="fa-solid fa-circle-check"></i><h2 style="justify-content:center;margin-top:14px">Thank you!</h2><p>Your photos have arrived safely. The project team will look at them soon.</p><a class="btn" href="'+location.href+'" target="_self">Send more photos</a><p><a href="<?= siteUrl ?>">Back to the website</a></p></div>';
+ }catch(e){$('err').textContent='Sorry, something went wrong. Please press "Send my photos" again. ('+(e&&e.message?e.message:e)+')';$('send').disabled=false;}
 };
 </script></body></html>`;
 
