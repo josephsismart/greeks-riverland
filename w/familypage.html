@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Family — Greeks of the Riverland</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_blank">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Family page (?f=Savaidis): photo slideshow, key facts, and the parts of the story still to be filled in.
+   Details come from the Family Register (data) plus widgets/profiles.json. See _frame.js for the three modes. */
+:root{--navy:#1b365d;--ink:#24323f;--muted:#5f5b53;--gold:#c9a44c;--gold2:#e2c48e;--cream:#f6f1e6;--sky:#eaf1f8;--line:#e3ddd0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
+html.page{font-size:18px}html.page body{background:#fbf8f1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;font-weight:700;border-radius:.75rem;padding:.85rem 1.4rem;font-size:1.05rem;line-height:1.2;transition:transform .15s,box-shadow .15s}
+.btn:hover,.btn:focus{transform:translateY(-.08rem);box-shadow:0 .4rem 1rem rgba(0,0,0,.25);outline:none}
+.btn.gold{background:var(--gold2);color:#1b2a3d}
+.btn.navy{background:var(--navy);color:#fff}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.78rem;font-weight:700;color:#9a7a35}
+
+#full{padding:.5rem .6rem .6rem}
+.top{display:none}
+html.page .top{display:block;background:var(--navy);color:#fff;text-align:center;padding:1.2rem 1rem 1.3rem;margin:0 0 1.6rem}
+.top .site{font:700 1rem 'Libre Baskerville',Georgia,serif;color:var(--gold2);text-decoration:none}
+.top .back{display:inline-block;margin-top:.8rem;color:#fff;border:.1rem solid rgba(255,255,255,.6);border-radius:999px;padding:.55rem 1.2rem;text-decoration:none;font-weight:600}
+html.page #full{max-width:72rem;margin:0 auto;padding:0 1rem 2rem}
+
+.hero{display:grid;grid-template-columns:38rem 1fr;gap:2.2rem;height:25rem}
+html.page .hero{height:auto;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.stage{position:relative;border-radius:1.1rem;overflow:hidden;background:#2b3442;box-shadow:0 .5rem 1.6rem rgba(27,54,93,.18)}
+html.page .stage{aspect-ratio:3/2}
+html.page .stage.e{aspect-ratio:auto;min-height:20rem}
+html.page .stage.e .ph-msg{position:relative;min-height:20rem}
+html.page .acts .btn{flex:1 1 12rem}
+.sl{position:absolute;inset:0;background:#2b3442 center/cover no-repeat;opacity:0;transition:opacity 1.2s ease}
+.sl.on{opacity:1}
+.stage .cap{position:absolute;left:0;right:0;bottom:0;padding:2.4rem 1.2rem 1rem;background:linear-gradient(transparent,rgba(8,16,28,.88));color:#fff;font-size:1rem;line-height:1.4}
+.stage .cap b{display:block;font:700 1.1rem 'Libre Baskerville',Georgia,serif;color:var(--gold2)}
+.nav{position:absolute;top:42%;width:3rem;height:3rem;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:var(--navy);font-size:2rem;line-height:3rem;padding:0;cursor:pointer;box-shadow:0 .1rem .5rem rgba(0,0,0,.3)}
+.nav.p{left:.8rem}.nav.n{right:.8rem}
+.ctr{position:absolute;top:.8rem;right:.8rem;background:rgba(8,16,28,.65);color:#fff;border-radius:999px;padding:.3rem .8rem;font-size:.9rem;font-weight:600}
+.ph0{position:absolute;inset:0;background:center/cover no-repeat;filter:grayscale(1)}
+.ph0+.veil{position:absolute;inset:0;background:linear-gradient(160deg,rgba(27,54,93,.86),rgba(15,30,52,.94))}
+.ph-msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:2rem;gap:.9rem}
+.ph-msg .ic{width:4.6rem;height:4.6rem;border-radius:50%;border:.15rem solid var(--gold2);display:flex;align-items:center;justify-content:center}
+.ph-msg h3{margin:0;font:700 1.45rem/1.3 'Libre Baskerville',Georgia,serif}
+.ph-msg p{margin:0;color:#dfe6ef;font-size:1.05rem;max-width:26rem;line-height:1.5}
+
+.info{display:flex;flex-direction:column;min-width:0}
+.info h2{margin:.35rem 0 .4rem;font:700 2.3rem/1.12 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.where{display:flex;align-items:center;gap:.45rem;font-size:1.12rem;color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.9rem 0 1.1rem}
+.chip{background:var(--sky);color:var(--navy);border-radius:999px;padding:.4rem .95rem;font-weight:700;font-size:.95rem}
+.chip.g{background:#f3e8cf;color:#6d5320}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.acts{display:flex;gap:.8rem;margin-top:auto;padding-top:1rem}
+.btn.line{background:#fff;color:var(--navy);border:.12rem solid var(--navy)}
+html.page .acts{flex-wrap:wrap}
+.fact{background:#fff;border:.08rem solid var(--line);border-radius:.8rem;padding:.75rem .95rem;min-width:0}
+.fact .k{text-transform:uppercase;letter-spacing:.1em;font-size:.72rem;font-weight:700;color:#9a7a35}
+.fact .v{font-size:1.05rem;font-weight:600;margin-top:.2rem;line-height:1.35;color:var(--ink)}
+.fact .v.no{font-weight:400;font-style:italic;color:var(--muted)}
+
+.help-h{display:flex;align-items:baseline;justify-content:space-between;margin:2.2rem 0 .9rem;gap:1rem}
+.help-h h3{margin:0;font:700 1.5rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.help-h span{color:var(--muted);font-size:1rem}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;height:9rem}
+html.page .cards{height:auto;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))}
+.card{display:flex;flex-direction:column;background:#fff;border:.08rem solid var(--line);border-top:.3rem solid var(--navy);border-radius:.8rem;padding:.9rem 1rem;min-width:0;text-decoration:none;color:var(--ink)}
+.card.todo{background:#fffdf8;border-top-color:var(--gold2);border-style:solid}
+.card h4{margin:0 0 .35rem;font:700 1.12rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.card p{margin:0;font-size:.98rem;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+html.page .card p{display:block}
+.card.todo p{font-style:italic;color:var(--muted)}
+.card .go{margin-top:auto;padding-top:.4rem;font-weight:700;color:#8a6a2c;font-size:.98rem}
+a.card:hover,a.card:focus{box-shadow:0 .5rem 1.2rem rgba(27,54,93,.15);outline:none;border-color:var(--navy)}
+
+@media(max-width:760px){
+ html.page{font-size:17px}
+ html.page .hero{grid-template-columns:1fr}
+ html.page .info h2{font-size:1.9rem}
+ html.page .facts{grid-template-columns:1fr}
+ html.page .help-h{flex-direction:column;gap:.2rem}
+ html.page .nav{width:2.6rem;height:2.6rem;line-height:2.6rem}
+}
+
+/* compact (phones, inside Google Sites): a photo banner with a big button */
+#mini{display:none}
+html.compact #full{display:none}
+html.compact #mini{display:block}
+#mini{position:relative;height:100vh;border-radius:.9rem;overflow:hidden;background:#1b365d center/cover no-repeat}
+#mini .veil{position:absolute;inset:0;background:linear-gradient(170deg,rgba(27,54,93,.55),rgba(10,22,40,.92))}
+#mini .in{position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:.9rem;color:#fff;gap:.35rem}
+#mini.nophoto .veil{background:linear-gradient(170deg,rgba(27,54,93,.8),rgba(10,22,40,.95))}
+#mini h2{margin:0;font:700 1.55rem/1.15 'Libre Baskerville',Georgia,serif}
+#mini .s{color:var(--gold2);font-weight:600;font-size:1rem}
+#mini a{margin-top:.45rem;display:flex;align-items:center;justify-content:center;background:#fff;color:var(--navy);text-decoration:none;font-weight:700;font-size:1.1rem;border-radius:.8rem;min-height:3rem;padding:.6rem}
+</style></head><body>
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
+function load(prep, main) {
+  var ld = document.createElement('div');
+  ld.textContent = 'Loading…';
+  ld.style.cssText = 'position:fixed;right:12px;bottom:8px;z-index:9999;font:italic 14px Lora,Georgia,serif;color:#5f5b53';
+  setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
+  // Two sources, fetched together: data.json on GitHub Pages (fast, refreshed every few hours) and the
+  // Apps Script web app (live from the Sheet, a little slower). The live copy is used when it answers within
+  // a couple of seconds, so a family or photo marked Published shows straight away; otherwise data.json.
+  var used = false, cached = null, live = null, timer = null;
+  function use(d) {
+    if (used) return; used = true; clearTimeout(timer);
+    ld.done = true; if (ld.parentNode) ld.remove();
+    main(prep ? prep(d) : d);
+  }
+  function getJson(src) {
+    return fetch(src, { credentials: 'omit' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  getJson(API + '?page=data').then(function (d) { live = d; use(d); }).catch(function () { live = false; if (cached) use(cached); });
+  getJson('data.json?v=' + Math.floor(Date.now() / 300000)).then(function (d) {
+    cached = d;
+    if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 2500);
+  }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 9000); });
+  function fail() {
+    if (used) return; used = true;
+    ld.done = true; if (ld.parentNode) ld.remove();
+    var p = document.createElement('p');
+    p.style.cssText = 'font:16px Lora,Georgia,serif;color:#5f5b53;padding:12px';
+    p.innerHTML = 'Sorry, this could not be loaded just now. <a href="" target="_self" onclick="location.reload();return false">Try again</a>.';
+    document.body.appendChild(p);
+  }
+}
+</script>
+
+<div id="full"></div><div id="mini"></div>
+<script>
+/* Shared by the page widgets (town, family profile).
+   Google Sites keeps an embed's height in proportion to its width (a phone gets a much shorter frame),
+   so inside Sites everything is sized from the frame width:
+     wide    framed, 860px or wider: the whole design scales with the width (1rem = width / 72)
+     compact framed, narrower (phones): a short summary card with big buttons that open the full page
+     page    opened on its own (new tab): an ordinary responsive page with a header and a back link */
+var FRAMED = (function () { try { return window.top !== window; } catch (e) { return true; } })();
+function frameMode() {
+  var W = window.innerWidth, root = document.documentElement, mode = !FRAMED ? 'page' : (W < 860 ? 'compact' : 'wide');
+  root.classList.remove('page', 'compact', 'wide'); root.classList.add(mode);
+  root.style.fontSize = mode === 'wide' ? (W / 72) + 'px' : mode === 'compact' ? Math.min(W / 24, 22) + 'px' : '';
+  var b = document.querySelector('base'); if (b) b.target = FRAMED ? '_blank' : '_self';
+  return mode;
+}
+var MODE = frameMode();
+var lastW = window.innerWidth;
+window.addEventListener('resize', function () {
+  if (Math.abs(window.innerWidth - lastW) < 2) return;
+  lastW = window.innerWidth;
+  var m = MODE; MODE = frameMode(); if (m !== MODE && window.render) window.render();
+});
+var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var img = function (id, w) { return 'https://lh3.googleusercontent.com/d/' + id + '=w' + (w || 800); };
+
+var PROFILES = {"Savaidis":{"place":"Distillery Road, Monash","years":"1970 – 1980","yearsLong":"January 1970 – December 1980","origin":"Ptolemaida, Greece","facts":[["Parents","Savas Savaidis and Athina Savaidis"],["From","Ptolemaida (Savas)"],["Savas was born","1932"],["Arrived in Australia",""]],"story":"","children":"","community":"","memoriam":""}};
+function main(DATA){
+var SITE = String(DATA.site || '').replace(/\/?$/, '/');
+var ARCH = '../public/m/arch-family-community.jpg';
+var q = new URLSearchParams(location.search).get('f') || '';
+var F = (DATA.families || []).filter(function (x) { return norm(x.family) === norm(q); })[0] || { family: q.trim().slice(0, 40), towns: '', detail: '' };
+var P = {}; for (var k in PROFILES) if (norm(k) === norm(F.family)) P = PROFILES[k];
+var name = F.family;
+var photos = (DATA.photos || []).filter(function (p) { return norm(p.family) === norm(name); }).slice(0, 8);
+var famSite = String(F.url || '').trim();
+var backUrl = famSite ? (/^https?:/.test(famSite) ? famSite : SITE + famSite.replace(/^\//, '')) : SITE;
+var selfUrl = 'familypage.html?f=' + encodeURIComponent(name);
+var addUrl = 'family.html?s=' + encodeURIComponent(name);
+var where = P.place || F.detail || F.towns || '';
+var years = P.years || ((/\(([^)]*\d{4}[^)]*)\)/.exec(F.detail || '') || [])[1] || '');
+var PIN = '<svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#9a7a35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+var CAM = '<svg width="55%" height="55%" viewBox="0 0 24 24" fill="none" stroke="#e2c48e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+
+function stage() {
+  if (!photos.length) {
+    return '<div class="stage e"><div class="ph0" style="background-image:url(\'' + ARCH + '\')"></div><div class="veil"></div><div class="ph-msg">' +
+      '<div class="ic">' + CAM + '</div><h3>Photographs of the ' + esc(name) + ' family</h3>' +
+      '<p>They will appear here once they are shared. Do you have one?</p><a class="btn gold" href="upload.html">Share a family photo</a></div></div>';
+  }
+  return '<div class="stage" id="stage">' + photos.map(function (p, i) {
+    return '<div class="sl' + (i ? '' : ' on') + '" style="background-image:url(\'' + img(p.id, 1400) + '\')"></div>';
+  }).join('') + '<div class="cap" id="cap"></div>' + (photos.length > 1 ? '<button class="nav p" id="prev" aria-label="Previous photo">&#8249;</button><button class="nav n" id="next" aria-label="Next photo">&#8250;</button><div class="ctr" id="ctr"></div>' : '') + '</div>';
+}
+function card(title, text, page) {
+  if (text) return '<a class="card" href="' + esc(page ? addUrl : selfUrl) + '"><h4>' + esc(title) + '</h4><p>' + esc(text) + '</p>' + (page ? '' : '<div class="go">Read more &rarr;</div>') + '</a>';
+  return '<a class="card todo" href="' + esc(addUrl) + '"><h4>' + esc(title) + '</h4><p>Not yet recorded.</p><div class="go">Add what you know &rarr;</div></a>';
+}
+function full() {
+  var page = MODE === 'page', h = '';
+  h += '<div class="top"><a class="site" href="' + esc(SITE) + '">Greeks of the Riverland</a><br><a class="back" href="' + esc(backUrl) + '">&larr; Back to the website</a></div>';
+  var facts = (P.facts || []).slice(0, 4);
+  if (!facts.length) facts = [['Riverland towns', F.towns || ''], ['Where and when', F.detail || '']];
+  h += '<div class="hero">' + stage() + '<div class="info"><div class="eyebrow">Family story</div><h2>The ' + esc(name) + ' Family</h2>' +
+       (where ? '<div class="where">' + PIN + esc(where) + '</div>' : '') +
+       '<div class="chips">' + (years ? '<span class="chip">In the Riverland ' + esc(years) + '</span>' : '') + (P.origin ? '<span class="chip g">From ' + esc(P.origin) + '</span>' : '') + '</div>' +
+       '<div class="facts">' + facts.map(function (f) { return '<div class="fact"><div class="k">' + esc(f[0]) + '</div><div class="v' + (f[1] ? '' : ' no') + '">' + esc(f[1] || 'Not yet recorded') + '</div></div>'; }).join('') + '</div>' +
+       '<div class="acts"><a class="btn navy" href="upload.html">Share a photo</a><a class="btn line" href="' + esc(addUrl) + '">Add to this story</a></div></div></div>';
+  h += '<div class="help-h"><h3>The ' + esc(name) + ' story</h3><span>Do you know more? Tap a box to add it.</span></div>';
+  h += '<div class="cards">' + card('Family story', P.story, page) + card('Children', P.children, page) + card('Community life', P.community, page) + card('In memoriam', P.memoriam, page) + '</div>';
+  return h;
+}
+function mini() {
+  var bg = photos.length ? img(photos[0].id, 900) : ARCH;
+  return '<div class="veil"></div><div class="in"><h2>The ' + esc(name) + ' Family</h2>' +
+    '<div class="s">' + esc([where, years].filter(Boolean).join(' · ')) + '</div>' +
+    '<a href="' + esc(selfUrl) + '">' + (photos.length ? 'See photos &amp; family story' : 'Read the family story') + ' &rsaquo;</a></div>';
+}
+var timer = null;
+window.render = function () {
+  document.title = 'The ' + name + ' Family — Greeks of the Riverland';
+  clearInterval(timer);
+  var m = document.getElementById('mini'), f = document.getElementById('full');
+  if (MODE === 'compact') {
+    f.innerHTML = ''; m.innerHTML = mini();
+    m.style.backgroundImage = 'url(\'' + (photos.length ? img(photos[0].id, 900) : ARCH) + '\')';
+    m.classList.toggle('nophoto', !photos.length);
+    return;
+  }
+  m.innerHTML = ''; f.innerHTML = full();
+  if (photos.length) {
+    var cur = 0, sl = f.querySelectorAll('.sl');
+    var go = function (n) {
+      sl[cur].classList.remove('on'); cur = (n + sl.length) % sl.length; sl[cur].classList.add('on');
+      var p = photos[cur], line = [p.people, p.about, [p.year, p.place].filter(Boolean).join(', ')].filter(Boolean).join(' · ');
+      document.getElementById('cap').innerHTML = '<b>The ' + esc(name) + ' family</b>' + esc(line);
+      var c = document.getElementById('ctr'); if (c) c.textContent = (cur + 1) + ' of ' + sl.length;
+    };
+    var start = function () { clearInterval(timer); if (sl.length > 1) timer = setInterval(function () { go(cur + 1); }, 6000); };
+    go(0); start();
+    if (sl.length > 1) {
+      document.getElementById('prev').onclick = function () { go(cur - 1); start(); };
+      document.getElementById('next').onclick = function () { go(cur + 1); start(); };
+    }
+  }
+};
+render();
+}
+load(null, main);
+</script></body></html>

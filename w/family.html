@@ -44,14 +44,36 @@ button.go:disabled{opacity:.55;cursor:default}
 .top h1{font-family:'Libre Baskerville',serif;font-size:clamp(28px,5vw,40px);margin:4px 0 8px}
 .top p{margin:0;font-size:20px}.top a{color:#e2c48e;font-size:18px}
 body.standalone{background:#fbf8f1}body.standalone .top{display:block}
-.full{display:none;background:#fff7e0;border:3px solid #b8914a;border-radius:14px;padding:16px;margin:0 0 18px;text-align:center}
-.full a{display:inline-block;background:#1f3a5f;color:#fff;text-decoration:none;border-radius:14px;padding:16px 22px;font-weight:700;font-size:22px;margin-top:8px}
-body.squeezed .full{display:block}
+.full{display:none}
+body.squeezed{background:transparent}
+body.squeezed .wrap>.card,body.squeezed #app>*:not(.full){display:none}
+body.squeezed .full{display:flex;flex-direction:column;min-height:100vh;padding:4px 2px}
+.full .fc{flex:1;display:flex;flex-direction:column;justify-content:flex-start;gap:14px;overflow:hidden;padding:0 0 20px}
+.full .fc>*:not(.pic){margin-left:18px;margin-right:18px}
+.full .pic{flex:1;min-height:170px;max-height:420px;background:url(../public/m/arch-family-community.jpg) center 30%/cover;filter:sepia(.25)}
+.full li small{display:block;font-weight:400;color:var(--muted);font-size:17px;line-height:1.35}
+.full .fc{background:#fff;border:2px solid var(--line);border-radius:18px;box-shadow:0 6px 18px rgba(31,58,95,.08)}
+.full h3{font-family:'Libre Baskerville',serif;color:var(--navy);font-size:25px;margin:0 0 6px;line-height:1.25}
+.full p{margin:0 0 14px;color:var(--muted);font-size:19px;line-height:1.5}
+.full ol{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:12px}
+.full li{display:flex;align-items:flex-start;gap:12px;font-size:19px;font-weight:600}
+.full li span{flex:none;width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px}
+.full a.big{display:flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;text-decoration:none;border-radius:14px;min-height:64px;padding:14px;font-weight:700;font-size:22px;text-align:center}
+.full a.ph{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--olive);color:#fff;text-decoration:none;border-radius:14px;min-height:58px;padding:12px;font-weight:700;font-size:20px;margin-top:12px}
+.full .note{font-size:17px;color:var(--muted);text-align:center;margin:12px 0 0}
 .done a.btn{display:inline-block;margin-top:14px;background:var(--navy);color:#fff;padding:16px 26px;border-radius:14px;text-decoration:none;font-weight:700}
 </style></head><body>
 <div class="top"><h1>Add Your Family</h1><p>Four easy steps. Share as much or as little as you know.</p><div style="margin-top:12px"><a href="https://sites.google.com/view/greeksoftheriverland">&larr; Back to the website</a></div></div>
 <div class="wrap" id="app">
-  <div class="full">This form is easier to read on a full page.<br><a href="family.html">Open the form full screen &rarr;</a></div>
+  <div class="full"><div class="fc">
+    <div class="pic" role="img" aria-label="An old family photograph"></div>
+    <h3 style="margin-top:6px">Add your family</h3>
+    <p>Share your family's story in four easy steps. Write as much or as little as you know.</p>
+    <ol><li><span>1</span><div>About you<small>Your name and how to reach you (never shown on the website)</small></div></li><li><span>2</span><div>About the family<small>Surname, towns, and where they came from</small></div></li><li><span>3</span><div>The people and their story<small>Names, work, church and community life</small></div></li><li><span>4</span><div>Photos and permission<small>Describe any photos and tick one box</small></div></li></ol>
+    <div><a class="big" href="family.html">Start &mdash; open the form &rsaquo;</a>
+    <a class="ph" href="upload.html">Send family photos</a></div>
+    <p class="note">Nothing goes on the website until the project team has checked it.</p>
+  </div></div>
   <div class="card">
     <h2><span class="n">1</span> About you</h2>
     <p class="help">So we can thank you and ask a question if we need to. Your email and phone are never shown on the website.</p>
@@ -110,6 +132,7 @@ var PERM = ["I give Greeks of the Riverland permission to use the family history
 var $ = function (id) { return document.getElementById(id); };
 if (window.top === window) document.body.classList.add('standalone');
 else if (window.innerWidth < 700) document.body.classList.add('squeezed');
+(function () { var sn = new URLSearchParams(location.search).get('s'); if (sn) $('surname').value = sn.slice(0, 60); })();
 $('towns').innerHTML = TOWNS.map(function (t) { return '<label class="chip"><input type="checkbox" value="' + t + '"> ' + t + '</label>'; }).join('');
 document.querySelectorAll('.chip input').forEach(function (c) { c.onchange = function () { c.parentNode.classList.toggle('on', c.checked); }; });
 document.querySelectorAll('.radio input').forEach(function (r) { r.onchange = function () {

@@ -1,31 +1,115 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<title>Families — Greeks of the Riverland</title>
-<base target="_blank">
+<title>Town — Greeks of the Riverland</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<base target="_blank">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-/* Town page: "Greek Families of <town>" as a grid of name tiles (Nick's town mock-up, 8 Oct 2026).
-   Google Sites keeps an embed's height proportional to its width, so short frames (phones) get one sideways-scrolling row. */
+/* Town page body (?t=Barmera): the town's families as cards, its shared photos, and a "share yours" band.
+   One embed per town page in Google Sites; opened on its own it is a full page (see _frame.js). */
+:root{--navy:#1b365d;--navy2:#24476f;--ink:#24323f;--muted:#5f5b53;--gold:#c9a44c;--gold2:#e2c48e;--cream:#f6f1e6;--sky:#eaf1f8;--line:#e3ddd0}
 *{box-sizing:border-box}
-html{font-size:clamp(16px,1.6vw,20px)}
-html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:#24323f}
-h2{margin:.2rem .1rem .8rem;font:700 1.75rem/1.2 'Libre Baskerville',Georgia,serif;color:#1b365d}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.55rem}
-.t{display:flex;align-items:center;justify-content:center;text-align:center;min-height:2.9rem;padding:.4rem .6rem;background:#eaf1f8;border:1px solid #d3deeb;
- border-radius:.35rem;font:600 1rem/1.25 'Libre Baskerville',Georgia,serif;color:#1b365d;text-decoration:none}
-a.t:hover,a.t:focus{background:#1b365d;color:#fff;border-color:#1b365d;outline:none}
-.t.more{font-family:Lora,Georgia,serif;font-weight:600}
-.empty{grid-column:1/-1;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;font-style:italic;color:#5f5b53;padding:.2rem .1rem}
-.empty a{font-style:normal}
-@media(max-height:110px){
- h2{font-size:1.25rem;margin:.1rem .1rem .45rem}
- .grid{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:max-content;overflow-x:auto;padding-bottom:.3rem}
- .t{min-height:2.4rem;white-space:nowrap}
- .empty{grid-column:auto;flex-wrap:nowrap;white-space:nowrap}
+html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
+html.page{font-size:18px}html.page body{background:#fbf8f1}
+a{color:inherit}
+.serif{font-family:'Libre Baskerville',Georgia,serif}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;font-weight:700;border-radius:.75rem;padding:.85rem 1.4rem;font-size:1.05rem;line-height:1.2;transition:transform .15s,box-shadow .15s}
+.btn:hover,.btn:focus{transform:translateY(-.08rem);box-shadow:0 .4rem 1rem rgba(27,54,93,.25);outline:none}
+.btn.navy{background:var(--navy);color:#fff}
+.btn.gold{background:var(--gold2);color:#1b2a3d}
+.btn.line{background:#fff;color:var(--navy);border:.12rem solid var(--navy)}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.78rem;font-weight:700;color:#9a7a35}
+
+/* ---------- full layout (wide and page) ---------- */
+#full{padding:.5rem .6rem .6rem}
+.top{display:none}
+html.page .top{display:block;background:var(--navy);color:#fff;text-align:center;padding:1.4rem 1rem 1.6rem;margin:0 0 1.6rem}
+.top .site{font:700 1rem 'Libre Baskerville',Georgia,serif;color:var(--gold2);text-decoration:none}
+.top h1{font:700 2.4rem/1.15 'Libre Baskerville',Georgia,serif;margin:.5rem 0 .8rem}
+.top .back{display:inline-block;color:#fff;border:.1rem solid rgba(255,255,255,.6);border-radius:999px;padding:.55rem 1.2rem;text-decoration:none;font-weight:600}
+html.page #full{max-width:72rem;margin:0 auto;padding:0 1rem 2rem}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.1rem}
+.head h2{margin:.2rem 0 0;font:700 2.1rem/1.15 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.head p{margin:.35rem 0 0;color:var(--muted);font-size:1.05rem}
+.count{flex:none;background:var(--sky);color:var(--navy);border-radius:999px;padding:.55rem 1.1rem;font-weight:700;font-size:1rem;white-space:nowrap}
+
+.fams{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;height:12rem;grid-auto-rows:1fr}
+html.page .fams{height:auto;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));grid-auto-rows:minmax(6rem,auto)}
+.fam{display:flex;align-items:center;gap:1rem;padding:1rem 1.1rem;background:#fff;border:.08rem solid var(--line);border-radius:1rem;text-decoration:none;color:var(--ink);
+ box-shadow:0 .15rem .6rem rgba(27,54,93,.07);transition:transform .15s,box-shadow .15s,border-color .15s;min-width:0}
+.fam:hover,.fam:focus{transform:translateY(-.15rem);box-shadow:0 .6rem 1.4rem rgba(27,54,93,.16);border-color:var(--navy);outline:none}
+.mono{flex:none;width:3.4rem;height:3.4rem;border-radius:50%;background:var(--navy);color:var(--gold2);display:flex;align-items:center;justify-content:center;font:700 1.5rem 'Libre Baskerville',Georgia,serif}
+.fam .nm{font:700 1.25rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy);overflow-wrap:anywhere}
+.fam .dt{color:var(--muted);font-size:.95rem;margin-top:.25rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fam .go{margin-top:.35rem;font-weight:700;color:#8a6a2c;font-size:.95rem}
+.fams.one .fam{flex-direction:column;justify-content:center;text-align:center}
+.fams.one .mono{width:4.2rem;height:4.2rem;font-size:1.9rem}
+.fams.one .fam>div{max-width:100%}
+.fams.two .fam{padding:.55rem .9rem;gap:.8rem}
+.fams.two .mono{width:2.7rem;height:2.7rem;font-size:1.2rem}
+.fams.two .nm{font-size:1.1rem;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.fams.two .dt{-webkit-line-clamp:1;font-size:.9rem;margin-top:.1rem}
+.fams.two .go{display:none}
+.fam.add{border:.15rem dashed #c9b994;background:#fffdf8;box-shadow:none}
+.fam.add .mono{background:var(--gold2);color:var(--navy);font-family:Lora,Georgia,serif}
+.fam.more .mono{background:var(--sky);color:var(--navy);font-size:1.2rem}
+.none{grid-column:1/-1;display:flex;align-items:center;gap:1.6rem;padding:1.4rem 1.8rem;background:linear-gradient(120deg,#fff 0%,var(--sky) 100%);border:.08rem solid #d3deeb;border-radius:1rem}
+.none .ic{flex:none;width:5rem;height:5rem;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center}
+.none h3{margin:0 0 .3rem;font:700 1.45rem/1.25 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.none p{margin:0;color:var(--muted);font-size:1.05rem;line-height:1.5}
+.none .btn{margin-left:auto;flex:none}
+
+.ph-head{display:flex;align-items:baseline;justify-content:space-between;margin:2rem 0 .9rem}
+.ph-head h2{margin:0;font:700 1.6rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.ph-head a{font-weight:700;color:var(--navy);font-size:1.05rem}
+.strip{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;height:12rem}
+html.page .strip{height:auto;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));grid-auto-rows:12rem}
+.tile{position:relative;display:block;border-radius:1rem;overflow:hidden;background:#e9e2d2 center/cover no-repeat;text-decoration:none;color:#fff;box-shadow:0 .15rem .6rem rgba(0,0,0,.1)}
+.tile:hover,.tile:focus{outline:.2rem solid var(--gold2);outline-offset:.15rem}
+.tile .cap{position:absolute;left:0;right:0;bottom:0;padding:1.6rem .8rem .65rem;background:linear-gradient(transparent,rgba(10,20,35,.82));font-weight:600;font-size:.95rem;line-height:1.3}
+.tile.plus{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;background:#fffdf8;border:.15rem dashed #c9b994;color:var(--navy);font-weight:700;font-size:1.05rem;box-shadow:none;text-align:center;padding:1rem}
+.tile .more{position:absolute;inset:0;background:rgba(27,54,93,.72);display:flex;align-items:center;justify-content:center;font:700 1.5rem 'Libre Baskerville',Georgia,serif}
+.strip.empty .tile{filter:grayscale(1) brightness(.75)}
+.strip .msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.strip .msg div{pointer-events:auto;background:rgba(255,255,255,.96);border-radius:1rem;padding:1.1rem 1.6rem;text-align:center;box-shadow:0 .6rem 2rem rgba(0,0,0,.3);max-width:34rem}
+.strip .msg b{display:block;font:700 1.25rem/1.3 'Libre Baskerville',Georgia,serif;color:var(--navy);margin-bottom:.3rem}
+.strip .msg span{color:var(--muted);font-size:1rem}
+
+.share{display:flex;align-items:center;gap:1.4rem;margin-top:2rem;padding:1.3rem 1.6rem;background:var(--cream);border-radius:1rem;border-left:.45rem solid var(--gold)}
+.share .ic{flex:none;width:3.6rem;height:3.6rem;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+.share h3{margin:0 0 .2rem;font:700 1.3rem/1.25 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.share p{margin:0;color:var(--muted);font-size:1rem}
+.share .btns{margin-left:auto;display:flex;gap:.8rem;flex:none}
+
+html.page .share{flex-wrap:wrap}
+@media(max-width:700px){
+ html.page{font-size:17px}
+ html.page .top h1{font-size:2rem}
+ html.page .head{flex-direction:column;align-items:flex-start}
+ html.page .head h2{font-size:1.7rem}
+ html.page .ph-head{flex-direction:column;gap:.3rem}
+ html.page .strip{grid-template-columns:1fr 1fr;grid-auto-rows:9.5rem}
+ html.page .none{flex-direction:column;text-align:center}
+ html.page .none .btn{margin:0}
+ html.page .share{flex-direction:column;text-align:center;border-left:0;border-top:.4rem solid var(--gold)}
+ html.page .share .btns{margin:0;flex-direction:column;width:100%}
 }
-</style></head>
-<body>
+
+/* ---------- compact (phones, inside Google Sites) ---------- */
+#mini{display:none}
+html.compact #full{display:none}
+html.compact #mini{display:flex}
+#mini{height:100vh;flex-direction:column;justify-content:center;gap:.55rem;padding:.4rem .2rem}
+.m-title{font:700 1.3rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.m-title small{display:block;font:400 .9rem Lora,Georgia,serif;color:var(--muted);margin-top:.15rem}
+.m-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:.35rem;height:3.6rem}
+.m-strip div{border-radius:.5rem;background:#e9e2d2 center/cover no-repeat}
+.m-strip.empty div{filter:grayscale(1) brightness(.8)}
+.m-pills{display:flex;flex-wrap:wrap;gap:.4rem}
+.m-pills a{background:var(--sky);color:var(--navy);text-decoration:none;font-weight:700;border-radius:999px;padding:.45rem .9rem;font-size:1rem;border:.08rem solid #c9d4e2}
+.m-pills span{font-style:italic;color:var(--muted);font-size:1rem}
+.m-btn{display:flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:1.1rem;border-radius:.8rem;padding:.8rem;min-height:3rem}
+</style></head><body>
 <script>
 var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
 function load(prep, main) {
@@ -60,30 +144,114 @@ function load(prep, main) {
   }
 }
 </script>
-<div id="out"></div>
+
+<div id="full"></div><div id="mini"></div>
 <script>
-function main(DATA){
-function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function link(u){u=String(u||'').trim();if(!u)return '';return /^https?:/.test(u)?u:DATA.site+u.replace(/^\/?/,'/')}
-var f = DATA.families || [];
-var h = '<h2>Greek Families of ' + esc(DATA.town) + '</h2><div class="grid">';
-f.forEach(function (x) {
-  var u = link(x.url), tip = x.detail ? ' title="' + esc(x.detail) + '"' : '';
-  h += u ? '<a class="t" href="' + esc(u) + '" target="_blank" rel="noopener"' + tip + '>' + esc(x.family) + '</a>'
-         : '<span class="t"' + tip + '>' + esc(x.family) + '</span>';
-});
-if (f.length) h += '<a class="t more" href="' + esc(DATA.site) + '/families" target="_blank" rel="noopener">Other Families</a>';
-else h += '<div class="empty">No families listed yet. <a class="t more" href="' + esc(DATA.site) + '/add-your-family" target="_blank" rel="noopener">Add your family &rarr;</a></div>';
-document.getElementById('out').innerHTML = h + '</div>';
+/* Shared by the page widgets (town, family profile).
+   Google Sites keeps an embed's height in proportion to its width (a phone gets a much shorter frame),
+   so inside Sites everything is sized from the frame width:
+     wide    framed, 860px or wider: the whole design scales with the width (1rem = width / 72)
+     compact framed, narrower (phones): a short summary card with big buttons that open the full page
+     page    opened on its own (new tab): an ordinary responsive page with a header and a back link */
+var FRAMED = (function () { try { return window.top !== window; } catch (e) { return true; } })();
+function frameMode() {
+  var W = window.innerWidth, root = document.documentElement, mode = !FRAMED ? 'page' : (W < 860 ? 'compact' : 'wide');
+  root.classList.remove('page', 'compact', 'wide'); root.classList.add(mode);
+  root.style.fontSize = mode === 'wide' ? (W / 72) + 'px' : mode === 'compact' ? Math.min(W / 24, 22) + 'px' : '';
+  var b = document.querySelector('base'); if (b) b.target = FRAMED ? '_blank' : '_self';
+  return mode;
 }
-load(function (D) {
-  var q = new URLSearchParams(location.search).get('t') || '';
-  var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
-  var t = D.towns.filter(function (x) { return norm(x.name) === norm(q); })[0];
-  var town = t ? t.name : q.trim().slice(0, 40);
-  var fams = D.families.filter(function (f) {
-    return String(f.towns).split(/\s*,\s*/).map(norm).indexOf(norm(town)) >= 0;
-  }).sort(function (a, b) { return a.family.localeCompare(b.family); });
-  return { site: D.site, town: town, families: fams };
-}, main);
+var MODE = frameMode();
+var lastW = window.innerWidth;
+window.addEventListener('resize', function () {
+  if (Math.abs(window.innerWidth - lastW) < 2) return;
+  lastW = window.innerWidth;
+  var m = MODE; MODE = frameMode(); if (m !== MODE && window.render) window.render();
+});
+var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var img = function (id, w) { return 'https://lh3.googleusercontent.com/d/' + id + '=w' + (w || 800); };
+
+function main(DATA){
+var SITE = String(DATA.site || '').replace(/\/?$/, '/');
+var ARCH = ['../public/m/arch-family-community.jpg', '../public/m/arch-work-everyday.jpg', '../public/m/arch-school-sporting.jpg', '../public/m/arch-vineyard.jpg'];
+var q = new URLSearchParams(location.search).get('t') || '';
+var T = (DATA.towns || []).filter(function (x) { return norm(x.name) === norm(q); })[0] || { name: q.trim().slice(0, 40) };
+var town = T.name;
+var townUrl = T.path ? SITE + String(T.path).replace(/^\//, '') : SITE + 'towns/' + norm(town);
+var inTown = function (s) { return String(s || '').split(/\s*[,;\/]\s*/).map(norm).indexOf(norm(town)) >= 0; };
+var fams = (DATA.families || []).filter(function (f) { return inTown(f.towns); }).sort(function (a, b) { return a.family.localeCompare(b.family); });
+var photos = (DATA.photos || []).filter(function (p) { return inTown(p.town); });
+var famUrl = function (f) { var u = String(f.url || '').trim(); return u ? (/^https?:/.test(u) ? u : SITE + u.replace(/^\//, '')) : 'familypage.html?f=' + encodeURIComponent(f.family); };
+var photosUrl = 'photos.html?t=' + encodeURIComponent(town) + '&h=' + encodeURIComponent('Photographs of ' + town);
+var selfUrl = 'town.html?t=' + encodeURIComponent(town);
+var ICON_HOUSE = '<svg width="55%" height="55%" viewBox="0 0 24 24" fill="none" stroke="#e2c48e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>';
+var ICON_CAM = '<svg width="55%" height="55%" viewBox="0 0 24 24" fill="none" stroke="#1b365d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+
+function famCard(f) {
+  return '<a class="fam" href="' + esc(famUrl(f)) + '"><div class="mono">' + esc(f.family.charAt(0)) + '</div><div style="min-width:0">' +
+    '<div class="nm">' + esc(f.family) + '</div>' + (f.detail ? '<div class="dt">' + esc(f.detail) + '</div>' : '') +
+    '<div class="go">Read their story &rarr;</div></div></a>';
+}
+function full() {
+  var page = MODE === 'page', n = fams.length, h = '';
+  h += '<div class="top"><a class="site" href="' + esc(SITE) + '">Greeks of the Riverland</a><h1>' + esc(town) + '</h1>' +
+       '<a class="back" href="' + esc(townUrl) + '">&larr; Back to the website</a></div>';
+  h += '<div class="head"><div><div class="eyebrow">The Greek families of</div><h2>' + esc(town) + '</h2>' +
+       '<p>' + (n ? 'Tap a family to read their story and see their photos.' : 'Every family story helps us remember the Greeks of ' + esc(town) + '.') + '</p></div>' +
+       '<div class="count">' + (n ? n + (n === 1 ? ' family' : ' families') + ' so far' : 'No families yet') + '</div></div>';
+  if (!n) {
+    h += '<div class="fams"><div class="none"><div class="ic">' + ICON_HOUSE + '</div><div><h3>Is your family from ' + esc(town) + '?</h3>' +
+         '<p>No families are listed here yet. Be the first &mdash; share as much or as little as you know.</p></div>' +
+         '<a class="btn navy" href="family.html">Add your family &rarr;</a></div></div>';
+  } else {
+    var list = fams, cards;
+    if (!page && n > 7) list = fams.slice(0, 7);
+    cards = list.map(famCard);
+    if (!page && n > 7) cards.push('<a class="fam more" href="' + esc(selfUrl) + '"><div class="mono">+' + (n - 7) + '</div><div><div class="nm">See all ' + n + '</div><div class="go">Open the full list &rarr;</div></div></a>');
+    else cards.push('<a class="fam add" href="family.html"><div class="mono">+</div><div><div class="nm">Add your family</div><div class="dt">Is your family from ' + esc(town) + '?</div></div></a>');
+    h += '<div class="fams' + (page ? '' : cards.length <= 4 ? ' one' : ' two') + '">' + cards.join('') + '</div>';
+  }
+  h += '<div class="ph-head"><h2>Photographs &amp; memories</h2>' + (photos.length ? '<a href="' + esc(photosUrl) + '">See all ' + photos.length + ' photos &rarr;</a>' : '') + '</div>';
+  if (!photos.length) {
+    h += '<div class="strip empty">' + ARCH.map(function (s) { return '<div class="tile" style="background-image:url(\'' + s + '\')"></div>'; }).join('') +
+         '<div class="msg"><div><b>Photos of ' + esc(town) + ' will appear here</b><span>Old photos of family, work, church and sport are all welcome.</span></div></div></div>';
+  } else {
+    var show = page ? photos : photos.slice(0, 4), t = show.map(function (p, i) {
+      var cap = [p.people, p.about].filter(Boolean)[0] || ('The ' + p.family + ' family');
+      var more = !page && i === 3 && photos.length > 4 ? '<div class="more">+' + (photos.length - 3) + ' more</div>' : '';
+      return '<a class="tile" href="' + esc(photosUrl) + '" style="background-image:url(\'' + img(p.id, 700) + '\')"><div class="cap">' + esc(cap).slice(0, 90) + '</div>' + more + '</a>';
+    });
+    if (!page) while (t.length < 4) t.push('<a class="tile plus" href="upload.html">' + ICON_CAM.replace('55%', '2.6rem').replace('55%', '2.6rem') + 'Share a photo</a>');
+    h += '<div class="strip">' + t.join('') + '</div>';
+  }
+  h += '<div class="share"><div class="ic">' + ICON_CAM + '</div><div><h3>Do you have photos or memories of ' + esc(town) + '?</h3>' +
+       '<p>Help us keep them safe for our children and grandchildren.</p></div>' +
+       '<div class="btns"><a class="btn navy" href="upload.html">Send photos</a><a class="btn line" href="family.html">Add your family</a></div></div>';
+  return h;
+}
+function mini() {
+  var n = fams.length, h = '';
+  h += '<div class="m-title">Greek families of ' + esc(town) + '<small>' + (n ? n + (n === 1 ? ' family' : ' families') + ' &middot; ' : '') + (photos.length ? photos.length + ' photos' : 'photos coming soon') + '</small></div>';
+  var ims = photos.slice(0, 4).map(function (p) { return img(p.id, 300); });
+  h += '<div class="m-strip' + (ims.length ? '' : ' empty') + '">' + (ims.length ? ims : ARCH).concat(ARCH).slice(0, 4).map(function (s) { return '<div style="background-image:url(\'' + s + '\')"></div>'; }).join('') + '</div>';
+  h += '<div class="m-pills">' + (n ? fams.slice(0, 3).map(function (f) { return '<a href="' + esc(famUrl(f)) + '">' + esc(f.family) + '</a>'; }).join('') + (n > 3 ? '<span>+' + (n - 3) + ' more</span>' : '')
+                                : '<span>No families listed yet &mdash; is yours from here?</span>') + '</div>';
+  h += n || photos.length ? '<a class="m-btn" href="' + esc(selfUrl) + '">See families &amp; photos &rsaquo;</a>'
+                          : '<a class="m-btn" href="family.html">Add your family &rsaquo;</a>';
+  return h;
+}
+window.render = function () {
+  document.title = town + ' — Greeks of the Riverland';
+  document.getElementById('full').innerHTML = MODE === 'compact' ? '' : full();
+  if (MODE === 'compact') {
+    var m = document.getElementById('mini'); m.innerHTML = mini();
+    var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    if (window.innerHeight < 13.2 * rem) m.querySelector('.m-strip').style.display = 'none';
+    if (window.innerHeight < 8.8 * rem) m.querySelector('.m-pills').style.display = 'none';
+  }
+};
+render();
+}
+load(null, main);
 </script></body></html>
