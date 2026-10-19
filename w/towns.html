@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <title>Riverland Towns — Greeks of the Riverland</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<base target="_top">
+<base target="_blank">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 /* Towns page: every town as a big button (major towns first), with the number of families on it. */
@@ -86,11 +86,11 @@ function href(t) { return t.path ? (/^https?:/.test(t.path) ? t.path : SITE + St
 document.getElementById('out').innerHTML =
   '<div class="pick"><select id="sel" aria-label="Choose a town"><option value="">Choose a town…</option>' +
     towns.map(function (t) { return '<option value="' + esc(href(t)) + '">' + esc(t.name) + (isMajor(t) ? '' : ' (small town)') + '</option>'; }).join('') +
-  '</select><a id="go" href="#" target="_top">Open</a></div>' +
+  '</select><a id="go" href="#">Open</a></div>' +
   '<h2>Major towns <small>tap a town to see its families and photos</small></h2><div class="grid major">' + major.map(tile).join('') + '</div>' +
   '<div class="small-section"><h2>Smaller towns and settlements</h2><div class="grid">' + small.map(tile).join('') + '</div></div>';
 var sel = document.getElementById('sel'), go = document.getElementById('go');
-sel.onchange = function () { if (sel.value) { go.href = sel.value; try { window.top.location.href = sel.value; } catch (e) {} } };
+sel.onchange = function () { if (sel.value) { go.href = sel.value; window.open(sel.value, '_blank'); } };
 go.onclick = function (e) { if (!sel.value) { e.preventDefault(); sel.focus(); } };
 }
 load(null, main);
