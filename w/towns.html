@@ -20,7 +20,7 @@ a.t:hover span,a.t:focus span{color:#e2c48e}
 /* Phones: Google Sites gives the frame a short height, so pack the 14 towns into two tight columns. */
 .pick{display:none;gap:8px;margin-bottom:12px}
 .pick select{flex:1;min-width:0;font:600 18px Lora,Georgia,serif;padding:12px;border:2px solid #1b365d;border-radius:10px;background:#fff;color:#1b365d}
-.pick button{font:700 18px Lora,Georgia,serif;background:#1b365d;color:#fff;border:0;border-radius:10px;padding:12px 16px}
+.pick a{font:700 18px Lora,Georgia,serif;background:#1b365d;color:#fff;text-decoration:none;border-radius:10px;padding:12px 16px;display:flex;align-items:center}
 @media(max-width:560px){
  .pick{display:flex}
  h2{font-size:17px;margin:2px 0 6px}h2 small{display:none}
@@ -86,12 +86,12 @@ function href(t) { return t.path ? (/^https?:/.test(t.path) ? t.path : SITE + St
 document.getElementById('out').innerHTML =
   '<div class="pick"><select id="sel" aria-label="Choose a town"><option value="">Choose a town…</option>' +
     towns.map(function (t) { return '<option value="' + esc(href(t)) + '">' + esc(t.name) + (isMajor(t) ? '' : ' (small town)') + '</option>'; }).join('') +
-  '</select><button type="button" id="go">Open</button></div>' +
+  '</select><a id="go" href="#" target="_top">Open</a></div>' +
   '<h2>Major towns <small>tap a town to see its families and photos</small></h2><div class="grid major">' + major.map(tile).join('') + '</div>' +
   '<div class="small-section"><h2>Smaller towns and settlements</h2><div class="grid">' + small.map(tile).join('') + '</div></div>';
-var sel = document.getElementById('sel');
-function openSel() { if (sel.value) window.top.location.href = sel.value; }
-document.getElementById('go').onclick = openSel; sel.onchange = openSel;
+var sel = document.getElementById('sel'), go = document.getElementById('go');
+sel.onchange = function () { if (sel.value) { go.href = sel.value; try { window.top.location.href = sel.value; } catch (e) {} } };
+go.onclick = function (e) { if (!sel.value) { e.preventDefault(); sel.focus(); } };
 }
 load(null, main);
 </script></body></html>
