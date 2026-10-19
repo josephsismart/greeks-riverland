@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Riverland Towns — Greeks of the Riverland</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_top">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* Towns page: every town as a big button (major towns first), with the number of families on it. */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:#24323f}
+h2{margin:.2rem 0 .6rem;font:700 24px/1.2 'Libre Baskerville',Georgia,serif;color:#1b365d}
+h2 small{font:400 17px Lora,Georgia,serif;color:#5f5b53;margin-left:.5rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:26px}
+a.t{display:flex;flex-direction:column;justify-content:center;min-height:84px;padding:14px 18px;background:#fff;border:2px solid #c9d4e2;border-radius:14px;text-decoration:none;color:#1b365d;
+ font:700 22px/1.2 'Libre Baskerville',Georgia,serif;box-shadow:0 1px 4px rgba(27,54,93,.08)}
+a.t span{display:block;margin-top:4px;font:400 16px Lora,Georgia,serif;color:#5f5b53}
+a.t:hover,a.t:focus{background:#1b365d;color:#fff;border-color:#1b365d;outline:none}
+a.t:hover span,a.t:focus span{color:#e2c48e}
+.major a.t{background:#eaf1f8}
+</style></head><body>
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
+function load(prep, main) {
+  var ld = document.createElement('div');
+  ld.textContent = 'Loading…';
+  ld.style.cssText = 'position:fixed;right:12px;bottom:8px;z-index:9999;font:italic 14px Lora,Georgia,serif;color:#5f5b53';
+  setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
+  // Two sources, fetched together: data.json on GitHub Pages (fast, refreshed every few hours) and the
+  // Apps Script web app (live from the Sheet, a little slower). The live copy is used when it answers within
+  // a couple of seconds, so a family or photo marked Published shows straight away; otherwise data.json.
+  var used = false, cached = null, live = null, timer = null;
+  function use(d) {
+    if (used) return; used = true; clearTimeout(timer);
+    ld.done = true; if (ld.parentNode) ld.remove();
+    main(prep ? prep(d) : d);
+  }
+  function getJson(src) {
+    return fetch(src, { credentials: 'omit' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  getJson(API + '?page=data').then(function (d) { live = d; use(d); }).catch(function () { live = false; if (cached) use(cached); });
+  getJson('data.json?v=' + Math.floor(Date.now() / 300000)).then(function (d) {
+    cached = d;
+    if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 2500);
+  }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 9000); });
+  function fail() {
+    if (used) return; used = true;
+    ld.done = true; if (ld.parentNode) ld.remove();
+    var p = document.createElement('p');
+    p.style.cssText = 'font:16px Lora,Georgia,serif;color:#5f5b53;padding:12px';
+    p.innerHTML = 'Sorry, this could not be loaded just now. <a href="" target="_self" onclick="location.reload();return false">Try again</a>.';
+    document.body.appendChild(p);
+  }
+}
+</script>
+
+<div id="out"></div>
+<script>
+function main(DATA){
+var SITE = String(DATA.site || '').replace(/\/?$/, '/');
+var MAJOR = ['Barmera', 'Berri', 'Loxton', 'Renmark', 'Waikerie'];
+var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+var esc = function (s) { return String(s || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+function count(t) { return (DATA.families || []).filter(function (f) { return String(f.towns).split(/\s*,\s*/).map(norm).indexOf(norm(t)) >= 0; }).length; }
+function tile(t) {
+  var n = count(t.name);
+  var href = t.path ? (/^https?:/.test(t.path) ? t.path : SITE + String(t.path).replace(/^\//, '')) : SITE + 'towns/' + norm(t.name);
+  return '<a class="t" href="' + esc(href) + '">' + esc(t.name) +
+    '<span>' + (n ? n + (n === 1 ? ' family' : ' families') : 'Tap to open') + '</span></a>';
+}
+var towns = (DATA.towns || []).map(function (t) { return typeof t === 'string' ? { name: t } : t; });
+var isMajor = function (t) { return t.major === true || MAJOR.indexOf(t.name) >= 0; };
+var major = towns.filter(isMajor), small = towns.filter(function (t) { return !isMajor(t); });
+document.getElementById('out').innerHTML =
+  '<h2>Major towns <small>tap a town to see its families and photos</small></h2><div class="grid major">' + major.map(tile).join('') + '</div>' +
+  '<h2>Smaller towns and settlements</h2><div class="grid">' + small.map(tile).join('') + '</div>';
+}
+load(null, main);
+</script></body></html>

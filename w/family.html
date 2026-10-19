@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Add Your Family — Greeks of the Riverland</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_top">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Add Your Family: one page, big text, four numbered steps. Replaces the Google Form (small text, grey box).
+   Answers go to the same Family Register row, folder and email as the form did (Apps Script submitFamily). */
+:root{--navy:#1F3A5F;--olive:#5E6B3A;--gold2:#E2C48E;--cream:#F6F1E6;--line:#d9ccb1;--muted:#5d554b}
+*{box-sizing:border-box}
+body{margin:0;background:transparent;color:#2a251f;font:20px/1.6 Lora,Georgia,serif}
+.wrap{max-width:820px;margin:0 auto;padding:4px 4px 40px}
+.card{background:#fff;border:2px solid var(--line);border-radius:16px;padding:24px;margin-bottom:22px}
+h2{font-family:'Libre Baskerville',serif;color:var(--navy);font-weight:700;font-size:26px;margin:0 0 6px;display:flex;align-items:center;gap:12px}
+h2 .n{flex:none;width:42px;height:42px;border-radius:50%;background:var(--navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:22px}
+.help{color:var(--muted);margin:0 0 10px}
+label{display:block;font-weight:700;color:var(--navy);margin:18px 0 6px}
+label small{font-weight:400;color:var(--muted)}
+input[type=text],input[type=email],input[type=tel],textarea{width:100%;padding:14px 16px;border:2px solid #c9b994;border-radius:12px;font:inherit;background:#fffdf8;color:inherit;min-height:58px}
+input:focus,textarea:focus{outline:3px solid var(--gold2);border-color:var(--navy)}
+textarea{min-height:120px;resize:vertical}
+textarea.big{min-height:200px}
+.towns{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:6px}
+.chip{display:flex;align-items:center;gap:10px;border:2px solid #c9b994;border-radius:12px;padding:12px 14px;background:#fffdf8;cursor:pointer;font-weight:600}
+.chip input{width:26px;height:26px;margin:0;accent-color:var(--navy);flex:none}
+.chip.on{border-color:var(--navy);background:#eaf1f8}
+.check{display:flex;gap:14px;align-items:flex-start;font-weight:400;color:inherit;cursor:pointer;margin:14px 0 0}
+.check input{flex:none;width:30px;height:30px;margin-top:2px;accent-color:var(--navy)}
+.radio{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.radio label{flex:1;min-width:120px;margin:0;display:flex;align-items:center;justify-content:center;gap:10px;border:2px solid #c9b994;border-radius:12px;padding:14px;background:#fffdf8;cursor:pointer;font-weight:600}
+.radio label.on{border-color:var(--navy);background:#eaf1f8}
+.radio input{width:26px;height:26px;margin:0;accent-color:var(--navy)}
+.notice{background:var(--cream);border-left:6px solid var(--olive);padding:14px 16px;border-radius:10px;margin-top:18px}
+.photobtn{display:inline-flex;align-items:center;gap:12px;background:var(--olive);color:#fff;text-decoration:none;border-radius:14px;padding:16px 22px;font-weight:700;margin-top:10px}
+button.go{width:100%;background:var(--navy);color:#fff;border:0;border-radius:14px;padding:22px;font:700 26px Lora,serif;cursor:pointer;margin-top:20px}
+button.go:disabled{opacity:.55;cursor:default}
+.err{color:#a3271b;font-weight:700;margin-top:12px;font-size:21px}
+#status{font-weight:700;color:var(--navy);margin-top:12px}
+.done{text-align:center;padding:40px 20px}
+.done .tick{font-size:64px;color:var(--olive)}
+.done a.btn{display:inline-block;margin-top:14px;background:var(--navy);color:#fff;padding:16px 26px;border-radius:14px;text-decoration:none;font-weight:700}
+</style></head><body>
+<div class="wrap" id="app">
+  <div class="card">
+    <h2><span class="n">1</span> About you</h2>
+    <p class="help">So we can thank you and ask a question if we need to. Your email and phone are never shown on the website.</p>
+    <label for="name">Your name</label><input type="text" id="name" autocomplete="name">
+    <label for="email">Your email</label><input type="email" id="email" autocomplete="email">
+    <label for="phone">Your phone <small>(you can leave this empty)</small></label><input type="tel" id="phone" autocomplete="tel">
+    <label for="connection">How are you connected to the family?</label><input type="text" id="connection" placeholder="for example: son, daughter, grandchild, friend">
+    <label>May we contact you if we have a question?</label>
+    <div class="radio" id="mayContact"><label class="on"><input type="radio" name="mc" value="Yes" checked> Yes</label><label><input type="radio" name="mc" value="No"> No</label></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">2</span> About the family</h2>
+    <label for="surname">The family's surname</label><input type="text" id="surname" placeholder="for example: Savaidis">
+    <label>Which Riverland towns was the family connected with? <small>(tick as many as you like)</small></label>
+    <div class="towns" id="towns"></div>
+    <label for="townOther">Another town or area <small>(if it is not in the list)</small></label><input type="text" id="townOther">
+    <label for="firstYear">About what year did the family first come to the Riverland? <small>(a rough year is fine)</small></label><input type="text" id="firstYear" placeholder="for example: 1955">
+    <label for="lastYear">About what year did the family leave? <small>(leave empty if they are still there)</small></label><input type="text" id="lastYear">
+    <label for="origin">Which town or village in Greece (or elsewhere) did the family come from?</label><input type="text" id="origin" placeholder="for example: Ptolemaida">
+    <label for="country">Country</label><input type="text" id="country" placeholder="for example: Greece">
+    <label for="arrived">About what year did the family arrive in Australia?</label><input type="text" id="arrived">
+    <label for="before">Did they live somewhere else in Australia first? <small>(optional)</small></label><input type="text" id="before">
+    <label for="moved">Did the family live in more than one Riverland town or property? <small>(optional)</small></label><textarea id="moved"></textarea>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">3</span> The people and their story</h2>
+    <label for="people">The family members you would like included</label>
+    <p class="help">One person per line is easiest, for example:<br>George Papadopoulos – father – born 1928<br>Maria Papadopoulos – mother</p>
+    <textarea id="people" class="big"></textarea>
+    <label for="work">What work did the family do? <small>(fruit blocks, packing sheds, shops, trades…)</small></label><textarea id="work"></textarea>
+    <label for="community">Church, school, sport, Greek clubs or other community life <small>(optional)</small></label><textarea id="community"></textarea>
+    <label for="story">Tell us about the family's life in the Riverland</label>
+    <p class="help">Why they came, where they lived, friends and neighbours, celebrations, happy or hard times. Write it in your own words. We tidy the spelling.</p>
+    <textarea id="story" class="big"></textarea>
+    <label for="notPublish">Is there anything you would prefer us NOT to publish? <small>(optional)</small></label><textarea id="notPublish"></textarea>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">4</span> Photos and permission</h2>
+    <p class="help">Old photos are a big part of this project. After you send this page, you can add photos on our photo page.</p>
+    <label for="photoDesc">Describe any photos you have <small>(optional)</small></label><textarea id="photoDesc" placeholder="who is in them, and roughly when and where"></textarea>
+    <label class="check"><input type="checkbox" id="perm"><span>I agree that the family information and any photos I share may be shown on the Greeks of the Riverland website. My email and phone will not be published, and wording may be lightly tidied.</span></label>
+    <div class="notice">Nothing appears on the website straight away. The project team checks every submission first.</div>
+    <div id="status"></div>
+    <div class="err" id="err" role="alert"></div>
+    <button class="go" id="send">Send my family's story</button>
+  </div>
+</div>
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
+var PHOTO = 'upload.html';
+var TOWNS = ["Barmera","Berri","Loxton","Renmark","Waikerie","Cobdogla","Glossop","Kingston-on-Murray","Loveday","Lyrup","Monash","Moorook","Paringa","Winkie"];
+var PERM = ["I give Greeks of the Riverland permission to use the family history information I have provided on the Greeks of the Riverland website and project.","If I have uploaded photographs or documents, I give permission for them to be displayed as part of the project.","I understand that my email address and phone number will not be published.","I understand that the wording may be lightly edited for spelling, grammar and clarity before publication."];
+var $ = function (id) { return document.getElementById(id); };
+$('towns').innerHTML = TOWNS.map(function (t) { return '<label class="chip"><input type="checkbox" value="' + t + '"> ' + t + '</label>'; }).join('');
+document.querySelectorAll('.chip input').forEach(function (c) { c.onchange = function () { c.parentNode.classList.toggle('on', c.checked); }; });
+document.querySelectorAll('.radio input').forEach(function (r) { r.onchange = function () {
+  r.closest('.radio').querySelectorAll('label').forEach(function (l) { l.classList.toggle('on', l.querySelector('input').checked); }); }; });
+function need(id, msg) { $('err').textContent = msg; $(id).focus(); $(id).scrollIntoView({ block: 'center' }); }
+$('send').onclick = function () {
+  $('err').textContent = '';
+  var v = function (id) { return $(id).value.trim(); };
+  if (!v('name')) return need('name', 'Please type your name (step 1).');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('email'))) return need('email', 'Please type your email address (step 1).');
+  if (!v('surname')) return need('surname', 'Please type the family surname (step 2).');
+  if (!$('perm').checked) { $('err').textContent = 'Please tick the "I agree" box (step 4).'; $('perm').scrollIntoView({ block: 'center' }); return; }
+  var towns = [].slice.call(document.querySelectorAll('.chip input:checked')).map(function (c) { return c.value; });
+  if (v('townOther')) towns.push(v('townOther'));
+  var answers = { name: v('name'), email: v('email'), phone: v('phone'), connection: v('connection'),
+    mayContact: document.querySelector('.radio input:checked').value, surname: v('surname'), towns: towns,
+    firstYear: v('firstYear'), lastYear: v('lastYear'), moved: v('moved'), origin: v('origin'), country: v('country'),
+    arrived: v('arrived'), before: v('before'), people: v('people'), work: v('work'), community: v('community'),
+    story: v('story'), notPublish: v('notPublish'), photoDesc: v('photoDesc'), perms: PERM, confirmName: v('name') };
+  $('send').disabled = true; $('status').textContent = 'Sending… please keep this page open.';
+  fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: 'submitFamily', args: [answers] }) })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (!j.ok) throw new Error(j.error);
+      window.scrollTo(0, 0);
+      $('app').innerHTML = '<div class="card done"><div class="tick">&#10004;</div><h2 style="justify-content:center">Thank you, ' + esc(answers.name) + '!</h2>' +
+        '<p>The ' + esc(answers.surname) + ' family story has arrived safely (reference ' + esc(j.result) + '). The project team will look at it soon.</p>' +
+        '<p><b>Do you have photos?</b> Use the same surname and email so we can match them.</p>' +
+        '<a class="btn" href="' + PHOTO + '">Add family photos &rarr;</a></div>';
+    })
+    .catch(function (e) { $('status').textContent = ''; $('err').textContent = 'Sorry, something went wrong. Please press the button again. (' + e.message + ')'; $('send').disabled = false; });
+};
+function esc(s) { return String(s || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+</script></body></html>

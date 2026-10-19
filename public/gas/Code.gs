@@ -183,7 +183,7 @@ function doPost(e) {
   let out;
   try {
     const req = JSON.parse(e.postData.contents);
-    const fns = { startUpload: startUpload, uploadPhoto: uploadPhoto, finishUpload: finishUpload };
+    const fns = { startUpload: startUpload, uploadPhoto: uploadPhoto, finishUpload: finishUpload, submitFamily: submitFamily };
     if (!fns[req.fn]) throw new Error('Unknown request');
     out = { ok: true, result: fns[req.fn].apply(null, req.args || []) };
   } catch (err) {
@@ -831,7 +831,7 @@ const FIND_HTML = String.raw`<!DOCTYPE html>
    height proportional to its width. Very short frames (phones) switch to a compact one-row layout. */
 :root{--navy:#1b365d;--pale:#eef4fa;--line:#c9d7e8;--ink:#24323f}
 *{box-sizing:border-box}
-html{font-size:clamp(13px,1.55vw,20px)}
+html{font-size:clamp(15px,1.7vw,21px)}
 html,body{margin:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
 .box{background:var(--pale);border:1px solid var(--line);border-radius:.9rem;padding:.9rem 1rem;min-height:100vh}
 .ttl{margin:0 .1rem .1rem;font:700 1.55rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
@@ -842,7 +842,7 @@ input{width:100%;font:italic 1.1rem Lora,Georgia,serif;padding:.75rem .9rem .75r
 input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,54,93,.15)}
 .az{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:.35rem;margin-top:.7rem}
 @media(min-width:640px){.az{grid-template-columns:repeat(13,1fr)}}
-.az button{font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy);background:#fff;border:1.5px solid #9fb5cf;border-radius:.55rem;height:2.4rem;cursor:pointer;padding:0}
+.az button{font:700 1.15rem 'Libre Baskerville',Georgia,serif;color:var(--navy);background:#fff;border:1.5px solid #9fb5cf;border-radius:.55rem;height:2.8rem;cursor:pointer;padding:0}
 .az button:hover,.az button:focus{background:var(--navy);color:#fff;border-color:var(--navy);outline:none}
 .note{font-size:.85rem;color:#56667a;margin:.6rem .1rem 0;line-height:1.4}
 .res{display:none;margin-top:.7rem}
@@ -903,7 +903,7 @@ const TOWN_HTML = String.raw`<!DOCTYPE html>
 /* Town page: "Greek Families of <town>" as a grid of name tiles (Nick's town mock-up, 8 Oct 2026).
    Google Sites keeps an embed's height proportional to its width, so short frames (phones) get one sideways-scrolling row. */
 *{box-sizing:border-box}
-html{font-size:clamp(13px,1.35vw,17px)}
+html{font-size:clamp(16px,1.6vw,20px)}
 html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:#24323f}
 h2{margin:.2rem .1rem .8rem;font:700 1.75rem/1.2 'Libre Baskerville',Georgia,serif;color:#1b365d}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.55rem}
@@ -1367,6 +1367,20 @@ function setupRegister() {
 function onFamilySubmit(e) {
   const a = {};
   e.response.getItemResponses().forEach(function (r) { a[r.getItem().getTitle()] = r.getResponse(); });
+  return registerFamily_(a, e.response.getTimestamp());
+}
+
+/** The website's own Add Your Family page (family.html) posts here through doPost. Same answers, same Register row. */
+function submitFamily(answers) {
+  const a = {};
+  Object.keys(answers || {}).forEach(function (k) { if (Q[k]) a[Q[k]] = answers[k]; });
+  if (!a[Q.name] || !a[Q.email] || !a[Q.surname]) throw new Error('Please fill in your name, email and the family surname.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(a[Q.email]))) throw new Error('Please enter a valid email address.');
+  if (![].concat(a[Q.perms] || []).length) throw new Error('Please tick the permission box.');
+  return registerFamily_(a, new Date());
+}
+
+function registerFamily_(a, when) {
   const get = function (k) { const v = a[Q[k]]; return v == null ? '' : (Array.isArray(v) ? v.join(', ') : String(v).trim()); };
 
   const lock = LockService.getScriptLock(); lock.waitLock(30000);
@@ -1387,7 +1401,7 @@ function onFamilySubmit(e) {
 
     const v = {
       'Submission ID': id,
-      'Date Submitted': e.response.getTimestamp(),
+      'Date Submitted': when,
       'Family Surname': surname,
       'Other Surname Spellings': get('spellings'),
       'Riverland Towns / Areas': get('towns'),
@@ -1444,6 +1458,7 @@ function onFamilySubmit(e) {
         '<a href="' + folder.getUrl() + '">Family folder</a></p>',
       name: 'Greeks of the Riverland'
     });
+    return id;
   } finally { lock.releaseLock(); }
 }
 
