@@ -132,6 +132,9 @@ var PERM = ["I give Greeks of the Riverland permission to use the family history
 var $ = function (id) { return document.getElementById(id); };
 if (window.top === window) document.body.classList.add('standalone');
 else if (window.innerWidth < 700) document.body.classList.add('squeezed');
+// Google Sites keeps the frame's height in proportion to its width, so on narrower desktop screens shrink the
+// form a little (zoom) to keep it inside the frame. The frame on the page is sized for 1302px wide.
+else document.body.style.zoom = Math.min(1, window.innerWidth / 1302);
 (function () { var sn = new URLSearchParams(location.search).get('s'); if (sn) $('surname').value = sn.slice(0, 60); })();
 $('towns').innerHTML = TOWNS.map(function (t) { return '<label class="chip"><input type="checkbox" value="' + t + '"> ' + t + '</label>'; }).join('');
 document.querySelectorAll('.chip input').forEach(function (c) { c.onchange = function () { c.parentNode.classList.toggle('on', c.checked); }; });
