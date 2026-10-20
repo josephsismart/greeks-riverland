@@ -212,7 +212,7 @@ function full() {
     else cards.push('<a class="fam add" href="family.html"><div class="mono">+</div><div><div class="nm">Add your family</div><div class="dt">Is your family from ' + esc(town) + '?</div></div></a>');
     h += '<div class="fams' + (page ? '' : cards.length <= 4 ? ' one' : ' two') + '">' + cards.join('') + '</div>';
   }
-  h += '<div class="ph-head"><h2>Photographs &amp; memories</h2>' + (photos.length ? '<a href="' + esc(photosUrl) + '">See all ' + photos.length + ' photos &rarr;</a>' : '') + '</div>';
+  h += '<div class="ph-head"><h2>Photographs &amp; memories</h2>' + (photos.length ? '<a href="' + esc(photosUrl) + '">' + (photos.length === 1 ? 'See the photo' : 'See all ' + photos.length + ' photos') + ' &rarr;</a>' : '') + '</div>';
   if (!photos.length) {
     h += '<div class="strip empty">' + ARCH.map(function (s) { return '<div class="tile" style="background-image:url(\'' + s + '\')"></div>'; }).join('') +
          '<div class="msg"><div><b>Photos of ' + esc(town) + ' will appear here</b><span>Old photos of family, work, church and sport are all welcome.</span></div></div></div>';
