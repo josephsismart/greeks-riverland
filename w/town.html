@@ -232,7 +232,7 @@ function full() {
 }
 function mini() {
   var n = fams.length, h = '';
-  h += '<div class="m-title">Greek families of ' + esc(town) + '<small>' + (n ? n + (n === 1 ? ' family' : ' families') + ' &middot; ' : '') + (photos.length ? photos.length + ' photos' : 'photos coming soon') + '</small></div>';
+  h += '<div class="m-title">Greek families of ' + esc(town) + '<small>' + (n ? n + (n === 1 ? ' family' : ' families') + ' &middot; ' : '') + (photos.length ? photos.length + (photos.length === 1 ? ' photo' : ' photos') : 'photos coming soon') + '</small></div>';
   var ims = photos.slice(0, 4).map(function (p) { return img(p.id, 300); });
   h += '<div class="m-strip' + (ims.length ? '' : ' empty') + '">' + (ims.length ? ims : ARCH).concat(ARCH).slice(0, 4).map(function (s) { return '<div style="background-image:url(\'' + s + '\')"></div>'; }).join('') + '</div>';
   h += '<div class="m-pills">' + (n ? fams.slice(0, 3).map(function (f) { return '<a href="' + esc(famUrl(f)) + '">' + esc(f.family) + '</a>'; }).join('') + (n > 3 ? '<span>+' + (n - 3) + ' more</span>' : '')
