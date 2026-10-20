@@ -34,6 +34,15 @@ html,body{margin:0;height:100%;background:var(--cream);font-family:Lora,Georgia,
 .small .pick{display:block}
 .small .dot{width:15px;height:15px;border-width:3px}
 .leaflet-control-zoom a{width:38px!important;height:38px!important;line-height:38px!important;font-size:22px!important}
+</style><style>
+#phone{display:none}
+html.phone #map,html.phone .hint,html.phone .pick{display:none!important}
+html.phone body{background:transparent}
+html.phone #phone{display:flex;flex-direction:column;justify-content:center;gap:.5rem;height:100vh;padding:.7rem;box-sizing:border-box;border-radius:.9rem;background:#eaf1f8;font-family:Lora,Georgia,serif}
+#phone b{font:700 1.2rem/1.2 'Libre Baskerville',Georgia,serif;color:#1b365d}
+#phone .g{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
+#phone a{display:flex;align-items:center;justify-content:center;text-align:center;min-height:2.8rem;padding:.3rem;border-radius:.6rem;background:#fff;border:.1rem solid #c9d4e2;color:#1b365d;text-decoration:none;font:700 1rem/1.15 'Libre Baskerville',Georgia,serif}
+#phone a.all{background:#1b365d;color:#fff;border-color:#1b365d;font-family:Lora,Georgia,serif}
 </style></head>
 <body>
 <script>
@@ -71,7 +80,7 @@ function load(prep, main) {
 }
 </script>
 
-<div id="map" role="application" aria-label="Map of Riverland towns. Choose a town to open its page."></div>
+<div id="phone"></div><div id="map" role="application" aria-label="Map of Riverland towns. Choose a town to open its page."></div>
 <div class="hint">Click a town to explore</div>
 <select class="pick" id="pick" aria-label="Choose a town"><option value="">Choose a town &#9662;</option></select>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -83,6 +92,15 @@ function norm(s){return String(s||'').toLowerCase().replace(/[^a-z]/g,'')}
 function link(p){p=String(p||'');return /^https?:/.test(p)?p:DATA.site+p}
 function famsOf(t){return DATA.families.filter(function(f){return String(f.towns).split(/\s*,\s*/).map(norm).indexOf(norm(t))>=0}).map(function(f){return f.family}).sort()}
 
+var framedNarrow = (function(){try{return window.top!==window}catch(e){return true}})() && innerWidth < 600;
+if (framedNarrow) {
+  var R = document.documentElement; R.classList.add('phone'); R.style.fontSize = Math.min(innerWidth / 24, 22) + 'px';
+  var MJ = ['Barmera','Berri','Loxton','Renmark','Waikerie'];
+  var mj = DATA.towns.filter(function(t){return t.major===true||MJ.indexOf(t.name)>=0});
+  document.getElementById('phone').innerHTML = '<b>Choose a town</b><div class="g">' + mj.map(function(t){return '<a href="'+esc(link(t.path))+'">'+esc(t.name)+'</a>'}).join('') +
+    '<a class="all" href="'+esc(DATA.site.replace(/\/?$/,'/')+'towns')+'">All towns &rsaquo;</a></div>';
+  return;
+}
 var map = L.map('map', {zoomControl:false, scrollWheelZoom:false, dragging:!L.Browser.mobile, tap:true, zoomSnap:0.25, attributionControl:true});
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
   maxZoom:15, minZoom:7,
