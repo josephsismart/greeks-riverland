@@ -94,7 +94,12 @@ var esc = function (s) { return String(s || '').replace(/[&<>"]/g, function (c) 
 var img = function (id, w) { return 'https://lh3.googleusercontent.com/d/' + id + '=w' + w; };
 var town = q.get('t'), fam = q.get('f');
 var list = (DATA.photos || []).filter(function (p) {
-  if (town && String(p.town).split(/\s*,\s*/).map(norm).indexOf(norm(town)) < 0) return false;
+  if (town) {
+    var inT = function (v) { return String(v || '').split(/\s*,\s*/).map(norm).indexOf(norm(town)) >= 0; };
+    // no town given: use the family's towns
+    var famT = (DATA.families || []).filter(function (f) { return norm(f.family) === norm(p.family); }).map(function (f) { return f.towns; }).join(',');
+    if (!(p.town ? inT(p.town) : inT(famT))) return false;
+  }
   if (fam && norm(p.family) !== norm(fam)) return false;
   return true;
 });
