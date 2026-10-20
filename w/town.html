@@ -196,7 +196,9 @@ var town = T.name;
 var townUrl = T.path ? SITE + String(T.path).replace(/^\//, '') : SITE + 'towns/' + norm(town);
 var inTown = function (s) { return String(s || '').split(/\s*[,;\/]\s*/).map(norm).indexOf(norm(town)) >= 0; };
 var fams = (DATA.families || []).filter(function (f) { return inTown(f.towns); }).sort(function (a, b) { return a.family.localeCompare(b.family); });
-var photos = (DATA.photos || []).filter(function (p) { return inTown(p.town); });
+var famNames = fams.map(function (f) { return norm(f.family); });
+// A photo shows on a town page when its town is this town, or when no town was given and its family lives here.
+var photos = (DATA.photos || []).filter(function (p) { return p.town ? inTown(p.town) : famNames.indexOf(norm(p.family)) >= 0; });
 var famUrl = function (f) { var u = String(f.url || '').trim(); return u ? (/^https?:/.test(u) ? u : SITE + u.replace(/^\//, '')) : 'familypage.html?f=' + encodeURIComponent(f.family); };
 var photosUrl = 'photos.html?t=' + encodeURIComponent(town) + '&h=' + encodeURIComponent('Photographs of ' + town);
 var selfUrl = 'town.html?t=' + encodeURIComponent(town);
