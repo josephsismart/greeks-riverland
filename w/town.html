@@ -205,9 +205,14 @@ var selfUrl = 'town.html?t=' + encodeURIComponent(town);
 var ICON_HOUSE = '<svg width="55%" height="55%" viewBox="0 0 24 24" fill="none" stroke="#e2c48e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>';
 var ICON_CAM = '<svg width="55%" height="55%" viewBox="0 0 24 24" fill="none" stroke="#1b365d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
 
+function famDetail(f) {
+  if (f.detail) return f.detail;
+  if (!f.first) return '';
+  return f.first + ' – ' + (/still|now|today|connected/i.test(f.last || '') || !f.last ? 'today' : f.last) + (f.origin ? ' · from ' + f.origin : '');
+}
 function famCard(f) {
   return '<a class="fam" href="' + esc(famUrl(f)) + '"><div class="mono">' + esc(f.family.charAt(0)) + '</div><div style="min-width:0">' +
-    '<div class="nm">' + esc(f.family) + '</div>' + (f.detail ? '<div class="dt">' + esc(f.detail) + '</div>' : '') +
+    '<div class="nm">' + esc(f.family) + '</div>' + (famDetail(f) ? '<div class="dt">' + esc(famDetail(f)) + '</div>' : '') +
     '<div class="go">Read their story &rarr;</div></div></a>';
 }
 function full() {

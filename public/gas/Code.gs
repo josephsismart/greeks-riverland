@@ -578,8 +578,14 @@ function publicFamilies_() {
       sh.getRange(3, 1, sh.getLastRow() - 2, H.length).getValues().forEach(function (r) {
         if (String(r[ix('Website Status')]).trim() !== 'Published' || !String(r[ix('Family Surname')]).trim()) return;
         if (String(r[ix('Permission to Publish')]).trim() === 'No') return;
-        out.push({ family: String(r[ix('Family Surname')]).trim(), alt: String(r[ix('Other Surname Spellings')]).trim(),
-          towns: String(r[ix('Riverland Towns / Areas')]).trim(), url: String(r[ix('Website Page Link')]).trim() });
+        // Public story fields only (never contributor names, emails, phones or privacy notes).
+        const v = function (n) { const i = ix(n); if (i < 0) return ''; const x = r[i]; return String(x instanceof Date ? x.getFullYear() : x).trim(); };
+        out.push({ family: v('Family Surname'), alt: v('Other Surname Spellings'),
+          towns: v('Riverland Towns / Areas'), url: v('Website Page Link'),
+          first: v('First Year in Riverland'), last: v('Last Year in Riverland'), origin: v('Place of Origin'), country: v('Region / Country'),
+          arrived: v('Year Arrived in Australia'), before: v('Previous Australian Location'), members: v('Family Members Summary'),
+          deceased: v('Deceased Family Members'), work: v('Work / Occupations'), business: v('Family Business'),
+          community: v('Community Involvement'), story: v('Family Story'), memory: v('Important Memory / Story') });
       });
     }
   } catch (e) {}

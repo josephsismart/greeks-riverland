@@ -182,11 +182,15 @@ var P = {}; for (var k in PROFILES) if (norm(k) === norm(F.family)) P = PROFILES
 var name = F.family;
 var photos = (DATA.photos || []).filter(function (p) { return norm(p.family) === norm(name); }).slice(0, 8);
 var famSite = String(F.url || '').trim();
-var backUrl = famSite ? (/^https?:/.test(famSite) ? famSite : SITE + famSite.replace(/^\//, '')) : SITE;
+var firstTown = (DATA.towns || []).filter(function (t) { return String(F.towns || '').split(/\s*,\s*/).map(norm).indexOf(norm(t.name)) >= 0; })[0];
+var backUrl = famSite ? (/^https?:/.test(famSite) ? famSite : SITE + famSite.replace(/^\//, '')) : (firstTown && firstTown.path ? SITE + String(firstTown.path).replace(/^\//, '') : SITE);
 var selfUrl = 'familypage.html?f=' + encodeURIComponent(name);
 var addUrl = 'family.html?s=' + encodeURIComponent(name);
 var where = P.place || F.detail || F.towns || '';
-var years = P.years || ((/\(([^)]*\d{4}[^)]*)\)/.exec(F.detail || '') || [])[1] || '');
+var lastY = /still|now|today|connected/i.test(F.last || '') ? 'today' : (F.last || '');
+var years = P.years || ((/\(([^)]*\d{4}[^)]*)\)/.exec(F.detail || '') || [])[1] || '') || (F.first ? F.first + ' – ' + (lastY || 'today') : '');
+var origin = P.origin || [F.origin, F.country].filter(Boolean).join(', ');
+var join = function () { return [].slice.call(arguments).filter(Boolean).join('\n\n'); };
 var PIN = '<svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#9a7a35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
 var CAM = '<svg width="55%" height="55%" viewBox="0 0 24 24" fill="none" stroke="#e2c48e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
 
@@ -208,14 +212,14 @@ function full() {
   var page = MODE === 'page', h = '';
   h += '<div class="top"><a class="site" href="' + esc(SITE) + '">Greeks of the Riverland</a><br><a class="back" href="' + esc(backUrl) + '">&larr; Back to the website</a></div>';
   var facts = (P.facts || []).slice(0, 4);
-  if (!facts.length) facts = [['Riverland towns', F.towns || ''], ['Where and when', F.detail || '']];
+  if (!facts.length) facts = [['From', origin], ['In the Riverland', years], ['Arrived in Australia', F.arrived || ''], ['Lived before the Riverland', F.before || '']];
   h += '<div class="hero">' + stage() + '<div class="info"><div class="eyebrow">Family story</div><h2>The ' + esc(name) + ' Family</h2>' +
        (where ? '<div class="where">' + PIN + esc(where) + '</div>' : '') +
-       '<div class="chips">' + (years ? '<span class="chip">In the Riverland ' + esc(years) + '</span>' : '') + (P.origin ? '<span class="chip g">From ' + esc(P.origin) + '</span>' : '') + '</div>' +
+       '<div class="chips">' + (years ? '<span class="chip">In the Riverland ' + esc(years) + '</span>' : '') + (origin ? '<span class="chip g">From ' + esc(origin) + '</span>' : '') + '</div>' +
        '<div class="facts">' + facts.map(function (f) { return '<div class="fact"><div class="k">' + esc(f[0]) + '</div><div class="v' + (f[1] ? '' : ' no') + '">' + esc(f[1] || 'Not yet recorded') + '</div></div>'; }).join('') + '</div>' +
        '<div class="acts"><a class="btn navy" href="upload.html">Share a photo</a><a class="btn line" href="' + esc(addUrl) + '">Add to this story</a></div></div></div>';
   h += '<div class="help-h"><h3>The ' + esc(name) + ' story</h3><span>Do you know more? Tap a box to add it.</span></div>';
-  h += '<div class="cards">' + card('Family story', P.story, page) + card('Children', P.children, page) + card('Community life', P.community, page) + card('In memoriam', P.memoriam, page) + '</div>';
+  h += '<div class="cards">' + card('Family story', P.story || join(F.story, F.memory), page) + card('Family members', P.children || join(F.members, F.deceased), page) + card('Work', P.work || join(F.work, F.business), page) + card('Community life', P.community || F.community, page) + '</div>';
   return h;
 }
 function mini() {
