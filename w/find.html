@@ -104,6 +104,23 @@ function reset(){ $('q').value=''; $('az').style.display=''; $('note').style.dis
 $('back').onclick=reset;
 $('q').addEventListener('input',function(){var v=fold(this.value.trim()); if(!v){reset();return;}
   show(this.value.trim(), fams.filter(function(f){return fold(f.family).indexOf(v)>=0||fold(f.alt).indexOf(v)>=0}), 'Results for “'+this.value.trim()+'”');});
+
+(function () {
+  var framed = (function(){try{return window.top!==window}catch(e){return true}})();
+  var q0 = new URLSearchParams(location.search).get('q');
+  if (!framed) {
+    document.body.style.cssText += ';max-width:900px;margin:0 auto;padding:16px';
+    if (q0) { $('q').value = q0; $('q').dispatchEvent(new Event('input')); }
+    return;
+  }
+  if (innerWidth >= 600) return;
+  var R = document.documentElement; R.style.fontSize = Math.min(innerWidth / 24, 22) + 'px';
+  document.body.innerHTML = '<form id="ph" style="height:100vh;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:.4rem;padding:.5rem .6rem;border-radius:.8rem;background:#eaf1f8">' +
+    '<b style="font:700 1.15rem/1.2 Libre Baskerville,Georgia,serif;color:#1b365d">Find a family</b>' +
+    '<div style="display:flex;gap:.4rem"><input id="pq" type="search" placeholder="Type a surname" aria-label="Type a surname" style="flex:1;min-width:0;font:1.05rem Lora,Georgia,serif;padding:.6rem .7rem;border:2px solid #9fb5cf;border-radius:.6rem">' +
+    '<button style="font:700 1.05rem Lora,Georgia,serif;background:#1b365d;color:#fff;border:0;border-radius:.6rem;padding:0 1rem">Search</button></div></form>';
+  document.getElementById('ph').onsubmit = function (e) { e.preventDefault(); window.open('find.html?q=' + encodeURIComponent(document.getElementById('pq').value.trim()), '_blank'); };
+})();
 }
 load(null, main);
 </script></body></html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Get involved — Greeks of the Riverland</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_blank">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Home page "get involved" cards: Connect, Share photos, Learn, Support. Replaces four picture-cards whose text
+   became tiny on phones. Sized from the frame width (see _frame.js); phones get four big tiles. */
+:root{--navy:#1b365d;--ink:#24323f;--muted:#5f5b53;--gold2:#e2c48e;--sky:#eaf1f8;--line:#d3deeb}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
+html.page{font-size:17px}
+#full{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;padding:.5rem .6rem}
+html.page #full{grid-template-columns:1fr;max-width:46rem;margin:0 auto;padding:1rem}
+.card{display:grid;grid-template-columns:13rem 1fr;background:#fff;border:.08rem solid var(--line);border-radius:1.1rem;overflow:hidden;text-decoration:none;color:var(--ink);
+ box-shadow:0 .2rem .8rem rgba(27,54,93,.08);transition:transform .15s,box-shadow .15s;min-height:13.5rem}
+.card:hover,.card:focus{transform:translateY(-.15rem);box-shadow:0 .7rem 1.6rem rgba(27,54,93,.16);outline:none}
+.im{background:center/cover no-repeat;filter:sepia(.15)}
+.tx{display:flex;flex-direction:column;padding:1.2rem 1.3rem}
+.hd{display:flex;align-items:center;gap:.7rem;margin-bottom:.5rem}
+.ic{flex:none;width:2.8rem;height:2.8rem;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center}
+.hd h3{margin:0;font:700 1.3rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.tx p{margin:0;font-size:1.02rem;line-height:1.5;color:var(--muted)}
+.go{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:.4rem;background:var(--navy);color:#fff;border-radius:.7rem;padding:.7rem 1.2rem;font-weight:700;font-size:1.02rem}
+.card.gold .go{background:var(--gold2);color:#1b2a3d}
+#mini{display:none}
+html.compact #full{display:none}
+html.compact #mini{display:grid}
+#mini{height:100vh;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:.45rem;padding:.2rem}
+#mini a{display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;border-radius:.8rem;background:var(--sky);border:.08rem solid var(--line);text-decoration:none;color:var(--navy);font:700 1rem/1.15 'Libre Baskerville',Georgia,serif}
+#mini a .ic{width:2.2rem;height:2.2rem}
+#mini a.gold{background:#f6ecd4;border-color:#e6d3a6}
+</style></head><body>
+<div id="full"></div><div id="mini"></div>
+<script>
+/* Shared by the page widgets (town, family profile).
+   Google Sites keeps an embed's height in proportion to its width (a phone gets a much shorter frame),
+   so inside Sites everything is sized from the frame width:
+     wide    framed, 860px or wider: the whole design scales with the width (1rem = width / 72)
+     compact framed, narrower (phones): a short summary card with big buttons that open the full page
+     page    opened on its own (new tab): an ordinary responsive page with a header and a back link */
+var FRAMED = (function () { try { return window.top !== window; } catch (e) { return true; } })();
+function frameMode() {
+  var W = window.innerWidth, root = document.documentElement, mode = !FRAMED ? 'page' : (W < 860 ? 'compact' : 'wide');
+  root.classList.remove('page', 'compact', 'wide'); root.classList.add(mode);
+  root.style.fontSize = mode === 'wide' ? (W / 72) + 'px' : mode === 'compact' ? Math.min(W / 24, 22) + 'px' : '';
+  var b = document.querySelector('base'); if (b) b.target = FRAMED ? '_blank' : '_self';
+  return mode;
+}
+var MODE = frameMode();
+var lastW = window.innerWidth;
+window.addEventListener('resize', function () {
+  if (Math.abs(window.innerWidth - lastW) < 2) return;
+  lastW = window.innerWidth;
+  var m = MODE; MODE = frameMode(); if (m !== MODE && window.render) window.render();
+});
+var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var img = function (id, w) { return 'https://lh3.googleusercontent.com/d/' + id + '=w' + (w || 800); };
+
+var SITE = "https://sites.google.com/view/greeksoftheriverland/";
+var M = '../public/m/';
+function icon(d) { return '<svg width="55%" height="55%" viewBox="0 0 24 24" fill="none" stroke="#e2c48e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>'; }
+var CARDS = [
+  { t: 'Connect with the community', s: 'Looking for an old friend or family connection? Send Nick a message and we\'ll help you connect.', b: 'Send a message', short: 'Contact us',
+    u: SITE + 'about-contact', im: M + 'arch-family-community.jpg', i: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
+  { t: 'Share your photos & memories', s: 'Add photographs, letters and stories to keep this history alive for future generations.', b: 'Send photos', short: 'Send photos',
+    u: 'upload.html', im: M + 'arch-wedding.jpg', i: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>' },
+  { t: 'Learn about our history', s: 'Explore the people, places and events that shaped the Greek community in the Riverland.', b: 'Explore the stories', short: 'Stories & photos',
+    u: SITE + 'stories-photos', im: M + 'arch-school-sporting.jpg', i: '<path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/>' },
+  { t: 'Support the project', s: 'Help keep this history alive. Your support helps with research, scanning old photos and running the website.', b: 'Support the project', short: 'Support us',
+    u: SITE + 'support-the-project', im: M + 'arch-work-everyday.jpg', i: '<path d="M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>', gold: true }
+];
+window.render = function () {
+  document.title = 'Get involved — Greeks of the Riverland';
+  document.getElementById('full').innerHTML = MODE === 'compact' ? '' : CARDS.map(function (c) {
+    return '<a class="card' + (c.gold ? ' gold' : '') + '" href="' + esc(c.u) + '"><div class="im" style="background-image:url(\'' + c.im + '\')"></div><div class="tx">' +
+      '<div class="hd"><div class="ic">' + icon(c.i) + '</div><h3>' + esc(c.t) + '</h3></div><p>' + esc(c.s) + '</p><span class="go">' + esc(c.b) + ' &rarr;</span></div></a>';
+  }).join('');
+  document.getElementById('mini').innerHTML = MODE !== 'compact' ? '' : CARDS.map(function (c) {
+    return '<a' + (c.gold ? ' class="gold"' : '') + ' href="' + esc(c.u) + '"><span class="ic" style="flex:none;border-radius:50%;background:#1b365d;display:flex;align-items:center;justify-content:center">' + icon(c.i) + '</span>' + esc(c.short) + '</a>';
+  }).join('');
+};
+render();
+</script></body></html>
