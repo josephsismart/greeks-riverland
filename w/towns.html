@@ -40,20 +40,35 @@ function load(prep, main) {
   // Two sources, fetched together: data.json on GitHub Pages (fast, refreshed every few hours) and the
   // Apps Script web app (live from the Sheet, a little slower). The live copy is used when it answers within
   // a couple of seconds, so a family or photo marked Published shows straight away; otherwise data.json.
-  var used = false, cached = null, live = null, timer = null;
+  // If data.json had to be used and the live copy arrives later with different families or photos,
+  // the widget is drawn again from the live copy (the page is put back as it was first, then redrawn).
+  var used = false, cached = null, live = null, timer = null, shown = null, shell = null;
+  function key(d) { return JSON.stringify([d && d.families, d && d.photos, d && d.towns]); }
+  function draw(d) {
+    if (shell === null) shell = document.body.innerHTML; else document.body.innerHTML = shell;
+    shown = d; main(prep ? prep(d) : d);
+  }
   function use(d) {
     if (used) return; used = true; clearTimeout(timer);
     ld.done = true; if (ld.parentNode) ld.remove();
-    main(prep ? prep(d) : d);
+    draw(d);
+  }
+  function gotLive(d) {
+    live = d;
+    if (!used) use(d); else if (shown !== d && key(d) !== key(shown)) { try { draw(d); } catch (e) {} }
   }
   function getJson(src) {
     return fetch(src, { credentials: 'omit' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
   }
-  getJson(API + '?page=data').then(function (d) { live = d; use(d); }).catch(function () { live = false; if (cached) use(cached); });
+  getJson(API + '?page=data').then(gotLive).catch(function () {
+    setTimeout(function () {   // one more try: the web app sometimes needs a moment to wake up
+      getJson(API + '?page=data').then(gotLive).catch(function () { live = false; if (cached) use(cached); else if (!used) timer = setTimeout(fail, 4000); });
+    }, 1500);
+  });
   getJson('data.json?v=' + Math.floor(Date.now() / 300000)).then(function (d) {
     cached = d;
     if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 6000);
-  }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 9000); });
+  }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 12000); });
   function fail() {
     if (used) return; used = true;
     ld.done = true; if (ld.parentNode) ld.remove();
