@@ -132,7 +132,7 @@ function load(prep, main) {
   getJson(API + '?page=data').then(function (d) { live = d; use(d); }).catch(function () { live = false; if (cached) use(cached); });
   getJson('data.json?v=' + Math.floor(Date.now() / 300000)).then(function (d) {
     cached = d;
-    if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 2500);
+    if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 6000);
   }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 9000); });
   function fail() {
     if (used) return; used = true;
