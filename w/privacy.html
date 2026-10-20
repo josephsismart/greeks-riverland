@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Privacy, Permission and Photo Use — Greeks of the Riverland</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_blank">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Privacy, Permission and Photo Use: Nick's privacy text (unchanged wording) as six easy-to-scan cards.
+   Same look as the other page widgets (see _frame.js). */
+:root{--navy:#1b365d;--ink:#24323f;--muted:#5f5b53;--gold:#c9a44c;--gold2:#e2c48e;--cream:#f6f1e6;--sky:#eaf1f8;--line:#e3ddd0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
+html.page{font-size:18px}html.page body{background:#fbf8f1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;font-weight:700;border-radius:.75rem;padding:.8rem 1.3rem;font-size:1.02rem;line-height:1.2;transition:transform .15s,box-shadow .15s}
+.btn:hover,.btn:focus{transform:translateY(-.08rem);box-shadow:0 .4rem 1rem rgba(27,54,93,.25);outline:none}
+.btn.navy{background:var(--navy);color:#fff}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.78rem;font-weight:700;color:#9a7a35}
+
+#full{padding:.5rem .6rem .6rem}
+.top{display:none}
+html.page .top{display:block;background:var(--navy);color:#fff;text-align:center;padding:1.4rem 1rem 1.6rem;margin:0 0 1.6rem}
+.top .site{font:700 1rem 'Libre Baskerville',Georgia,serif;color:var(--gold2);text-decoration:none}
+.top h1{font:700 2.2rem/1.15 'Libre Baskerville',Georgia,serif;margin:.5rem 0 .8rem}
+.top .back{display:inline-block;color:#fff;border:.1rem solid rgba(255,255,255,.6);border-radius:999px;padding:.55rem 1.2rem;text-decoration:none;font-weight:600}
+html.page #full{max-width:72rem;margin:0 auto;padding:0 1rem 2rem}
+
+.intro{display:flex;align-items:center;gap:1.6rem;padding:1.5rem 1.8rem;background:linear-gradient(120deg,#fff 0%,var(--sky) 100%);border:.08rem solid #d3deeb;border-radius:1.1rem}
+.intro .ic{flex:none;width:4.6rem;height:4.6rem;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center}
+.intro h2{margin:.25rem 0 .35rem;font:700 1.9rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.intro p{margin:0;font-size:1.12rem;line-height:1.5}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-top:1.4rem}
+.card{background:#fff;border:.08rem solid var(--line);border-top:.3rem solid var(--navy);border-radius:1rem;padding:1.1rem 1.2rem;box-shadow:0 .15rem .6rem rgba(27,54,93,.06)}
+.card .h{display:flex;align-items:center;gap:.7rem;margin-bottom:.5rem}
+.card .n{flex:none;width:2.3rem;height:2.3rem;border-radius:50%;background:var(--sky);display:flex;align-items:center;justify-content:center}
+.card h3{margin:0;font:700 1.12rem/1.25 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.card p{margin:0;font-size:1rem;line-height:1.5}
+.card .btn{margin-top:.8rem}
+.aim{margin-top:1.4rem;padding:1.2rem 1.6rem;background:var(--cream);border-left:.45rem solid var(--gold);border-radius:1rem;font:italic 1.12rem/1.55 Lora,Georgia,serif;color:var(--ink)}
+.aim b{font-style:normal;color:var(--navy)}
+
+@media(max-width:760px){
+ html.page{font-size:17px}
+ html.page .top h1{font-size:1.75rem}
+ html.page .intro{flex-direction:column;text-align:center}
+ html.page .intro h2{font-size:1.5rem}
+ html.page .cards{grid-template-columns:1fr}
+}
+
+/* compact (phones, inside Google Sites) */
+#mini{display:none}
+html.compact #full{display:none}
+html.compact #mini{display:flex}
+#mini{height:100vh;flex-direction:column;justify-content:center;gap:.45rem;padding:.9rem;border-radius:.9rem;background:linear-gradient(120deg,#fff 0%,var(--sky) 100%);border:.08rem solid #d3deeb}
+#mini h3{margin:0 0 .1rem;font:700 1.3rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+#mini li{list-style:none;display:flex;gap:.45rem;font-size:1rem;line-height:1.35}
+#mini ul{margin:0;padding:0;display:grid;gap:.3rem}
+#mini li:before{content:'\2713';color:#2f7d4a;font-weight:700}
+#mini a{margin-top:.3rem;display:flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:1.05rem;border-radius:.8rem;min-height:3rem;padding:.5rem}
+</style></head><body>
+<div id="full"></div><div id="mini"></div>
+<script>
+/* Shared by the page widgets (town, family profile).
+   Google Sites keeps an embed's height in proportion to its width (a phone gets a much shorter frame),
+   so inside Sites everything is sized from the frame width:
+     wide    framed, 860px or wider: the whole design scales with the width (1rem = width / 72)
+     compact framed, narrower (phones): a short summary card with big buttons that open the full page
+     page    opened on its own (new tab): an ordinary responsive page with a header and a back link */
+var FRAMED = (function () { try { return window.top !== window; } catch (e) { return true; } })();
+function frameMode() {
+  var W = window.innerWidth, root = document.documentElement, mode = !FRAMED ? 'page' : (W < 860 ? 'compact' : 'wide');
+  root.classList.remove('page', 'compact', 'wide'); root.classList.add(mode);
+  root.style.fontSize = mode === 'wide' ? (W / 72) + 'px' : mode === 'compact' ? Math.min(W / 24, 22) + 'px' : '';
+  var b = document.querySelector('base'); if (b) b.target = FRAMED ? '_blank' : '_self';
+  return mode;
+}
+var MODE = frameMode();
+var lastW = window.innerWidth;
+window.addEventListener('resize', function () {
+  if (Math.abs(window.innerWidth - lastW) < 2) return;
+  lastW = window.innerWidth;
+  var m = MODE; MODE = frameMode(); if (m !== MODE && window.render) window.render();
+});
+var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var img = function (id, w) { return 'https://lh3.googleusercontent.com/d/' + id + '=w' + (w || 800); };
+
+var SITE = "https://sites.google.com/view/greeksoftheriverland/";
+var EMAIL = 'nick.savaidis@gmail.com';
+function icon(d, c, s) { return '<svg width="' + (s || '55%') + '" height="' + (s || '55%') + '" viewBox="0 0 24 24" fill="none" stroke="' + (c || '#1b365d') + '" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>'; }
+var I = {
+  shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  hand: '<path d="M7 11V6a1.5 1.5 0 0 1 3 0v4M10 10V4.5a1.5 1.5 0 0 1 3 0V10M13 10V5.5a1.5 1.5 0 0 1 3 0V12M16 9.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-2.7L3.5 15a1.5 1.5 0 0 1 2.5-1.6L7 15"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  server: '<rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/>',
+  care: '<path d="M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'
+};
+var CARDS = [
+  ['eye', 'Nothing is published automatically', 'Information and photographs submitted to us will not automatically be published. We will review material before it appears on the website and will only publish information that is appropriate for a public historical record.'],
+  ['hand', 'Only share what is yours to share', 'Please only submit photographs, stories or personal information that you have the right to share. If a photograph includes living people, we ask that you consider whether they would be comfortable having the image published online.'],
+  ['lock', 'Private details stay private', 'We will avoid publishing sensitive personal information about living people, such as current addresses, phone numbers, email addresses, dates of birth, financial information or other private details.'],
+  ['server', 'Stored safely', 'Information submitted through our online forms will be stored in password-protected Google systems, with access limited to authorised project administrators. Private records will not be made publicly accessible through the website.'],
+  ['care', 'We take care', 'While no online system can guarantee absolute security, we will take reasonable steps to protect information and limit access to it.'],
+  ['edit', 'Change or remove anything', 'If you believe information or a photograph relating to you or your family should be corrected, updated or removed, please contact us and we will review the request.']
+];
+function full() {
+  var h = '';
+  h += '<div class="top"><a class="site" href="' + esc(SITE) + '">Greeks of the Riverland</a><h1>Privacy, Permission and Photo Use</h1>' +
+       '<a class="back" href="' + esc(SITE + 'privacy-permissions') + '">&larr; Back to the website</a></div>';
+  h += '<div class="intro"><div class="ic">' + icon(I.shield, '#e2c48e') + '</div><div><div class="eyebrow">Privacy, permission and photo use</div>' +
+       '<h2>Your family\'s story is safe with us</h2><p>We want Greeks of the Riverland to be a respectful and trusted community history project.</p></div></div>';
+  h += '<div class="cards">' + CARDS.map(function (c, i) {
+    return '<div class="card"><div class="h"><div class="n">' + icon(I[c[0]]) + '</div><h3>' + esc(c[1]) + '</h3></div><p>' + esc(c[2]) + '</p>' +
+      (i === 5 ? '<a class="btn navy" href="mailto:' + EMAIL + '">Email Nick</a>' : '') + '</div>';
+  }).join('') + '</div>';
+  h += '<div class="aim"><b>Our aim is simple:</b> to preserve the history, stories and photographs of the Greek families of the Riverland while respecting the privacy and wishes of the people whose history we are recording.</div>';
+  return h;
+}
+function mini() {
+  return '<h3>Your family\'s story is safe with us</h3><ul><li>Nothing is published without checking</li><li>Phone, email and address stay private</li><li>Ask us any time to change or remove something</li></ul>' +
+    '<a href="privacy.html">Read the full privacy page &rsaquo;</a>';
+}
+window.render = function () {
+  document.title = 'Privacy, Permission and Photo Use — Greeks of the Riverland';
+  document.getElementById('full').innerHTML = MODE === 'compact' ? '' : full();
+  document.getElementById('mini').innerHTML = MODE === 'compact' ? mini() : '';
+};
+render();
+</script></body></html>

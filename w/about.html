@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>About & Contact — Greeks of the Riverland</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_blank">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* About / Contact page body: what the project is, how it works, how to reach Nick, and privacy.
+   Same look as the town, family and photo pages (see _frame.js). Facebook links: FB_PAGE / FB_GROUP below. */
+:root{--navy:#1b365d;--ink:#24323f;--muted:#5f5b53;--gold:#c9a44c;--gold2:#e2c48e;--cream:#f6f1e6;--sky:#eaf1f8;--line:#e3ddd0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
+html.page{font-size:18px}html.page body{background:#fbf8f1}
+.btn{display:flex;align-items:center;justify-content:center;gap:.6rem;text-decoration:none;font-weight:700;border-radius:.75rem;padding:.85rem 1.2rem;font-size:1.05rem;line-height:1.2;transition:transform .15s,box-shadow .15s}
+.btn:hover,.btn:focus{transform:translateY(-.08rem);box-shadow:0 .4rem 1rem rgba(0,0,0,.25);outline:none}
+.btn.gold{background:var(--gold2);color:#1b2a3d}
+.btn.white{background:#fff;color:var(--navy)}
+.btn.ghost{background:transparent;color:#fff;border:.1rem solid rgba(255,255,255,.55)}
+.btn.off{background:rgba(255,255,255,.08);color:#b9c4d3;border:.1rem dashed rgba(255,255,255,.3);pointer-events:none}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.78rem;font-weight:700;color:#9a7a35}
+
+#full{padding:.5rem .6rem .6rem}
+.top{display:none}
+html.page .top{display:block;background:var(--navy);color:#fff;text-align:center;padding:1.4rem 1rem 1.6rem;margin:0 0 1.6rem}
+.top .site{font:700 1rem 'Libre Baskerville',Georgia,serif;color:var(--gold2);text-decoration:none}
+.top h1{font:700 2.4rem/1.15 'Libre Baskerville',Georgia,serif;margin:.5rem 0 .8rem}
+.top .back{display:inline-block;color:#fff;border:.1rem solid rgba(255,255,255,.6);border-radius:999px;padding:.55rem 1.2rem;text-decoration:none;font-weight:600}
+html.page #full{max-width:72rem;margin:0 auto;padding:0 1rem 2rem}
+
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:2.4rem;align-items:start}
+.about h2{margin:.3rem 0 .8rem;font:700 2.1rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.about p{margin:0 0 .9rem;font-size:1.12rem;line-height:1.6}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin-top:1.3rem}
+.step{background:#fff;border:.08rem solid var(--line);border-radius:1rem;padding:1rem;box-shadow:0 .15rem .6rem rgba(27,54,93,.06)}
+.step .n{width:2.4rem;height:2.4rem;border-radius:50%;background:var(--navy);color:var(--gold2);display:flex;align-items:center;justify-content:center;font:700 1.1rem 'Libre Baskerville',Georgia,serif;margin-bottom:.6rem}
+.step b{display:block;font:700 1.05rem/1.3 'Libre Baskerville',Georgia,serif;color:var(--navy);margin-bottom:.25rem}
+.step span{color:var(--muted);font-size:.95rem;line-height:1.45}
+
+.contact{background:linear-gradient(160deg,#1f3f6b,#142a48);color:#fff;border-radius:1.2rem;padding:1.6rem;box-shadow:0 .6rem 1.8rem rgba(27,54,93,.25)}
+.contact .eyebrow{color:var(--gold2)}
+.contact h3{margin:.3rem 0 .4rem;font:700 1.6rem/1.2 'Libre Baskerville',Georgia,serif}
+.contact p{margin:0 0 1rem;color:#d9e2ee;font-size:1.02rem;line-height:1.5}
+.contact .mail{display:block;margin:-.3rem 0 1rem;color:var(--gold2);font-weight:600;font-size:1.05rem;word-break:break-all}
+.contact .btn+.btn{margin-top:.6rem}
+.contact hr{border:0;border-top:.08rem solid rgba(255,255,255,.18);margin:1.1rem 0}
+.contact .fb{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.contact .fb .btn{margin:0;font-size:.98rem;padding:.75rem .6rem}
+.contact small{display:block;margin-top:.5rem;color:#b9c4d3;font-size:.88rem}
+
+.priv{display:flex;align-items:center;gap:1.4rem;margin-top:2rem;padding:1.3rem 1.6rem;background:var(--cream);border-radius:1rem;border-left:.45rem solid var(--gold)}
+.priv .ic{flex:none;width:3.6rem;height:3.6rem;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+.priv h3{margin:0 0 .2rem;font:700 1.3rem/1.25 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.priv p{margin:0;color:var(--muted);font-size:1.02rem;line-height:1.5}
+
+@media(max-width:760px){
+ html.page{font-size:17px}
+ html.page .top h1{font-size:2rem}
+ html.page .grid{grid-template-columns:1fr;gap:1.6rem}
+ html.page .about h2{font-size:1.7rem}
+ html.page .steps{grid-template-columns:1fr}
+ html.page .priv{flex-direction:column;text-align:center;border-left:0;border-top:.4rem solid var(--gold)}
+}
+
+/* compact (phones, inside Google Sites) */
+#mini{display:none}
+html.compact #full{display:none}
+html.compact #mini{display:flex}
+#mini{height:100vh;flex-direction:column;justify-content:center;gap:.5rem;padding:.9rem;border-radius:.9rem;background:linear-gradient(160deg,#1f3f6b,#142a48);color:#fff}
+#mini h3{margin:0;font:700 1.35rem/1.2 'Libre Baskerville',Georgia,serif}
+#mini p{margin:0;color:#d9e2ee;font-size:.98rem;line-height:1.4}
+#mini .row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.3rem}
+#mini a{display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;font-weight:700;font-size:1.02rem;border-radius:.8rem;min-height:3rem;padding:.5rem;line-height:1.2}
+#mini a.w{background:#fff;color:var(--navy)}
+#mini a.g{background:var(--gold2);color:#1b2a3d}
+</style></head><body>
+<div id="full"></div><div id="mini"></div>
+<script>
+/* Shared by the page widgets (town, family profile).
+   Google Sites keeps an embed's height in proportion to its width (a phone gets a much shorter frame),
+   so inside Sites everything is sized from the frame width:
+     wide    framed, 860px or wider: the whole design scales with the width (1rem = width / 72)
+     compact framed, narrower (phones): a short summary card with big buttons that open the full page
+     page    opened on its own (new tab): an ordinary responsive page with a header and a back link */
+var FRAMED = (function () { try { return window.top !== window; } catch (e) { return true; } })();
+function frameMode() {
+  var W = window.innerWidth, root = document.documentElement, mode = !FRAMED ? 'page' : (W < 860 ? 'compact' : 'wide');
+  root.classList.remove('page', 'compact', 'wide'); root.classList.add(mode);
+  root.style.fontSize = mode === 'wide' ? (W / 72) + 'px' : mode === 'compact' ? Math.min(W / 24, 22) + 'px' : '';
+  var b = document.querySelector('base'); if (b) b.target = FRAMED ? '_blank' : '_self';
+  return mode;
+}
+var MODE = frameMode();
+var lastW = window.innerWidth;
+window.addEventListener('resize', function () {
+  if (Math.abs(window.innerWidth - lastW) < 2) return;
+  lastW = window.innerWidth;
+  var m = MODE; MODE = frameMode(); if (m !== MODE && window.render) window.render();
+});
+var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var img = function (id, w) { return 'https://lh3.googleusercontent.com/d/' + id + '=w' + (w || 800); };
+
+var SITE = "https://sites.google.com/view/greeksoftheriverland/";
+var EMAIL = 'nick.savaidis@gmail.com';
+var FB_PAGE = '';   // Facebook Page link, when Nick sends it
+var FB_GROUP = '';  // Facebook Group link, when Nick sends it
+var MAIL = '<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
+var LOCK = '<svg width="50%" height="50%" viewBox="0 0 24 24" fill="none" stroke="#1b365d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+function fb(url, label) { return url ? '<a class="btn ghost" href="' + esc(url) + '">' + label + '</a>' : '<span class="btn off">' + label + ' (soon)</span>'; }
+function full() {
+  var h = '';
+  h += '<div class="top"><a class="site" href="' + esc(SITE) + '">Greeks of the Riverland</a><h1>About &amp; Contact</h1>' +
+       '<a class="back" href="' + esc(SITE + 'about-contact') + '">&larr; Back to the website</a></div>';
+  h += '<div class="grid"><div class="about"><div class="eyebrow">About the project</div><h2>Keeping the Riverland Greek story alive</h2>' +
+       '<p>Greeks of the Riverland preserves the stories, families, photographs and memories of the Greek community that lived in South Australia\'s Riverland, particularly from the 1950s to around 2020.</p>' +
+       '<p>Many of the first families have passed away, and their children have moved on. This website records their history before it is lost.</p>' +
+       '<div class="steps">' +
+         '<div class="step"><div class="n">1</div><b>Families share</b><span>Stories and old photos, sent through this website.</span></div>' +
+         '<div class="step"><div class="n">2</div><b>We check every one</b><span>The project team reads each one and tidies the spelling.</span></div>' +
+         '<div class="step"><div class="n">3</div><b>Shared with permission</b><span>Only what you agree to goes on the website.</span></div>' +
+       '</div></div>';
+  h += '<div class="contact"><div class="eyebrow">Get in touch</div><h3>Contact Nick</h3>' +
+       '<p>Questions, corrections, or something to add? Nick would love to hear from you.</p>' +
+       '<a class="btn gold" href="mailto:' + EMAIL + '">' + MAIL + ' Email Nick</a><span class="mail" style="margin-top:.5rem">' + EMAIL + '</span>' +
+       '<a class="btn white" href="family.html">Add your family</a><a class="btn white" href="upload.html">Send family photos</a>' +
+       '<hr><div class="fb">' + fb(FB_PAGE, 'Facebook Page') + fb(FB_GROUP, 'Facebook Group') + '</div></div></div>';
+  h += '<div class="priv"><div class="ic">' + LOCK + '</div><div><h3>Your privacy</h3>' +
+       '<p>Your email and phone are kept private. Photos and stories go on the website only with your permission. If you want something changed or removed, just tell us.</p></div></div>';
+  return h;
+}
+function mini() {
+  return '<h3>About the project</h3><p>Keeping the stories and photos of Riverland Greek families safe. Questions? Contact Nick.</p>' +
+    '<div class="row"><a class="g" href="mailto:' + EMAIL + '">Email Nick</a><a class="w" href="about.html">Read more &rsaquo;</a></div>';
+}
+window.render = function () {
+  document.title = 'About & Contact — Greeks of the Riverland';
+  document.getElementById('full').innerHTML = MODE === 'compact' ? '' : full();
+  document.getElementById('mini').innerHTML = MODE === 'compact' ? mini() : '';
+};
+render();
+</script></body></html>
