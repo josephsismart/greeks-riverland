@@ -183,7 +183,7 @@ function doPost(e) {
   let out;
   try {
     const req = JSON.parse(e.postData.contents);
-    const fns = { startUpload: startUpload, uploadPhoto: uploadPhoto, finishUpload: finishUpload, submitFamily: submitFamily, adminList: adminList, adminSet: adminSet };
+    const fns = { startUpload: startUpload, uploadPhoto: uploadPhoto, finishUpload: finishUpload, submitFamily: submitFamily, adminList: adminList, adminSet: adminSet, adminReset: adminReset };
     if (!fns[req.fn]) throw new Error('Unknown request');
     out = { ok: true, result: fns[req.fn].apply(null, req.args || []) };
   } catch (err) {
@@ -1710,6 +1710,22 @@ function adminList(k) {
     });
   }
   return { families: fams, photos: photos, site: CONFIG.SITE_URL, reviewUrl: reviewUrl_() };
+}
+
+/** Put an item back to "waiting" (used for the tutorial and for undoing a decision). */
+function adminReset(k, kind, id) {
+  checkKey_(k);
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  if (kind === 'family') {
+    const sh = ss.getSheetByName(REG.TAB), H = regHeaders_();
+    const ids = sh.getRange(3, 1, Math.max(sh.getLastRow() - 2, 1), 1).getValues().map(function (r) { return String(r[0]); });
+    const i = ids.indexOf(String(id)); if (i < 0) throw new Error('Family ' + id + ' was not found.');
+    sh.getRange(i + 3, H.indexOf('Website Status') + 1).setValue('Not reviewed');
+  } else {
+    const sh = ss.getSheetByName('Photo Uploads'); sh.getRange(+String(id).replace(/^P/, ''), 13).setValue('New');
+  }
+  try { CacheService.getScriptCache().remove('publicData'); } catch (e) {}
+  return { ok: true };
 }
 
 /* ---------- show / hide ---------- */
