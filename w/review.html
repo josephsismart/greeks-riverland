@@ -112,7 +112,8 @@ document.addEventListener('click', function (e) {
   var card = b.closest('.card'); card.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
   b.textContent = 'Please wait…';
   call('adminSet', KEY, b.dataset.kind, b.dataset.id, b.dataset.act).then(function (r) {
-    toast(r.status === 'Published' ? '✓ ' + r.label + ' is now on the website' : r.label + ' is hidden');
+    var are = /photos$/.test(r.label) ? ' are' : ' is';
+    toast(r.status === 'Published' ? '✓ ' + r.label + are + ' now on the website' : r.label + are + ' hidden');
     var list = b.dataset.kind === 'family' ? DATA.families : DATA.photos;
     list.forEach(function (x) { if (x.id === b.dataset.id) x.status = r.status; });
     render();
