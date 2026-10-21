@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Families — Greeks of the Riverland</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base target="_blank">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Families page: a card for every published family, A–Z, filling itself from the Family Register.
+   Same three modes as the other page widgets (see _frame.js). */
+:root{--navy:#1b365d;--ink:#24323f;--muted:#5f5b53;--gold2:#e2c48e;--cream:#f6f1e6;--sky:#eaf1f8;--line:#e3ddd0}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
+html.page{font-size:18px}html.page body{background:#fbf8f1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;font-weight:700;border-radius:.75rem;padding:.85rem 1.4rem;font-size:1.05rem;line-height:1.2}
+.btn.navy{background:var(--navy);color:#fff}.btn.line{background:#fff;color:var(--navy);border:.12rem solid var(--navy)}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.78rem;font-weight:700;color:#9a7a35}
+#full{padding:.5rem .6rem .6rem}
+.top{display:none}
+html.page .top{display:block;background:var(--navy);color:#fff;text-align:center;padding:1.4rem 1rem 1.6rem;margin:0 0 1.6rem}
+.top .site{font:700 1rem 'Libre Baskerville',Georgia,serif;color:var(--gold2);text-decoration:none}
+.top h1{font:700 2.4rem/1.15 'Libre Baskerville',Georgia,serif;margin:.5rem 0 .8rem}
+.top .back{display:inline-block;color:#fff;border:.1rem solid rgba(255,255,255,.6);border-radius:999px;padding:.55rem 1.2rem;text-decoration:none;font-weight:600}
+html.page #full{max-width:72rem;margin:0 auto;padding:0 1rem 2rem}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.1rem}
+.head h2{margin:.2rem 0 0;font:700 2.1rem/1.15 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.head p{margin:.35rem 0 0;color:var(--muted);font-size:1.05rem}
+.count{flex:none;background:var(--sky);color:var(--navy);border-radius:999px;padding:.55rem 1.1rem;font-weight:700;font-size:1rem;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+html.page .grid{grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))}
+.fam{position:relative;display:flex;flex-direction:column;min-height:11.5rem;background:#fff;border:.08rem solid var(--line);border-radius:1rem;overflow:hidden;text-decoration:none;color:var(--ink);box-shadow:0 .15rem .6rem rgba(27,54,93,.07);transition:transform .15s,box-shadow .15s}
+.fam:hover,.fam:focus{transform:translateY(-.15rem);box-shadow:0 .6rem 1.4rem rgba(27,54,93,.16);outline:none}
+.fam .im{height:6.5rem;background:#dfe6ee center/cover no-repeat;display:flex;align-items:center;justify-content:center}
+.fam .im.none{background:linear-gradient(135deg,#1b365d,#2e5386)}
+.fam .mono{width:3.4rem;height:3.4rem;border-radius:50%;background:rgba(255,255,255,.14);border:.12rem solid var(--gold2);color:var(--gold2);display:flex;align-items:center;justify-content:center;font:700 1.6rem 'Libre Baskerville',Georgia,serif}
+.fam .tx{padding:.75rem .95rem .9rem;display:flex;flex-direction:column;flex:1}
+.fam .nm{font:700 1.2rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.fam .dt{color:var(--muted);font-size:.92rem;margin-top:.25rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fam .go{margin-top:auto;padding-top:.4rem;font-weight:700;color:#8a6a2c;font-size:.95rem}
+.fam.add{border:.15rem dashed #c9b994;background:#fffdf8;box-shadow:none}
+.fam.add .im{background:#f6ecd4}.fam.add .mono{border-color:var(--navy);color:var(--navy)}
+.fam .ph{position:absolute;top:.5rem;right:.5rem;background:rgba(27,54,93,.85);color:#fff;font-size:.78rem;font-weight:700;border-radius:999px;padding:.2rem .55rem}
+.none-box{grid-column:1/-1;display:flex;align-items:center;gap:1.6rem;padding:1.4rem 1.8rem;background:linear-gradient(120deg,#fff 0%,var(--sky) 100%);border:.08rem solid #d3deeb;border-radius:1rem}
+.none-box h3{margin:0 0 .3rem;font:700 1.45rem/1.25 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.none-box p{margin:0;color:var(--muted)}
+.share{display:flex;align-items:center;gap:1.4rem;margin-top:1.6rem;padding:1.2rem 1.6rem;background:var(--cream);border-radius:1rem;border-left:.45rem solid #c9a44c}
+.share h3{margin:0 0 .2rem;font:700 1.25rem/1.25 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.share p{margin:0;color:var(--muted);font-size:1rem}
+.share .btns{margin-left:auto;display:flex;gap:.8rem;flex:none}
+@media(max-width:700px){
+ html.page{font-size:17px}
+ html.page .head{flex-direction:column;align-items:flex-start}
+ html.page .grid{grid-template-columns:1fr 1fr;gap:.7rem}
+ html.page .share{flex-direction:column;text-align:center;border-left:0;border-top:.4rem solid #c9a44c}
+ html.page .share .btns{margin:0;flex-direction:column;width:100%}
+}
+/* compact (phones, inside Google Sites) */
+#mini{display:none}
+html.compact #full{display:none}
+html.compact #mini{display:flex}
+#mini{height:100vh;flex-direction:column;justify-content:center;gap:.5rem;padding:.4rem .2rem}
+.m-title{font:700 1.3rem/1.2 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.m-title small{display:block;font:400 .9rem Lora,Georgia,serif;color:var(--muted);margin-top:.15rem}
+.m-pills{display:flex;flex-wrap:wrap;gap:.4rem;overflow:hidden;max-height:5.6rem}
+.m-pills a{background:var(--sky);color:var(--navy);text-decoration:none;font-weight:700;border-radius:999px;padding:.45rem .9rem;font-size:1rem;border:.08rem solid #c9d4e2}
+.m-btn{display:flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:1.1rem;border-radius:.8rem;padding:.8rem;min-height:3rem}
+</style></head><body>
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
+function load(prep, main) {
+  var ld = document.createElement('div');
+  ld.textContent = 'Loading…';
+  ld.style.cssText = 'position:fixed;right:12px;bottom:8px;z-index:9999;font:italic 14px Lora,Georgia,serif;color:#5f5b53';
+  setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
+  // Two sources, fetched together: data.json on GitHub Pages (fast, refreshed every few hours) and the
+  // Apps Script web app (live from the Sheet, a little slower). The live copy is used when it answers within
+  // a couple of seconds, so a family or photo marked Published shows straight away; otherwise data.json.
+  // If data.json had to be used and the live copy arrives later with different families or photos,
+  // the widget is drawn again from the live copy (the page is put back as it was first, then redrawn).
+  var used = false, cached = null, live = null, timer = null, shown = null, shell = null;
+  function key(d) { return JSON.stringify([d && d.families, d && d.photos, d && d.towns]); }
+  function draw(d) {
+    if (shell === null) shell = document.body.innerHTML; else document.body.innerHTML = shell;
+    shown = d; main(prep ? prep(d) : d);
+  }
+  function use(d) {
+    if (used) return; used = true; clearTimeout(timer);
+    ld.done = true; if (ld.parentNode) ld.remove();
+    draw(d);
+  }
+  function gotLive(d) {
+    live = d;
+    if (!used) use(d); else if (shown !== d && key(d) !== key(shown)) { try { draw(d); } catch (e) {} }
+  }
+  function getJson(src) {
+    return fetch(src, { credentials: 'omit' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  getJson(API + '?page=data').then(gotLive).catch(function () {
+    setTimeout(function () {   // one more try: the web app sometimes needs a moment to wake up
+      getJson(API + '?page=data').then(gotLive).catch(function () { live = false; if (cached) use(cached); else if (!used) timer = setTimeout(fail, 4000); });
+    }, 1500);
+  });
+  getJson('data.json?v=' + Math.floor(Date.now() / 300000)).then(function (d) {
+    cached = d;
+    if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 6000);
+  }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 12000); });
+  function fail() {
+    if (used) return; used = true;
+    ld.done = true; if (ld.parentNode) ld.remove();
+    var p = document.createElement('p');
+    p.style.cssText = 'font:16px Lora,Georgia,serif;color:#5f5b53;padding:12px';
+    p.innerHTML = 'Sorry, this could not be loaded just now. <a href="" target="_self" onclick="location.reload();return false">Try again</a>.';
+    document.body.appendChild(p);
+  }
+}
+</script>
+
+<div id="full"></div><div id="mini"></div>
+<script>
+/* Shared by the page widgets (town, family profile).
+   Google Sites keeps an embed's height in proportion to its width (a phone gets a much shorter frame),
+   so inside Sites everything is sized from the frame width:
+     wide    framed, 860px or wider: the whole design scales with the width (1rem = width / 72)
+     compact framed, narrower (phones): a short summary card with big buttons that open the full page
+     page    opened on its own (new tab): an ordinary responsive page with a header and a back link */
+var FRAMED = (function () { try { return window.top !== window; } catch (e) { return true; } })();
+function frameMode() {
+  var W = window.innerWidth, root = document.documentElement, mode = !FRAMED ? 'page' : (W < 860 ? 'compact' : 'wide');
+  root.classList.remove('page', 'compact', 'wide'); root.classList.add(mode);
+  root.style.fontSize = mode === 'wide' ? (W / 72) + 'px' : mode === 'compact' ? Math.min(W / 24, 22) + 'px' : '';
+  var b = document.querySelector('base'); if (b) b.target = FRAMED ? '_blank' : '_self';
+  return mode;
+}
+var MODE = frameMode();
+var lastW = window.innerWidth;
+window.addEventListener('resize', function () {
+  if (Math.abs(window.innerWidth - lastW) < 2) return;
+  lastW = window.innerWidth;
+  var m = MODE; MODE = frameMode(); if (m !== MODE && window.render) window.render();
+});
+var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
+var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var img = function (id, w) { return 'https://lh3.googleusercontent.com/d/' + id + '=w' + (w || 800); };
+
+function main(DATA){
+var SITE = String(DATA.site || '').replace(/\/?$/, '/');
+var fams = (DATA.families || []).slice().sort(function (a, b) { return a.family.localeCompare(b.family); });
+var photosOf = function (f) { return (DATA.photos || []).filter(function (p) { return norm(p.family) === norm(f.family); }); };
+var famUrl = function (f) { var u = String(f.url || '').trim(); return u ? (/^https?:/.test(u) ? u : SITE + u.replace(/^\//, '')) : 'familypage.html?f=' + encodeURIComponent(f.family); };
+var lastY = function (f) { return /still|now|today|connected/i.test(f.last || '') || !f.last ? 'today' : f.last; };
+var detail = function (f) { return f.detail || [f.towns, f.first ? f.first + ' – ' + lastY(f) : '', f.origin ? 'from ' + f.origin : ''].filter(Boolean).join(' · '); };
+function card(f) {
+  var ph = photosOf(f), im = ph.length ? img(ph[0].id, 600) : '';
+  return '<a class="fam" href="' + esc(famUrl(f)) + '">' + (im ? '<div class="im" style="background-image:url(\'' + im + '\')"></div>' : '<div class="im none"><div class="mono">' + esc(f.family.charAt(0)) + '</div></div>') +
+    (ph.length ? '<span class="ph">' + ph.length + (ph.length === 1 ? ' photo' : ' photos') + '</span>' : '') +
+    '<div class="tx"><div class="nm">' + esc(f.family) + '</div><div class="dt">' + esc(detail(f)) + '</div><div class="go">Read their story &rarr;</div></div></a>';
+}
+function full() {
+  var page = MODE === 'page', n = fams.length, h = '';
+  h += '<div class="top"><a class="site" href="' + esc(SITE) + '">Greeks of the Riverland</a><h1>Families</h1><a class="back" href="' + esc(SITE + 'families') + '">&larr; Back to the website</a></div>';
+  h += '<div class="head"><div><div class="eyebrow">The Greek families of the Riverland</div><h2>Family stories</h2><p>' + (n ? 'Tap a family to read their story and see their photos.' : 'Family stories will appear here as they are shared.') + '</p></div>' +
+       '<div class="count">' + (n ? n + (n === 1 ? ' family' : ' families') + ' so far' : 'Coming soon') + '</div></div>';
+  var list = !page && n > 7 ? fams.slice(0, 7) : fams, cards = list.map(card);
+  if (!page && n > 7) cards.push('<a class="fam add" href="families.html"><div class="im"><div class="mono">+' + (n - 7) + '</div></div><div class="tx"><div class="nm">See all ' + n + ' families</div><div class="go">Open the full list &rarr;</div></div></a>');
+  else cards.push('<a class="fam add" href="family.html"><div class="im"><div class="mono">+</div></div><div class="tx"><div class="nm">Add your family</div><div class="dt">Share your family\'s story. It takes about ten minutes.</div><div class="go">Start &rarr;</div></div></a>');
+  h += '<div class="grid">' + cards.join('') + '</div>';
+  h += '<div class="share"><div><h3>Is your family missing?</h3><p>Every story helps us remember the Greeks of the Riverland.</p></div><div class="btns"><a class="btn navy" href="family.html">Add your family</a><a class="btn line" href="upload.html">Send photos</a></div></div>';
+  return h;
+}
+function mini() {
+  var n = fams.length;
+  return '<div class="m-title">Family stories<small>' + (n ? n + (n === 1 ? ' family' : ' families') + ' so far' : 'Coming soon') + '</small></div>' +
+    '<div class="m-pills">' + fams.slice(0, 6).map(function (f) { return '<a href="' + esc(famUrl(f)) + '">' + esc(f.family) + '</a>'; }).join('') + '</div>' +
+    '<a class="m-btn" href="families.html">See all families &rsaquo;</a>';
+}
+window.render = function () {
+  document.title = 'Families — Greeks of the Riverland';
+  document.getElementById('full').innerHTML = MODE === 'compact' ? '' : full();
+  document.getElementById('mini').innerHTML = MODE === 'compact' ? mini() : '';
+};
+render();
+}
+load(null, main);
+</script></body></html>

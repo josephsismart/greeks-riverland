@@ -137,8 +137,7 @@ function onFormSubmitNotify(e) {
     to: notifyEmails_(),
     subject: 'New family submission — ' + surname + ' (Greeks of the Riverland)',
     htmlBody: '<p><b>' + esc_(who) + '</b> submitted the <b>' + esc_(surname) + '</b> family' + (town ? ' (' + esc_(town) + ')' : '') + '.</p>' +
-      '<p>Nothing has been published. Review it in the Sheet and set <i>Review Status</i> when done:<br>' +
-      '<a href="' + sheetUrl + '">Open the submissions Sheet</a></p>',
+      '<p>Nothing is on the website yet. <a href="' + reviewUrl_() + '">Open the review page</a></p>',
     name: 'Greeks of the Riverland'
   });
 }
@@ -168,6 +167,7 @@ function doGet(e) {
   if (pg === 'privacy') return privacyPage_();
   if (pg === 'town') return townPage_(e.parameter.t);
   if (pg === 'data') return dataJson_(e);
+  if (pg === 'approve') return approvePage_(e);
   if (pg === 'oldmap') return mapPage_();
   const t = HtmlService.createTemplate(UPLOAD_HTML);
   t.maxPhotos = CONFIG.MAX_PHOTOS;
@@ -183,7 +183,7 @@ function doPost(e) {
   let out;
   try {
     const req = JSON.parse(e.postData.contents);
-    const fns = { startUpload: startUpload, uploadPhoto: uploadPhoto, finishUpload: finishUpload, submitFamily: submitFamily };
+    const fns = { startUpload: startUpload, uploadPhoto: uploadPhoto, finishUpload: finishUpload, submitFamily: submitFamily, adminList: adminList, adminSet: adminSet };
     if (!fns[req.fn]) throw new Error('Unknown request');
     out = { ok: true, result: fns[req.fn].apply(null, req.args || []) };
   } catch (err) {
@@ -226,13 +226,15 @@ function finishUpload(folderId, meta, photos) {
   sh.appendRow([new Date(), meta.surname, meta.town || '', meta.name, meta.relationship, meta.email, meta.phone || '',
     meta.contact ? 'Yes' : 'No', 'I agree', photos.length, details, folder.getUrl(), 'New', '', '']);
   const regId = linkUploadToRegister_(meta, folder, photos.length);
+  const photoRowId = 'P' + sh.getLastRow();
   MailApp.sendEmail({
     to: notifyEmails_(),
     subject: 'New family photos — ' + meta.surname + ' (' + photos.length + ' photo' + (photos.length === 1 ? '' : 's') + ')',
-    htmlBody: '<p><b>' + esc_(meta.name) + '</b> (' + esc_(meta.relationship) + ') sent ' + photos.length + ' photo(s) of the <b>' +
-      esc_(meta.surname) + '</b> family' + (regId ? ' (matched to ' + regId + ' in the Family Register)' : '') + '.</p><p><a href="' + folder.getUrl() + '">Open the photos in Drive</a> · ' +
-      '<a href="https://docs.google.com/spreadsheets/d/' + CONFIG.SHEET_ID + '/edit">Review in the Sheet (Photo Uploads tab)</a></p>' +
-      '<p>Nothing has been published.</p>',
+    htmlBody: '<p style="font:18px Arial,sans-serif"><b>' + esc_(meta.name) + '</b> (' + esc_(meta.relationship) + ') sent ' + photos.length + ' photo' + (photos.length === 1 ? '' : 's') + ' of the <b>' +
+      esc_(meta.surname) + '</b> family' + (meta.town ? ' (' + esc_(meta.town) + ')' : '') + '.</p>' +
+      (details ? '<p style="font:15px Arial,sans-serif;color:#444;white-space:pre-line">' + esc_(details) + '</p>' : '') +
+      '<p style="font:15px Arial,sans-serif"><a href="' + folder.getUrl() + '">Look at the photos in Drive</a></p>' +
+      '<p style="font:16px Arial,sans-serif">Nothing is on the website yet.</p>' + emailButtons_('photo', photoRowId, 'these photos'),
     name: 'Greeks of the Riverland'
   });
   return 'ok';
@@ -1457,11 +1459,15 @@ function registerFamily_(a, when) {
     MailApp.sendEmail({
       to: notifyEmails_(),
       subject: 'New family submission ' + id + ' — ' + (surname || '(no surname)') + ' (Greeks of the Riverland)',
-      htmlBody: '<p><b>' + esc_(get('name')) + '</b>' + (get('connection') ? ' (' + esc_(get('connection')) + ')' : '') +
+      htmlBody: '<p style="font:18px Arial,sans-serif"><b>' + esc_(get('name')) + '</b>' + (get('connection') ? ' (' + esc_(get('connection')) + ')' : '') +
         ' submitted the <b>' + esc_(surname) + '</b> family' + (get('towns') ? ' — ' + esc_(get('towns')) : '') + '.</p>' +
-        (hasPhotos ? '<p>They described photographs: ' + esc_(photoDesc || 'yes') + '</p>' : '') +
-        '<p>Nothing has been published. <a href="' + sheetUrl + '">Open the Family Register</a> · ' +
-        '<a href="' + folder.getUrl() + '">Family folder</a></p>',
+        '<p style="font:15px Arial,sans-serif;color:#444">' +
+        [get('origin') && 'From: ' + esc_([get('origin'), get('country')].filter(Boolean).join(', ')), get('firstYear') && 'In the Riverland from: ' + esc_(get('firstYear')),
+         get('people') && 'Family members: ' + esc_(get('people')), get('work') && 'Work: ' + esc_(get('work')), get('story') && 'Story: ' + esc_(get('story').slice(0, 400))]
+          .filter(Boolean).join('<br>') + '</p>' +
+        (hasPhotos ? '<p style="font:15px Arial,sans-serif">They described photographs: ' + esc_(photoDesc || 'yes') + '</p>' : '') +
+        '<p style="font:16px Arial,sans-serif">Nothing is on the website yet.</p>' + emailButtons_('family', id, 'the ' + esc_(surname) + ' family') +
+        '<p style="font:13px Arial,sans-serif;color:#888"><a href="' + sheetUrl + '">Family Register (Sheet)</a> · <a href="' + folder.getUrl() + '">Family folder</a></p>',
       name: 'Greeks of the Riverland'
     });
     return id;
@@ -1624,4 +1630,149 @@ function simplifyForm() {
   }
   form.setProgressBar(false);
   return log.join('\n') + '\nItems now: ' + form.getItems().length;
+}
+/* ======================= ADMIN: REVIEW PAGE & ONE-TAP APPROVAL =======================
+ * Nick reviews new families and photos on a simple page (w/review.html) instead of the Sheet.
+ * The page and the buttons in the notification emails carry a private key (ADMIN_KEY, stored in
+ * Script Properties). Anyone with the key can show or hide items, so the key only goes to the
+ * project team. Run rotateAdminKey() to make a new key (old links stop working).
+ */
+
+const ADMIN = {
+  FAMILY_HIDE: 'Hidden',        // Website Status used when Nick taps "Don't show"
+  PHOTO_HIDE: 'Declined',
+  REVIEW_PAGE: 'https://josephsismart.github.io/greeks-riverland/w/review.html'
+};
+
+function adminKey_() {
+  const p = PropertiesService.getScriptProperties();
+  let k = p.getProperty('ADMIN_KEY');
+  if (!k) { k = Utilities.getUuid().replace(/-/g, '').slice(0, 20); p.setProperty('ADMIN_KEY', k); }
+  return k;
+}
+function rotateAdminKey() { PropertiesService.getScriptProperties().deleteProperty('ADMIN_KEY'); return 'New key: ' + adminKey_(); }
+function showAdminLinks() { return 'Review page: ' + reviewUrl_() + '\nApprove base: ' + CONFIG.UPLOAD_URL + '?page=approve&k=' + adminKey_(); }
+function reviewUrl_() { return ADMIN.REVIEW_PAGE + '?k=' + adminKey_(); }
+function checkKey_(k) { if (!k || String(k) !== adminKey_()) throw new Error('This link is not valid. Please ask the project team for a new link.'); }
+function approveUrl_(kind, id, act) {
+  return CONFIG.UPLOAD_URL + '?page=approve&k=' + adminKey_() + '&kind=' + kind + '&id=' + encodeURIComponent(id) + '&act=' + act;
+}
+/** Big-button HTML used in the notification emails. */
+function emailButtons_(kind, id, label) {
+  const btn = function (url, text, bg) {
+    return '<a href="' + url + '" style="display:inline-block;background:' + bg + ';color:#fff;text-decoration:none;font:bold 18px Arial,sans-serif;padding:16px 26px;border-radius:10px;margin:6px 8px 6px 0">' + text + '</a>';
+  };
+  return '<p style="font:16px Arial,sans-serif;color:#333">Tap one button:</p>' +
+    btn(approveUrl_(kind, id, 'publish'), '&#10003; Show ' + label + ' on the website', '#1b365d') +
+    btn(approveUrl_(kind, id, 'hide'), 'Don\'t show', '#8a8a8a') +
+    '<p style="font:14px Arial,sans-serif;color:#666">Or see everything waiting for you: <a href="' + reviewUrl_() + '">Open the review page</a></p>';
+}
+
+/* ---------- data for the review page ---------- */
+
+function adminList(k) {
+  checkKey_(k);
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const H = regHeaders_();
+  const ix = function (n) { return H.indexOf(n); };
+  const fams = [];
+  const sh = ss.getSheetByName(REG.TAB);
+  if (sh && sh.getLastRow() >= 3) {
+    sh.getRange(3, 1, sh.getLastRow() - 2, H.length).getValues().forEach(function (r, i) {
+      const g = function (n) { const j = ix(n); const x = j < 0 ? '' : r[j]; return x instanceof Date ? Utilities.formatDate(x, Session.getScriptTimeZone(), 'd MMM yyyy') : String(x || '').trim(); };
+      if (!g('Family Surname')) return;
+      fams.push({ id: g('Submission ID'), row: i + 3, surname: g('Family Surname'), towns: g('Riverland Towns / Areas'), status: g('Website Status') || 'Not reviewed',
+        date: g('Date Submitted'), by: g('Contributor Name'), connection: g('Contributor Connection'), origin: [g('Place of Origin'), g('Region / Country')].filter(Boolean).join(', '),
+        years: [g('First Year in Riverland'), g('Last Year in Riverland')].filter(Boolean).join(' – '), members: g('Family Members Summary'), work: g('Work / Occupations'),
+        story: g('Family Story'), permission: g('Permission to Publish'), folder: g('Drive Folder Link'), site: g('Website Page Link') });
+    });
+  }
+  const photos = [];
+  const ph = ss.getSheetByName('Photo Uploads');
+  if (ph && ph.getLastRow() >= 2) {
+    ph.getRange(2, 1, ph.getLastRow() - 1, 15).getValues().forEach(function (r, i) {
+      if (!String(r[1]).trim() && !String(r[11]).trim()) return;
+      const m = /folders\/([\w-]+)/.exec(String(r[11]));
+      const thumbs = [];
+      if (m) {
+        try {
+          const it = DriveApp.getFolderById(m[1]).getFiles();
+          while (it.hasNext() && thumbs.length < 4) {
+            const f = it.next();
+            if (!/^image\//.test(f.getMimeType())) continue;
+            try { const b = f.getThumbnail(); if (b) thumbs.push('data:' + b.getContentType() + ';base64,' + Utilities.base64Encode(b.getBytes())); } catch (e) {}
+          }
+        } catch (e) {}
+      }
+      const d = r[0] instanceof Date ? Utilities.formatDate(r[0], Session.getScriptTimeZone(), 'd MMM yyyy') : String(r[0]);
+      photos.push({ id: 'P' + (i + 2), row: i + 2, surname: String(r[1]).trim(), town: String(r[2]).trim(), by: String(r[3]).trim(), connection: String(r[4]).trim(),
+        count: r[9], details: String(r[10]).trim(), status: String(r[12]).trim() || 'New', date: d, folder: String(r[11]).trim(), thumbs: thumbs });
+    });
+  }
+  return { families: fams, photos: photos, site: CONFIG.SITE_URL, reviewUrl: reviewUrl_() };
+}
+
+/* ---------- show / hide ---------- */
+
+function adminSet(k, kind, id, act) {
+  checkKey_(k);
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const who = 'Review page';
+  let label = '';
+  if (kind === 'family') {
+    const sh = ss.getSheetByName(REG.TAB);
+    const H = regHeaders_();
+    const ids = sh.getRange(3, 1, Math.max(sh.getLastRow() - 2, 1), 1).getValues().map(function (r) { return String(r[0]); });
+    const i = ids.indexOf(String(id));
+    if (i < 0) throw new Error('Family ' + id + ' was not found.');
+    const row = i + 3;
+    ensureStatusList_(sh, H.indexOf('Website Status') + 1, ['Not reviewed', 'In progress', 'Published', ADMIN.FAMILY_HIDE]);
+    sh.getRange(row, H.indexOf('Website Status') + 1).setValue(act === 'publish' ? 'Published' : ADMIN.FAMILY_HIDE);
+    if (act === 'publish') {
+      sh.getRange(row, H.indexOf('Permission to Publish') + 1).setValue('Yes');
+      sh.getRange(row, H.indexOf('Ready to Publish') + 1).setValue('Yes');
+    }
+    sh.getRange(row, H.indexOf('Last Reviewed') + 1).setValue(new Date());
+    sh.getRange(row, H.indexOf('Reviewed By') + 1).setValue(who);
+    label = 'The ' + sh.getRange(row, H.indexOf('Family Surname') + 1).getValue() + ' family';
+  } else if (kind === 'photo') {
+    const sh = ss.getSheetByName('Photo Uploads');
+    const row = +String(id).replace(/^P/, '');
+    if (!(row >= 2 && row <= sh.getLastRow())) throw new Error('Photos ' + id + ' were not found.');
+    sh.getRange(row, 13).setValue(act === 'publish' ? 'Published' : ADMIN.PHOTO_HIDE);
+    sh.getRange(row, 14).setValue(who);
+    label = 'The ' + sh.getRange(row, 2).getValue() + ' family photos';
+    if (act === 'publish') { try { publicPhotos_(); } catch (e) {} }   // makes the files viewable now
+  } else throw new Error('Unknown item');
+  try { CacheService.getScriptCache().remove('publicData'); } catch (e) {}
+  return { ok: true, label: label, status: act === 'publish' ? 'Published' : 'Hidden' };
+}
+
+function ensureStatusList_(sh, col, values) {
+  try {
+    const rng = sh.getRange(3, col, 998, 1);
+    const rule = rng.getDataValidation();
+    const cur = rule && rule.getCriteriaValues && rule.getCriteriaValues()[0];
+    if (cur && cur.indexOf(values[values.length - 1]) >= 0) return;
+    rng.setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(values, true).setAllowInvalid(false).build());
+  } catch (e) {}
+}
+
+/** ?page=approve&k=KEY&kind=family|photo&id=…&act=publish|hide  (the buttons in the emails) */
+function approvePage_(e) {
+  const p = e.parameter || {};
+  let msg, ok = true;
+  try {
+    const r = adminSet(p.k, p.kind, p.id, p.act === 'hide' ? 'hide' : 'publish');
+    msg = r.status === 'Published' ? r.label + ' is now on the website.' : r.label + ' will not be shown on the website.';
+  } catch (err) { ok = false; msg = String(err && err.message || err); }
+  const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Greeks of the Riverland</title>' +
+    '<style>body{margin:0;background:#fbf8f1;font:22px/1.5 Georgia,serif;color:#24323f}.c{max-width:560px;margin:8vh auto;padding:0 20px;text-align:center}' +
+    '.ic{width:96px;height:96px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:52px;color:#fff;background:' + (ok ? '#2f7d4a' : '#a3271b') + '}' +
+    'h1{font-size:30px;color:#1b365d;margin:0 0 10px}p{margin:0 0 26px}a.b{display:block;background:#1b365d;color:#fff;text-decoration:none;font-weight:bold;padding:18px;border-radius:12px;margin:10px 0}' +
+    'a.w{background:#fff;color:#1b365d;border:2px solid #1b365d}</style></head><body><div class="c"><div class="ic">' + (ok ? '&#10003;' : '!') + '</div>' +
+    '<h1>' + (ok ? 'Done' : 'Sorry') + '</h1><p>' + esc_(msg) + '</p>' +
+    (ok && p.act !== 'hide' ? '<a class="b" href="' + CONFIG.SITE_URL + '">See it on the website</a>' : '') +
+    '<a class="b w" href="' + reviewUrl_() + '">Open the review page</a></div></body></html>';
+  return HtmlService.createHtmlOutput(html).setTitle('Greeks of the Riverland').addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }

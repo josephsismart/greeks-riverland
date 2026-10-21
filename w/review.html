@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Review page — Greeks of the Riverland</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Review page — Greeks of the Riverland</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Nick's review page: everything waiting for a decision, with two big buttons each. Opened with ?k=KEY once;
+   the key is then remembered in this browser. Talks to Apps Script adminList / adminSet (doPost). */
+:root{--navy:#1b365d;--ink:#24323f;--muted:#5f5b53;--gold2:#e2c48e;--cream:#f6f1e6;--sky:#eaf1f8;--line:#e3ddd0;--green:#2f7d4a;--red:#a3271b}
+*{box-sizing:border-box}
+html{font-size:19px}
+body{margin:0;background:#fbf8f1;font-family:Lora,Georgia,serif;color:var(--ink);line-height:1.5}
+.top{background:var(--navy);color:#fff;text-align:center;padding:1.2rem 1rem 1.4rem}
+.top .site{font:700 1rem 'Libre Baskerville',Georgia,serif;color:var(--gold2)}
+.top h1{font:700 1.9rem/1.2 'Libre Baskerville',Georgia,serif;margin:.4rem 0 .4rem}
+.top p{margin:0;color:#d9e2ee;font-size:1rem}
+.wrap{max-width:46rem;margin:0 auto;padding:1.2rem 1rem 3rem}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.2rem}
+.tabs button{font:700 1.05rem Lora,Georgia,serif;padding:.9rem;border-radius:.8rem;border:.12rem solid var(--navy);background:#fff;color:var(--navy);cursor:pointer}
+.tabs button.on{background:var(--navy);color:#fff}
+.tabs button b{display:inline-block;min-width:1.7rem;padding:.1rem .5rem;border-radius:999px;background:#c9a44c;color:#1b2a3d;margin-left:.3rem}
+h2{font:700 1.35rem 'Libre Baskerville',Georgia,serif;color:var(--navy);margin:1.4rem 0 .7rem}
+.card{background:#fff;border:.08rem solid var(--line);border-radius:1rem;padding:1.1rem 1.2rem;margin-bottom:1rem;box-shadow:0 .15rem .6rem rgba(27,54,93,.07)}
+.card.wait{border-left:.45rem solid #c9a44c}
+.card .hd{display:flex;align-items:baseline;justify-content:space-between;gap:.8rem;flex-wrap:wrap}
+.card h3{margin:0;font:700 1.35rem/1.25 'Libre Baskerville',Georgia,serif;color:var(--navy)}
+.card .st{font-size:.9rem;font-weight:700;border-radius:999px;padding:.2rem .7rem;white-space:nowrap}
+.st.w{background:#fff4cc;color:#6d5320}.st.p{background:#d8eedb;color:#1f5a32}.st.h{background:#eee;color:#555}
+.meta{color:var(--muted);font-size:.98rem;margin:.2rem 0 .6rem}
+.facts{font-size:1rem;margin:0 0 .6rem;white-space:pre-line}
+.facts b{color:var(--navy)}
+.thumbs{display:flex;gap:.5rem;flex-wrap:wrap;margin:.3rem 0 .7rem}
+.thumbs img{height:6.5rem;border-radius:.5rem;background:#eee;object-fit:cover}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.7rem}
+.btns button,.btns a{font:700 1.08rem Lora,Georgia,serif;padding:1rem .8rem;border-radius:.8rem;border:0;cursor:pointer;text-align:center;text-decoration:none;min-height:3.4rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.show{background:var(--green);color:#fff}.hide{background:#fff;color:var(--ink);border:.12rem solid #bbb!important}
+.look{grid-column:1/-1;background:var(--sky);color:var(--navy)}
+button:disabled{opacity:.5;cursor:default}
+.none{background:var(--sky);border-radius:1rem;padding:1.3rem;text-align:center;color:var(--navy);font-size:1.1rem}
+.msg{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);background:var(--navy);color:#fff;padding:.9rem 1.3rem;border-radius:.9rem;font-weight:700;box-shadow:0 .5rem 1.4rem rgba(0,0,0,.3);display:none;max-width:90vw;text-align:center}
+.msg.on{display:block}
+.err{background:#fde8e6;border:.1rem solid #e5b3ae;color:var(--red);padding:1rem;border-radius:.8rem;margin:1rem 0;font-size:1.05rem}
+.help{margin-top:2rem;padding:1rem 1.2rem;background:var(--cream);border-left:.4rem solid #c9a44c;border-radius:.8rem;font-size:.98rem;color:var(--muted)}
+.help b{color:var(--navy)}
+details{margin-top:1.5rem}summary{cursor:pointer;font-weight:700;color:var(--navy);font-size:1.05rem}
+@media(max-width:520px){html{font-size:17px}.btns{grid-template-columns:1fr}.thumbs img{height:5.2rem}}
+</style></head><body>
+<div class="top"><div class="site">Greeks of the Riverland</div><h1>Review page</h1><p>New families and photos wait here until you decide.</p></div>
+<div class="wrap" id="app"><p style="text-align:center;color:#5f5b53">Loading…</p></div>
+<div class="msg" id="msg"></div>
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzhLYzjtKO_nrwsk3J_qXKdL0ngMO3_I6rHPRe4lxHibzdpIAncmMio2-mH4MjWIkdaGg/exec";
+var SITE = "https://sites.google.com/view/greeksoftheriverland/";
+var q = new URLSearchParams(location.search);
+var KEY = q.get('k') || '';
+try { if (KEY) localStorage.setItem('grl_admin_key', KEY); else KEY = localStorage.getItem('grl_admin_key') || ''; } catch (e) {}
+if (q.get('k')) try { history.replaceState(null, '', location.pathname); } catch (e) {}
+var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var $ = function (id) { return document.getElementById(id); };
+var DATA = null, tab = 'wait';
+function call(fn) {
+  var args = [].slice.call(arguments, 1);
+  return fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args }) })
+    .then(function (r) { if (!r.ok) throw new Error('The server did not answer (' + r.status + ').'); return r.json(); })
+    .then(function (j) { if (!j.ok) throw new Error(j.error); return j.result; });
+}
+function toast(t) { var m = $('msg'); m.textContent = t; m.classList.add('on'); clearTimeout(m.tm); m.tm = setTimeout(function () { m.classList.remove('on'); }, 3500); }
+function isWait(x) { return !/^(published|hidden|declined)$/i.test(x.status); }
+function isPub(x) { return /^published$/i.test(x.status); }
+function stPill(x) { return isPub(x) ? '<span class="st p">On the website</span>' : isWait(x) ? '<span class="st w">Waiting for you</span>' : '<span class="st h">Not shown</span>'; }
+function famCard(f) {
+  var facts = [f.towns && '<b>Towns:</b> ' + esc(f.towns), f.origin && '<b>From:</b> ' + esc(f.origin), f.years && '<b>In the Riverland:</b> ' + esc(f.years),
+    f.members && '<b>Family members:</b> ' + esc(f.members), f.work && '<b>Work:</b> ' + esc(f.work), f.story && '<b>Story:</b> ' + esc(f.story.slice(0, 500)) + (f.story.length > 500 ? '…' : '')].filter(Boolean).join('\n');
+  var pageUrl = f.site || ('familypage.html?f=' + encodeURIComponent(f.surname));
+  return '<div class="card' + (isWait(f) ? ' wait' : '') + '" id="family-' + esc(f.id) + '"><div class="hd"><h3>The ' + esc(f.surname) + ' family</h3>' + stPill(f) + '</div>' +
+    '<div class="meta">Sent by ' + esc(f.by || 'unknown') + (f.connection ? ' (' + esc(f.connection) + ')' : '') + (f.date ? ' on ' + esc(f.date) : '') + ' · ' + esc(f.id) + '</div>' +
+    (facts ? '<div class="facts">' + facts + '</div>' : '') +
+    '<div class="btns">' + btns('family', f.id, f) + (isPub(f) ? '<a class="look" href="' + esc(pageUrl) + '" target="_blank">See their page on the website &rarr;</a>' : '') + '</div></div>';
+}
+function photoCard(p) {
+  return '<div class="card' + (isWait(p) ? ' wait' : '') + '" id="photo-' + esc(p.id) + '"><div class="hd"><h3>' + esc(p.count || '') + ' photo' + (p.count == 1 ? '' : 's') + ' of the ' + esc(p.surname) + ' family</h3>' + stPill(p) + '</div>' +
+    '<div class="meta">Sent by ' + esc(p.by || 'unknown') + (p.connection ? ' (' + esc(p.connection) + ')' : '') + (p.town ? ' · ' + esc(p.town) : '') + (p.date ? ' · ' + esc(p.date) : '') + '</div>' +
+    (p.thumbs && p.thumbs.length ? '<div class="thumbs">' + p.thumbs.map(function (t) { return '<img src="' + t + '" alt="">'; }).join('') + '</div>' : '') +
+    (p.details ? '<div class="facts">' + esc(p.details) + '</div>' : '') +
+    '<div class="btns">' + btns('photo', p.id, p) + (p.folder ? '<a class="look" href="' + esc(p.folder) + '" target="_blank">See the full-size photos (Drive) &rarr;</a>' : '') + '</div></div>';
+}
+function btns(kind, id, x) {
+  var pub = isPub(x);
+  return '<button class="show" data-kind="' + kind + '" data-id="' + esc(id) + '" data-act="publish"' + (pub ? ' disabled' : '') + '>&#10003; ' + (pub ? 'Shown on the website' : 'Show on the website') + '</button>' +
+    '<button class="hide" data-kind="' + kind + '" data-id="' + esc(id) + '" data-act="hide"' + (!pub && !isWait(x) ? ' disabled' : '') + '>' + (pub ? 'Take off the website' : 'Don\'t show') + '</button>';
+}
+function render() {
+  if (!DATA) return;
+  var fw = DATA.families.filter(isWait), pw = DATA.photos.filter(isWait);
+  var list = tab === 'wait' ? { f: fw, p: pw } : { f: DATA.families.filter(function (x) { return !isWait(x); }).reverse(), p: DATA.photos.filter(function (x) { return !isWait(x); }).reverse() };
+  var h = '<div class="tabs"><button class="' + (tab === 'wait' ? 'on' : '') + '" data-tab="wait">Waiting for you <b>' + (fw.length + pw.length) + '</b></button>' +
+    '<button class="' + (tab === 'done' ? 'on' : '') + '" data-tab="done">Already decided</button></div>';
+  if (!list.f.length && !list.p.length) h += '<div class="none">' + (tab === 'wait' ? '&#10003; Nothing is waiting. You are up to date!' : 'Nothing here yet.') + '</div>';
+  if (list.f.length) h += '<h2>Families</h2>' + list.f.map(famCard).join('');
+  if (list.p.length) h += '<h2>Photos</h2>' + list.p.map(photoCard).join('');
+  h += '<div class="help"><b>How it works:</b> when someone fills in the Add Your Family form or sends photos, it appears here (and you get an email). ' +
+    'Tap <b>Show on the website</b> and it goes live within a minute: on its town page, in Find a Family, and in Stories &amp; Photos. ' +
+    'Tap <b>Don\'t show</b> to keep it off the website. You can change your mind any time under <b>Already decided</b>.</div>' +
+    '<details><summary>Fixing a spelling mistake</summary><p>Open the <a href="https://docs.google.com/spreadsheets/d/13t3MUpincrTxTr4hsMS4pgY5PNokFuv0sli8LQ93B9c/edit" target="_blank">Family Register sheet</a>, ' +
+    'correct the words in the family\'s row, and the website updates by itself within a minute.</p></details>';
+  $('app').innerHTML = h;
+}
+document.addEventListener('click', function (e) {
+  var t = e.target.closest('button[data-tab]'); if (t) { tab = t.dataset.tab; render(); return; }
+  var b = e.target.closest('button[data-act]'); if (!b) return;
+  var card = b.closest('.card'); card.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+  b.textContent = 'Please wait…';
+  call('adminSet', KEY, b.dataset.kind, b.dataset.id, b.dataset.act).then(function (r) {
+    toast(r.status === 'Published' ? '✓ ' + r.label + ' is now on the website' : r.label + ' is hidden');
+    var list = b.dataset.kind === 'family' ? DATA.families : DATA.photos;
+    list.forEach(function (x) { if (x.id === b.dataset.id) x.status = r.status; });
+    render();
+  }).catch(function (err) { toast('Sorry: ' + err.message); render(); });
+});
+function load() {
+  if (!KEY) { $('app').innerHTML = '<div class="err">This page needs your private link. Please open the link from your email, or ask Joseph for it.</div>'; return; }
+  call('adminList', KEY).then(function (d) { DATA = d; render(); })
+    .catch(function (err) { $('app').innerHTML = '<div class="err">' + esc(err.message) + '</div><p style="text-align:center"><button class="show" style="font:700 1.05rem Lora;padding:.9rem 1.4rem;border:0;border-radius:.8rem;background:#1b365d;color:#fff" onclick="load()">Try again</button></p>'; });
+}
+load();
+</script></body></html>
