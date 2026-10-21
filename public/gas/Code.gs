@@ -1764,7 +1764,8 @@ function approvePage_(e) {
   let msg, ok = true;
   try {
     const r = adminSet(p.k, p.kind, p.id, p.act === 'hide' ? 'hide' : 'publish');
-    msg = r.status === 'Published' ? r.label + ' is now on the website.' : r.label + ' will not be shown on the website.';
+    const are = /photos$/.test(r.label) ? ' are' : ' is';
+    msg = r.status === 'Published' ? r.label + are + ' now on the website.' : r.label + ' will not be shown on the website.';
   } catch (err) { ok = false; msg = String(err && err.message || err); }
   const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Greeks of the Riverland</title>' +
     '<style>body{margin:0;background:#fbf8f1;font:22px/1.5 Georgia,serif;color:#24323f}.c{max-width:560px;margin:8vh auto;padding:0 20px;text-align:center}' +
