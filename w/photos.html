@@ -41,8 +41,8 @@ function load(prep, main) {
   ld.style.cssText = 'position:fixed;right:12px;bottom:8px;z-index:9999;font:italic 14px Lora,Georgia,serif;color:#5f5b53';
   setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
   // Two sources, fetched together: data.json on GitHub Pages (fast, refreshed every few hours) and the
-  // Apps Script web app (live from the Sheet, a little slower). The live copy is used when it answers within
-  // a couple of seconds, so a family or photo marked Published shows straight away; otherwise data.json.
+  // Apps Script web app (live from the Sheet, slower). Whichever answers first is drawn; when the live copy
+  // then arrives with newer families or photos, the page redraws itself.
   // If data.json had to be used and the live copy arrives later with different families or photos,
   // the widget is drawn again from the live copy (the page is put back as it was first, then redrawn).
   var used = false, cached = null, live = null, timer = null, shown = null, shell = null;
@@ -70,7 +70,8 @@ function load(prep, main) {
   });
   getJson('data.json?v=' + Math.floor(Date.now() / 300000)).then(function (d) {
     cached = d;
-    if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 6000);
+    // Show the cached copy straight away (the page then redraws itself if the live copy differs).
+    use(d);
   }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 12000); });
   function fail() {
     if (used) return; used = true;
@@ -103,9 +104,9 @@ var list = (DATA.photos || []).filter(function (p) {
   if (fam && norm(p.family) !== norm(fam)) return false;
   return true;
 });
-function title(p) { return p.people || ('The ' + p.family + ' family'); }
+function title(p) { return p.people || (p.family + ' family'); }
 function meta(p) { return [p.year, p.place].filter(Boolean).map(esc).join(' · '); }
-function famLine(p) { return 'The ' + esc(p.family) + ' family' + (p.town ? ', ' + esc(p.town) : ''); }
+function famLine(p) { return esc(p.family) + ' family' + (p.town ? ', ' + esc(p.town) : ''); }
 if (q.get('h')) document.getElementById('head').innerHTML = '<div class="hd">' + esc(q.get('h')) + '</div>' +
   (q.get('s') ? '<p class="sub">' + esc(q.get('s')) + '</p>' : '');
 var grid = document.getElementById('grid');

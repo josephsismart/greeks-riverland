@@ -28,6 +28,7 @@ input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,5
 .bar h3{margin:0;font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
 .back{font:600 .9rem Lora,Georgia,serif;background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:.55rem;padding:.4rem .7rem;cursor:pointer}
 .list{max-height:calc(100vh - 12.5rem);min-height:4rem;overflow:auto;padding-right:.25rem}
+.addfam{display:block;margin:.6rem 0 0;background:var(--navy);color:#fff;text-decoration:none;text-align:center;font:700 1.1rem Lora,Georgia,serif;padding:.8rem;border-radius:.7rem}
 .item{display:block;background:#fff;border:1px solid var(--line);border-radius:.65rem;padding:.6rem .85rem;margin-bottom:.45rem;text-decoration:none;color:var(--ink)}
 a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
 .item b{font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
@@ -50,8 +51,8 @@ function load(prep, main) {
   ld.style.cssText = 'position:fixed;right:12px;bottom:8px;z-index:9999;font:italic 14px Lora,Georgia,serif;color:#5f5b53';
   setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
   // Two sources, fetched together: data.json on GitHub Pages (fast, refreshed every few hours) and the
-  // Apps Script web app (live from the Sheet, a little slower). The live copy is used when it answers within
-  // a couple of seconds, so a family or photo marked Published shows straight away; otherwise data.json.
+  // Apps Script web app (live from the Sheet, slower). Whichever answers first is drawn; when the live copy
+  // then arrives with newer families or photos, the page redraws itself.
   // If data.json had to be used and the live copy arrives later with different families or photos,
   // the widget is drawn again from the live copy (the page is put back as it was first, then redrawn).
   var used = false, cached = null, live = null, timer = null, shown = null, shell = null;
@@ -79,7 +80,8 @@ function load(prep, main) {
   });
   getJson('data.json?v=' + Math.floor(Date.now() / 300000)).then(function (d) {
     cached = d;
-    if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 6000);
+    // Show the cached copy straight away (the page then redraws itself if the live copy differs).
+    use(d);
   }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 12000); });
   function fail() {
     if (used) return; used = true;
@@ -100,6 +102,7 @@ function load(prep, main) {
 <div id="az" class="az" role="group" aria-label="Browse surnames A to Z"></div>
 <div id="res" class="res"><div class="bar"><h3 id="ttl"></h3><button class="back" id="back" type="button">&larr; A&ndash;Z</button></div><div class="list" id="list"></div></div>
 <p class="note" id="note">Family names are added as records are submitted and verified.</p>
+<a class="addfam" href="https://josephsismart.github.io/greeks-riverland/w/family.html" target="_blank" rel="noopener">+ Add your family</a>
 </div>
 <script>
 function main(DATA){

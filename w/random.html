@@ -39,8 +39,8 @@ function load(prep, main) {
   ld.style.cssText = 'position:fixed;right:12px;bottom:8px;z-index:9999;font:italic 14px Lora,Georgia,serif;color:#5f5b53';
   setTimeout(function () { if (!ld.done) document.body.appendChild(ld); }, 400);
   // Two sources, fetched together: data.json on GitHub Pages (fast, refreshed every few hours) and the
-  // Apps Script web app (live from the Sheet, a little slower). The live copy is used when it answers within
-  // a couple of seconds, so a family or photo marked Published shows straight away; otherwise data.json.
+  // Apps Script web app (live from the Sheet, slower). Whichever answers first is drawn; when the live copy
+  // then arrives with newer families or photos, the page redraws itself.
   // If data.json had to be used and the live copy arrives later with different families or photos,
   // the widget is drawn again from the live copy (the page is put back as it was first, then redrawn).
   var used = false, cached = null, live = null, timer = null, shown = null, shell = null;
@@ -68,7 +68,8 @@ function load(prep, main) {
   });
   getJson('data.json?v=' + Math.floor(Date.now() / 300000)).then(function (d) {
     cached = d;
-    if (live === false) use(d); else timer = setTimeout(function () { use(d); }, 6000);
+    // Show the cached copy straight away (the page then redraws itself if the live copy differs).
+    use(d);
   }).catch(function () { if (live === false) fail(); else timer = setTimeout(function () { if (!used) { if (live) use(live); else fail(); } }, 12000); });
   function fail() {
     if (used) return; used = true;
@@ -84,12 +85,15 @@ function load(prep, main) {
 <div class="row" id="row"></div>
 <div class="bar"><button id="more" type="button">&#8635; Show other photos</button><a href="stories.html">See all photos &rarr;</a></div>
 <script>
-/* Shared by the page widgets (town, family profile).
+/* Shared by the page widgets (town, family, families, stories...).
    Google Sites keeps an embed's height in proportion to its width (a phone gets a much shorter frame),
    so inside Sites everything is sized from the frame width:
      wide    framed, 860px or wider: the whole design scales with the width (1rem = width / 72)
      compact framed, narrower (phones): a short summary card with big buttons that open the full page
-     page    opened on its own (new tab): an ordinary responsive page with a header and a back link */
+     page    opened on its own (new tab): an ordinary responsive page with a header and a Back button
+   Navigation: Google Sites sandboxes embeds with no allow-top-navigation, so from INSIDE a Sites page every
+   link must open a new tab. Once a widget is open on its own (page mode) links between widgets stay in the
+   same tab, so the browser Back button works. Links back to the Google Site open in the same tab too. */
 var FRAMED = (function () { try { return window.top !== window; } catch (e) { return true; } })();
 function frameMode() {
   var W = window.innerWidth, root = document.documentElement, mode = !FRAMED ? 'page' : (W < 860 ? 'compact' : 'wide');
@@ -108,13 +112,24 @@ window.addEventListener('resize', function () {
 var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); };
 var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 var img = function (id, w) { return 'https://lh3.googleusercontent.com/d/' + id + '=w' + (w || 800); };
+/* Page header with a Back button. backTo = where to go when there is nothing to go back to. */
+function pageTop(title, backTo) {
+  var site = (typeof SITE !== 'undefined' && SITE) || (window.DATA && window.DATA.site) || 'https://sites.google.com/view/greeksoftheriverland/';
+  return '<div class="top"><a class="site" href="' + esc(site) + '">Greeks of the Riverland</a>' + (title ? '<h1>' + title + '</h1>' : '') +
+    '<button class="back" type="button" data-back="' + esc(backTo || site) + '">&larr; Back</button></div>';
+}
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('button[data-back]'); if (!b) return;
+  var ref = document.referrer || '';
+  if (history.length > 1 && ref && /josephsismart\.github\.io/.test(ref)) history.back(); else location.href = b.getAttribute('data-back');
+});
 
 function main(DATA){
 var ALL = String(DATA.site || '').replace(/\/?$/, '/') + 'stories-photos';
 document.querySelector('.bar a').href = ALL;
 var ARCHIVE = [{"src":"../public/m/intro-1950s.jpg","title":"Greek families of the Riverland"},{"src":"../public/m/arch-family-community.jpg","title":"Family & Community"},{"src":"../public/m/arch-work-everyday.jpg","title":"Work & Everyday Life"},{"src":"../public/m/arch-school-sporting.jpg","title":"School & Sporting Life"}];
 var pool = ARCHIVE.map(function (a) { return { src: a.src, t: a.title, s: a.sub || '' }; }).concat((DATA.photos || []).map(function (p) {
-  return { src: img(p.id, 800), t: 'The ' + p.family + ' family', s: [p.people, p.year, p.place || p.town].filter(Boolean).join(' · ') };
+  return { src: img(p.id, 800), t: p.family + ' family', s: [p.people, p.year, p.place || p.town].filter(Boolean).join(' · ') };
 }));
 var last = [];
 function pick() {

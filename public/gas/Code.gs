@@ -113,6 +113,7 @@ function installTriggers_() {
   });
   ScriptApp.newTrigger('onFamilySubmit').forForm(CONFIG.FORM_ID).onFormSubmit().create();
   ScriptApp.newTrigger('monthlyBackup').timeBased().onMonthDay(1).atHour(3).create();
+  ScriptApp.newTrigger('onSheetEdit').forSpreadsheet(CONFIG.SHEET_ID).onEdit().create();
   return 'Triggers installed (form notification + monthly backup)';
 }
 
@@ -140,6 +141,15 @@ function onFormSubmitNotify(e) {
       '<p>Nothing is on the website yet. <a href="' + reviewUrl_() + '">Open the review page</a></p>',
     name: 'Greeks of the Riverland'
   });
+}
+
+/** Installable trigger: any edit in the Sheet clears the website data cache, so changes show within a minute. */
+function onSheetEdit(e) { try { CacheService.getScriptCache().remove('publicData'); } catch (err) {} }
+/** Run once from the editor to add the on-edit trigger to an existing setup. */
+function installEditTrigger() {
+  const has = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'onSheetEdit'; });
+  if (!has) ScriptApp.newTrigger('onSheetEdit').forSpreadsheet(CONFIG.SHEET_ID).onEdit().create();
+  return has ? 'already installed' : 'installed';
 }
 
 /* ========================= BACKUPS ========================= */
@@ -183,7 +193,7 @@ function doPost(e) {
   let out;
   try {
     const req = JSON.parse(e.postData.contents);
-    const fns = { startUpload: startUpload, uploadPhoto: uploadPhoto, finishUpload: finishUpload, submitFamily: submitFamily, adminList: adminList, adminSet: adminSet, adminReset: adminReset };
+    const fns = { startUpload: startUpload, uploadPhoto: uploadPhoto, finishUpload: finishUpload, submitFamily: submitFamily, adminList: adminList, adminSet: adminSet, adminReset: adminReset, contactFamily: contactFamily };
     if (!fns[req.fn]) throw new Error('Unknown request');
     out = { ok: true, result: fns[req.fn].apply(null, req.args || []) };
   } catch (err) {
@@ -617,8 +627,10 @@ function dataJson_(e) {
   if (!json) {
     let photos = [];
     try { photos = publicPhotos_(); } catch (err) {}
-    json = JSON.stringify({ site: CONFIG.SITE_URL, towns: RIVERLAND_TOWNS, families: publicFamilies_(), photos: photos });
-    try { cache.put('publicData', json, 60); } catch (err) {}
+    let fb = { page: '', group: '' };
+    try { const st = SpreadsheetApp.openById(CONFIG.SHEET_ID).getSheetByName('Settings'); fb = { page: String(st.getRange('B3').getValue()).trim(), group: String(st.getRange('B4').getValue()).trim() }; } catch (err) {}
+    json = JSON.stringify({ site: CONFIG.SITE_URL, towns: RIVERLAND_TOWNS, families: publicFamilies_(), photos: photos, facebook: fb });
+    try { cache.put('publicData', json, 600); } catch (err) {}   // 10 min; approvals and the Sheet's onEdit clear it
   }
   const cb = e && e.parameter && e.parameter.callback;
   if (cb && /^[A-Za-z_$][\w$]{0,40}$/.test(cb)) {
@@ -858,6 +870,7 @@ input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,5
 .bar h3{margin:0;font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
 .back{font:600 .9rem Lora,Georgia,serif;background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:.55rem;padding:.4rem .7rem;cursor:pointer}
 .list{max-height:calc(100vh - 12.5rem);min-height:4rem;overflow:auto;padding-right:.25rem}
+.addfam{display:block;margin:.6rem 0 0;background:var(--navy);color:#fff;text-decoration:none;text-align:center;font:700 1.1rem Lora,Georgia,serif;padding:.8rem;border-radius:.7rem}
 .item{display:block;background:#fff;border:1px solid var(--line);border-radius:.65rem;padding:.6rem .85rem;margin-bottom:.45rem;text-decoration:none;color:var(--ink)}
 a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
 .item b{font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
@@ -880,6 +893,7 @@ a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
 <div id="az" class="az" role="group" aria-label="Browse surnames A to Z"></div>
 <div id="res" class="res"><div class="bar"><h3 id="ttl"></h3><button class="back" id="back" type="button">&larr; A&ndash;Z</button></div><div class="list" id="list"></div></div>
 <p class="note" id="note">Family names are added as records are submitted and verified.</p>
+<a class="addfam" href="https://josephsismart.github.io/greeks-riverland/w/family.html" target="_blank" rel="noopener">+ Add your family</a>
 </div>
 <script>
 var DATA = __DATA__;
@@ -1382,6 +1396,10 @@ function onFamilySubmit(e) {
 function submitFamily(answers) {
   const a = {};
   Object.keys(answers || {}).forEach(function (k) { if (Q[k]) a[Q[k]] = answers[k]; });
+  // Father / mother answers (form of 25 Oct 2026) go into the existing single columns as "x (father), y (mother)".
+  const fm = function (f, m) { f = String(f || '').trim(); m = String(m || '').trim(); if (f && m && f.toLowerCase() === m.toLowerCase()) return f; return [f && f + ' (father)', m && m + ' (mother)'].filter(Boolean).join(', '); };
+  if (answers && (answers.originF || answers.originM)) { a[Q.origin] = fm(answers.originF, answers.originM); a[Q.country] = a[Q.country] || ''; }
+  if (answers && (answers.arrivedF || answers.arrivedM)) a[Q.arrived] = fm(answers.arrivedF, answers.arrivedM);
   if (!a[Q.name] || !a[Q.email] || !a[Q.surname]) throw new Error('Please fill in your name, email and the family surname.');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(a[Q.email]))) throw new Error('Please enter a valid email address.');
   if (![].concat(a[Q.perms] || []).length) throw new Error('Please tick the permission box.');
@@ -1792,4 +1810,35 @@ function approvePage_(e) {
     (ok && p.act !== 'hide' ? '<a class="b" href="' + CONFIG.SITE_URL + '">See it on the website</a>' : '') +
     '<a class="b w" href="' + reviewUrl_() + '">Open the review page</a></div></body></html>';
   return HtmlService.createHtmlOutput(html).setTitle('Greeks of the Riverland').addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+
+/* ======================= CONTACT A FAMILY (Milestone 3) =======================
+ * A community member asks to reach a family. The request is emailed to the project team (Settings B2) and
+ * logged in a "Contact Requests" tab. No contact details are ever shown on the website. */
+function contactFamily(req) {
+  req = req || {};
+  const name = String(req.name || '').trim(), email = String(req.email || '').trim(), family = String(req.family || '').trim(), msg = String(req.message || '').trim();
+  if (!name || !email || !family || !msg) throw new Error('Please fill in your name, email and message.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Please enter a valid email address.');
+  if (msg.length > 3000) throw new Error('Please keep the message under 3000 characters.');
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  let sh = ss.getSheetByName('Contact Requests');
+  if (!sh) {
+    sh = ss.insertSheet('Contact Requests');
+    sh.getRange(1, 1, 1, 7).setValues([['Received', 'Family', 'From (name)', 'From (email)', 'Phone', 'Message', 'Handled']]).setFontWeight('bold').setBackground('#1F3A5F').setFontColor('#ffffff');
+    sh.setFrozenRows(1); sh.setColumnWidth(6, 420);
+  }
+  sh.appendRow([new Date(), family, name, email, String(req.phone || '').trim(), msg, '']);
+  MailApp.sendEmail({
+    to: notifyEmails_(),
+    replyTo: email,
+    subject: 'Someone would like to contact the ' + family + ' family (Greeks of the Riverland)',
+    htmlBody: '<p style="font:18px Arial,sans-serif"><b>' + esc_(name) + '</b> would like to get in touch with the <b>' + esc_(family) + ' family</b>.</p>' +
+      '<p style="font:16px Arial,sans-serif;white-space:pre-line;background:#f6f1e6;padding:14px;border-radius:8px">' + esc_(msg) + '</p>' +
+      '<p style="font:16px Arial,sans-serif">Their email: <a href="mailto:' + esc_(email) + '">' + esc_(email) + '</a>' + (req.phone ? '<br>Phone: ' + esc_(String(req.phone)) : '') + '</p>' +
+      '<p style="font:15px Arial,sans-serif;color:#666">Please pass this on to the family if they are happy to be contacted. Nothing has been shared with anyone else. ' +
+      'All requests are listed in the <a href="https://docs.google.com/spreadsheets/d/' + CONFIG.SHEET_ID + '/edit">Contact Requests tab</a>.</p>',
+    name: 'Greeks of the Riverland'
+  });
+  return 'ok';
 }

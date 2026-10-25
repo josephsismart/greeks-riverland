@@ -22,6 +22,7 @@ input[type=text],input[type=email],input[type=tel],textarea{width:100%;padding:1
 input:focus,textarea:focus{outline:3px solid var(--gold2);border-color:var(--navy)}
 textarea{min-height:120px;resize:vertical}
 textarea.big{min-height:200px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}.two .sub{display:block;font-weight:700;color:var(--navy);margin-bottom:4px}@media(max-width:560px){.two{grid-template-columns:1fr}}
 .towns{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:6px}
 .chip{display:flex;align-items:center;gap:10px;border:2px solid #c9b994;border-radius:12px;padding:12px 14px;background:#fffdf8;cursor:pointer;font-weight:600}
 .chip input{width:26px;height:26px;margin:0;accent-color:var(--navy);flex:none}
@@ -63,13 +64,13 @@ body.squeezed .full{display:flex;flex-direction:column;min-height:100vh;padding:
 .full .note{font-size:17px;color:var(--muted);text-align:center;margin:12px 0 0}
 .done a.btn{display:inline-block;margin-top:14px;background:var(--navy);color:#fff;padding:16px 26px;border-radius:14px;text-decoration:none;font-weight:700}
 </style></head><body>
-<div class="top"><h1>Add Your Family</h1><p>Four easy steps. Share as much or as little as you know.</p><div style="margin-top:12px"><a href="https://sites.google.com/view/greeksoftheriverland">&larr; Back to the website</a></div></div>
+<div class="top"><h1>Add Your Family</h1><p>Three easy steps. Share as much or as little as you know.</p><div style="margin-top:12px"><a href="https://sites.google.com/view/greeksoftheriverland">&larr; Back to the website</a></div></div>
 <div class="wrap" id="app">
   <div class="full"><div class="fc">
     <div class="pic" role="img" aria-label="An old family photograph"></div>
     <h3 style="margin-top:6px">Add your family</h3>
-    <p>Share your family's story in four easy steps. Write as much or as little as you know.</p>
-    <ol><li><span>1</span><div>About you<small>Your name and how to reach you (never shown on the website)</small></div></li><li><span>2</span><div>About the family<small>Surname, towns, and where they came from</small></div></li><li><span>3</span><div>The people and their story<small>Names, work, church and community life</small></div></li><li><span>4</span><div>Photos and permission<small>Describe any photos and tick one box</small></div></li></ol>
+    <p>Share your family's story in three easy steps. Write as much or as little as you know.</p>
+    <ol><li><span>1</span><div>About you<small>Your name and how to reach you (never shown on the website)</small></div></li><li><span>2</span><div>About the family<small>Surname, towns, and where they came from</small></div></li><li><span>3</span><div>The people and their story<small>Names and the family's story, then tick one box</small></div></li></ol>
     <div><a class="big" href="family.html">Start &mdash; open the form &rsaquo;</a>
     <a class="ph" href="upload.html">Send family photos</a></div>
     <p class="note">Nothing goes on the website until the project team has checked it.</p>
@@ -93,9 +94,10 @@ body.squeezed .full{display:flex;flex-direction:column;min-height:100vh;padding:
     <label for="townOther">Another town or area <small>(if it is not in the list)</small></label><input type="text" id="townOther">
     <label for="firstYear">About what year did the family first come to the Riverland? <small>(a rough year is fine)</small></label><input type="text" id="firstYear" placeholder="for example: 1955">
     <label for="lastYear">About what year did the family leave? <small>(leave empty if they are still there)</small></label><input type="text" id="lastYear">
-    <label for="origin">Which town or village in Greece (or elsewhere) did the family come from?</label><input type="text" id="origin" placeholder="for example: Ptolemaida">
-    <label for="country">Country</label><input type="text" id="country" placeholder="for example: Greece">
-    <label for="arrived">About what year did the family arrive in Australia?</label><input type="text" id="arrived">
+    <label>Where did the family come from? <small>(town or village, and country)</small></label>
+    <div class="two"><div><small class="sub">Father</small><input type="text" id="originF" placeholder="for example: Ptolemaida, Greece"></div><div><small class="sub">Mother</small><input type="text" id="originM" placeholder="for example: Komano, Greece"></div></div>
+    <label>About what year did they arrive in Australia? <small>(a rough year is fine)</small></label>
+    <div class="two"><div><small class="sub">Father</small><input type="text" id="arrivedF" placeholder="for example: 1953"></div><div><small class="sub">Mother</small><input type="text" id="arrivedM" placeholder="for example: 1956"></div></div>
     <label for="before">Did they live somewhere else in Australia first? <small>(optional)</small></label><input type="text" id="before">
     <label for="moved">Did the family live in more than one Riverland town or property? <small>(optional)</small></label><textarea id="moved"></textarea>
   </div>
@@ -103,22 +105,13 @@ body.squeezed .full{display:flex;flex-direction:column;min-height:100vh;padding:
   <div class="card">
     <h2><span class="n">3</span> The people and their story</h2>
     <label for="people">The family members you would like included</label>
-    <p class="help">One person per line is easiest, for example:<br>George Papadopoulos – father – born 1928<br>Maria Papadopoulos – mother</p>
+    <p class="help">One person per line is easiest, for example:<br>George Papadopoulos – father<br>Maria Papadopoulos – mother</p>
     <textarea id="people" class="big"></textarea>
-    <label for="work">What work did the family do? <small>(fruit blocks, packing sheds, shops, trades…)</small></label><textarea id="work"></textarea>
-    <label for="community">Church, school, sport, Greek clubs or other community life <small>(optional)</small></label><textarea id="community"></textarea>
     <label for="story">Tell us about the family's life in the Riverland</label>
     <p class="help">Why they came, where they lived, friends and neighbours, celebrations, happy or hard times. Write it in your own words. We tidy the spelling.</p>
     <textarea id="story" class="big"></textarea>
-    <label for="notPublish">Is there anything you would prefer us NOT to publish? <small>(optional)</small></label><textarea id="notPublish"></textarea>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">4</span> Photos and permission</h2>
-    <p class="help">Old photos are a big part of this project. After you send this page, you can add photos on our photo page.</p>
-    <label for="photoDesc">Describe any photos you have <small>(optional)</small></label><textarea id="photoDesc" placeholder="who is in them, and roughly when and where"></textarea>
-    <label class="check"><input type="checkbox" id="perm"><span>I agree that the family information and any photos I share may be shown on the Greeks of the Riverland website. My email and phone will not be published, and wording may be lightly tidied.</span></label>
-    <div class="notice">Nothing appears on the website straight away. The project team checks every submission first.</div>
+    <label class="check"><input type="checkbox" id="perm"><span>I agree that this family information may be shown on the Greeks of the Riverland website. My email and phone will not be published, and wording may be lightly tidied.</span></label>
+    <div class="notice">Nothing appears on the website straight away. The project team checks every submission first.<br><b>Photos</b> are sent separately on the photo page, after this.</div>
     <div id="status"></div>
     <div class="err" id="err" role="alert"></div>
     <button class="go" id="send">Send my family's story</button>
@@ -147,14 +140,14 @@ $('send').onclick = function () {
   if (!v('name')) return need('name', 'Please type your name (step 1).');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('email'))) return need('email', 'Please type your email address (step 1).');
   if (!v('surname')) return need('surname', 'Please type the family surname (step 2).');
-  if (!$('perm').checked) { $('err').textContent = 'Please tick the "I agree" box (step 4).'; $('perm').scrollIntoView({ block: 'center' }); return; }
+  if (!$('perm').checked) { $('err').textContent = 'Please tick the "I agree" box (step 3).'; $('perm').scrollIntoView({ block: 'center' }); return; }
   var towns = [].slice.call(document.querySelectorAll('.chip input:checked')).map(function (c) { return c.value; });
   if (v('townOther')) towns.push(v('townOther'));
   var answers = { name: v('name'), email: v('email'), phone: v('phone'), connection: v('connection'),
     mayContact: document.querySelector('.radio input:checked').value, surname: v('surname'), towns: towns,
-    firstYear: v('firstYear'), lastYear: v('lastYear'), moved: v('moved'), origin: v('origin'), country: v('country'),
-    arrived: v('arrived'), before: v('before'), people: v('people'), work: v('work'), community: v('community'),
-    story: v('story'), notPublish: v('notPublish'), photoDesc: v('photoDesc'), perms: PERM, confirmName: v('name') };
+    firstYear: v('firstYear'), lastYear: v('lastYear'), moved: v('moved'),
+    originF: v('originF'), originM: v('originM'), arrivedF: v('arrivedF'), arrivedM: v('arrivedM'), before: v('before'),
+    people: v('people'), story: v('story'), perms: PERM, confirmName: v('name') };
   $('send').disabled = true; $('status').textContent = 'Sending… please keep this page open.';
   fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: 'submitFamily', args: [answers] }) })
     .then(function (r) { return r.json(); })
