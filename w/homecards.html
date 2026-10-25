@@ -11,12 +11,12 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:transparent;font-family:Lora,Georgia,serif;color:var(--ink)}
 html.page{font-size:17px}
-#full{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;padding:.5rem .6rem}
+#full{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;padding:.5rem .6rem}
 html.page #full{grid-template-columns:1fr;max-width:46rem;margin:0 auto;padding:1rem}
-.card{display:grid;grid-template-columns:13rem 1fr;background:#fff;border:.08rem solid var(--line);border-radius:1.1rem;overflow:hidden;text-decoration:none;color:var(--ink);
+.card{display:flex;flex-direction:column;background:#fff;border:.08rem solid var(--line);border-radius:1.1rem;overflow:hidden;text-decoration:none;color:var(--ink);
  box-shadow:0 .2rem .8rem rgba(27,54,93,.08);transition:transform .15s,box-shadow .15s;min-height:13.5rem}
 .card:hover,.card:focus{transform:translateY(-.15rem);box-shadow:0 .7rem 1.6rem rgba(27,54,93,.16);outline:none}
-.im{background:center/cover no-repeat;filter:sepia(.15)}
+.im{height:7.5rem;background:center/cover no-repeat;filter:sepia(.15)}
 .tx{display:flex;flex-direction:column;padding:1.2rem 1.3rem}
 .hd{display:flex;align-items:center;gap:.7rem;margin-bottom:.5rem}
 .ic{flex:none;width:2.8rem;height:2.8rem;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center}
@@ -27,7 +27,8 @@ html.page #full{grid-template-columns:1fr;max-width:46rem;margin:0 auto;padding:
 #mini{display:none}
 html.compact #full{display:none}
 html.compact #mini{display:grid}
-#mini{height:100vh;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:.45rem;padding:.2rem}
+#mini{height:100vh;grid-template-columns:1fr 1fr 1fr;grid-auto-rows:1fr;gap:.4rem;padding:.2rem}
+#mini a{flex-direction:column;text-align:center;justify-content:center;padding:.4rem .3rem;font-size:.9rem}
 #mini a{display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;border-radius:.8rem;background:var(--sky);border:.08rem solid var(--line);text-decoration:none;color:var(--navy);font:700 1rem/1.15 'Libre Baskerville',Georgia,serif}
 #mini a .ic{width:2.2rem;height:2.2rem}
 #mini a.gold{background:#f6ecd4;border-color:#e6d3a6}
@@ -77,8 +78,6 @@ var SITE = "https://sites.google.com/view/greeksoftheriverland/";
 var M = '../public/m/';
 function icon(d) { return '<svg width="55%" height="55%" viewBox="0 0 24 24" fill="none" stroke="#e2c48e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>'; }
 var CARDS = [
-  { t: 'Connect with the community', s: 'Looking for an old friend or family connection? Send Nick a message and we\'ll help you connect.', b: 'Send a message', short: 'Contact us',
-    u: SITE + 'about-contact', im: M + 'arch-family-community.jpg', i: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
   { t: 'Share your photos & memories', s: 'Add photographs, letters and stories to keep this history alive for future generations.', b: 'Send photos', short: 'Send photos',
     u: 'upload.html', im: M + 'arch-wedding.jpg', i: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>' },
   { t: 'Learn about our history', s: 'Explore the people, places and events that shaped the Greek community in the Riverland.', b: 'Explore the stories', short: 'Stories & photos',
