@@ -343,6 +343,17 @@ button.go:disabled{opacity:.55;cursor:default}
 <script>
 const MAX=<?= maxPhotos ?>; let photos=[];
 const $=id=>document.getElementById(id);
+// Fill in what we already know: details saved by the Add Your Family form on this device (kept 3 days),
+// and ?s=Surname&t=Town from a family page. Only fills empty boxes.
+(function(){ try {
+  const q=new URLSearchParams(location.search); let me={};
+  try{ me=JSON.parse(localStorage.getItem('grl_me')||'{}'); if(!me.t||Date.now()-me.t>3*864e5) me={}; }catch(e){ me={}; }
+  const put=(id,v)=>{ const e=$(id); if(e&&!e.value&&v) e.value=String(v).slice(0,120); };
+  put('name',me.name); put('email',me.email); put('phone',me.phone); put('relationship',me.rel);
+  put('surname',q.get('s')||me.surname);
+  const tw=q.get('t')||me.town; if(tw){ const o=[...$('town').options].find(o=>o.text.toLowerCase()===String(tw).toLowerCase()); if(o) $('town').value=o.text; }
+  if(me.name){ const h=document.querySelector('.card .help'); if(h) h.insertAdjacentHTML('afterend','<p class="help" style="color:#3d6b2f;font-weight:600">&#10004; We filled in your details from your family story. Please check them.</p>'); }
+} catch(e){} })();
 $('drop').onclick=()=>$('files').click();
 ['dragover','dragenter'].forEach(ev=>$('drop').addEventListener(ev,e=>e.preventDefault()));
 $('drop').addEventListener('drop',e=>{e.preventDefault();addFiles(e.dataTransfer.files)});

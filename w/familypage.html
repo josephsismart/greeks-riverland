@@ -236,6 +236,7 @@ var towns = String(F.towns || '').split(/\s*[,;\/]\s*/).filter(Boolean);
 var townObjs = towns.map(function (t) { return (DATA.towns || []).filter(function (x) { return norm(x.name) === norm(t); })[0] || { name: t }; });
 var selfUrl = 'familypage.html?f=' + encodeURIComponent(name);
 var addUrl = 'family.html?s=' + encodeURIComponent(name);
+var photoUrl = 'upload.html?s=' + encodeURIComponent(name) + (towns[0] ? '&t=' + encodeURIComponent(towns[0]) : '');
 var where = P.place || F.detail || towns.join(', ') || '';
 var lastY = /still|now|today|connected/i.test(F.last || '') ? 'today' : (F.last || '');
 var years = P.years || ((/\(([^)]*\d{4}[^)]*)\)/.exec(F.detail || '') || [])[1] || '') || (F.first ? F.first + ' – ' + (lastY || 'today') : '');
@@ -252,7 +253,7 @@ function stage() {
   if (!photos.length) {
     return '<div class="stage e"><div class="ph0" style="background-image:url(\'' + ARCH + '\')"></div><div class="veil"></div><div class="ph-msg">' +
       '<div class="ic">' + CAM + '</div><h3>Photographs of the ' + esc(name) + ' family</h3>' +
-      '<p>They will appear here once they are shared. Do you have one?</p><a class="btn gold" href="upload.html">Share a family photo</a></div></div>';
+      '<p>They will appear here once they are shared. Do you have one?</p><a class="btn gold" href="' + esc(photoUrl) + '">Add a photo</a></div></div>';
   }
   return '<div class="stage" id="stage">' + photos.map(function (p, i) {
     return '<div class="sl' + (i ? '' : ' on') + '" style="background-image:url(\'' + img(p.id, 1400) + '\')"></div>';
@@ -268,7 +269,7 @@ function hero(page) {
     (where ? '<div class="where">' + PIN + esc(where) + '</div>' : '') +
     '<div class="chips">' + (years ? '<span class="chip">In the Riverland ' + esc(years) + '</span>' : '') + (origin ? '<span class="chip g">From ' + esc(origin) + '</span>' : '') + '</div>' +
     facts() +
-    '<div class="acts">' + (page ? '' : '<a class="btn navy" href="' + esc(selfUrl) + '">Read the full story &rarr;</a>') + '<a class="btn ' + (page ? 'navy' : 'line') + '" href="upload.html">Share a photo</a>' + (page ? '<a class="btn line" href="' + esc(addUrl) + '">Add to this story</a>' : '') + '</div></div></div>';
+    (page ? '' : '<div class="acts"><a class="btn navy" href="' + esc(selfUrl) + '">Read the full story &rarr;</a><a class="btn line" href="' + esc(photoUrl) + '">Add a photo</a></div>') + '</div></div>';
 }
 function fullPage() {
   var h = pageTop('', (function () { var t = townObjs[0]; return t && t.path ? SITE + String(t.path).replace(/^\//, '') : SITE + 'families'; })());
@@ -281,7 +282,7 @@ function fullPage() {
   if (towns.length) h += '<div class="sec"><h2>Riverland towns</h2><div class="chips" style="margin:0">' + townObjs.map(function (t) { return '<a class="chip" style="text-decoration:none" href="town.html?t=' + encodeURIComponent(t.name) + '">' + esc(t.name) + ' &rarr;</a>'; }).join('') + '</div></div>';
   h += '<div class="sec"><h2>Photographs <small>' + (photos.length ? 'Tap a photo to see it bigger' : '') + '</small></h2>' +
     (photos.length ? '<div class="gal">' + photos.map(function (p, i) { return '<button class="ph" data-i="' + i + '" style="background-image:url(\'' + img(p.id, 700) + '\')"><div class="cap">' + esc(capOf(p)).slice(0, 110) + '</div></button>'; }).join('') + '</div>'
-                   : '<div class="story todo"><span>No photographs yet. Do you have one of the ' + esc(name) + ' family?</span><a class="btn navy" href="upload.html">Share a photo</a></div>') + '</div>';
+                   : '<div class="story todo"><span>No photographs yet. Do you have one of the ' + esc(name) + ' family?</span><a class="btn navy" href="' + esc(photoUrl) + '">Add a photo</a></div>') + '</div>';
   h += '<div class="contact" id="contact"><h3>Would you like to contact the ' + esc(name) + ' family?</h3>' +
        '<p>Send a message to the project team. We pass it on to the family. Their contact details are never shown on the website.</p>' +
        '<button class="btn navy" type="button" id="cOpen">Ask to contact this family</button>' +
@@ -290,8 +291,8 @@ function fullPage() {
        '<label for="cPhone">Your phone <small>(optional)</small></label><input id="cPhone" type="tel" autocomplete="tel">' +
        '<label for="cMsg">Your message</label><textarea id="cMsg" placeholder="For example: I think my grandfather worked with your father in the 1960s and I would love to hear from you."></textarea>' +
        '<div class="err" id="cErr"></div><button class="btn navy" type="submit" id="cSend" style="margin-top:1rem;width:100%">Send my message</button></form></div>';
-  h += '<div class="share"><div><h3>Do you know more about the ' + esc(name) + ' family?</h3><p>Add to the story, or send old photographs. Everything is checked before it goes on the website.</p></div>' +
-       '<div class="btns"><a class="btn navy" href="' + esc(addUrl) + '">Add to this story</a><a class="btn line" href="upload.html">Send photos</a></div></div>';
+  h += '<div class="share"><div><h3>Can you add to the ' + esc(name) + ' family story?</h3><p>Send more photos, add to the story, or tell us if something needs correcting. Everything is checked before it goes on the website.</p></div>' +
+       '<div class="btns"><a class="btn navy" href="' + esc(photoUrl) + '">Add more photos</a><a class="btn navy" href="' + esc(addUrl) + '">Add to or correct the story</a></div></div>';
   return h;
 }
 function card(title, text, href) {

@@ -60,9 +60,10 @@ body.squeezed .full{display:flex;flex-direction:column;min-height:100vh;padding:
 .full li{display:flex;align-items:flex-start;gap:12px;font-size:19px;font-weight:600}
 .full li span{flex:none;width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px}
 .full a.big{display:flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;text-decoration:none;border-radius:14px;min-height:64px;padding:14px;font-weight:700;font-size:22px;text-align:center}
+.two-btn{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.two-btn{grid-template-columns:1fr}}
 .full a.ph{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--olive);color:#fff;text-decoration:none;border-radius:14px;min-height:58px;padding:12px;font-weight:700;font-size:20px;margin-top:12px}
 .full .note{font-size:17px;color:var(--muted);text-align:center;margin:12px 0 0}
-.done a.btn{display:inline-block;margin-top:14px;background:var(--navy);color:#fff;padding:16px 26px;border-radius:14px;text-decoration:none;font-weight:700}
+.done a.btn{display:inline-block;margin:14px 6px 0;background:var(--navy);color:#fff;padding:16px 26px;border-radius:14px;text-decoration:none;font-weight:700}
 </style></head><body>
 <div class="top"><h1>Add Your Family</h1><p>Three easy steps. Share as much or as little as you know.</p><div style="margin-top:12px"><a href="https://sites.google.com/view/greeksoftheriverland">&larr; Back to the website</a></div></div>
 <div class="wrap" id="app">
@@ -71,8 +72,8 @@ body.squeezed .full{display:flex;flex-direction:column;min-height:100vh;padding:
     <h3 style="margin-top:6px">Add your family</h3>
     <p>Share your family's story in three easy steps. Write as much or as little as you know.</p>
     <ol><li><span>1</span><div>About you<small>Your name and how to reach you (never shown on the website)</small></div></li><li><span>2</span><div>About the family<small>Surname, towns, and where they came from</small></div></li><li><span>3</span><div>The people and their story<small>Names and the family's story, then tick one box</small></div></li></ol>
-    <div><a class="big" href="family.html">Start &mdash; open the form &rsaquo;</a>
-    <a class="ph" href="upload.html">Send family photos</a></div>
+    <div class="two-btn"><a class="big" href="family.html">Send my family story &rsaquo;</a>
+    <a class="big" href="upload.html">Send family photos &rsaquo;</a></div>
     <p class="note">Nothing goes on the website until the project team has checked it.</p>
   </div></div>
   <div class="card">
@@ -153,11 +154,12 @@ $('send').onclick = function () {
     .then(function (r) { return r.json(); })
     .then(function (j) {
       if (!j.ok) throw new Error(j.error);
+      try { localStorage.setItem('grl_me', JSON.stringify({ name: answers.name, email: answers.email, phone: answers.phone, rel: answers.connection, surname: answers.surname, town: towns[0] || '', t: Date.now() })); } catch (e) {}
       window.scrollTo(0, 0);
       $('app').innerHTML = '<div class="card done"><div class="tick">&#10004;</div><h2 style="justify-content:center">Thank you, ' + esc(answers.name) + '!</h2>' +
         '<p>The ' + esc(answers.surname) + ' family story has arrived safely (reference ' + esc(j.result) + '). The project team will look at it soon.</p>' +
-        '<p><b>Do you have photos?</b> Use the same surname and email so we can match them.</p>' +
-        '<a class="btn" href="' + PHOTO + '">Add family photos &rarr;</a></div>';
+        '<p><b>Do you have photos?</b> Send them now. Your details are already filled in for you.</p>' +
+        '<a class="btn" href="' + PHOTO + '?s=' + encodeURIComponent(answers.surname) + '">Send family photos &rarr;</a></div>';
     })
     .catch(function (e) { $('status').textContent = ''; $('err').textContent = 'Sorry, something went wrong. Please press the button again. (' + e.message + ')'; $('send').disabled = false; });
 };
