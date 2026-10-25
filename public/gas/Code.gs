@@ -870,7 +870,8 @@ input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,5
 .bar h3{margin:0;font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
 .back{font:600 .9rem Lora,Georgia,serif;background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:.55rem;padding:.4rem .7rem;cursor:pointer}
 .list{max-height:calc(100vh - 12.5rem);min-height:4rem;overflow:auto;padding-right:.25rem}
-.addfam{display:block;margin:.6rem 0 0;background:var(--navy);color:#fff;text-decoration:none;text-align:center;font:700 1.1rem Lora,Georgia,serif;padding:.8rem;border-radius:.7rem}
+.hd{display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem}
+.addfam{flex:none;display:inline-block;background:var(--navy);color:#fff;text-decoration:none;text-align:center;font:700 1.05rem Lora,Georgia,serif;padding:.7rem 1rem;border-radius:.7rem;white-space:nowrap}
 .item{display:block;background:#fff;border:1px solid var(--line);border-radius:.65rem;padding:.6rem .85rem;margin-bottom:.45rem;text-decoration:none;color:var(--ink)}
 a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
 .item b{font:700 1.05rem 'Libre Baskerville',Georgia,serif;color:var(--navy)}
@@ -878,14 +879,15 @@ a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
 .empty{background:#fff;border:1px dashed #9fb5cf;border-radius:.65rem;padding:.8rem;font-size:.9rem;line-height:1.5}
 .empty a{color:var(--navy);font-weight:600}
 @media(max-height:230px){
- .box{padding:.5rem .6rem}.ttl,.sub,.note{display:none}
+ .box{padding:.5rem .6rem}.ttl,.sub,.note{display:none}.hd{display:none}
  input{padding-top:.55rem;padding-bottom:.55rem}
  .az{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:2.4rem;overflow-x:auto;margin-top:.45rem;padding-bottom:.3rem}
  .res{margin-top:.4rem}.list{max-height:calc(100vh - 6.5rem)}
 }
 </style></head>
 <body><div class="box">
-<h2 class="ttl">Find a Family</h2><p class="sub">Search by surname or browse A&ndash;Z.</p>
+<div class="hd"><div><h2 class="ttl">Find a Family</h2><p class="sub">Search by surname or browse A&ndash;Z.</p></div>
+<a class="addfam" href="https://josephsismart.github.io/greeks-riverland/w/family.html" target="_blank" rel="noopener">+ Add your family</a></div>
 <div class="search">
  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b365d" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
  <input id="q" type="search" placeholder="Search surname..." aria-label="Search surname" autocomplete="off">
@@ -893,7 +895,6 @@ a.item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(27,54,93,.15)}
 <div id="az" class="az" role="group" aria-label="Browse surnames A to Z"></div>
 <div id="res" class="res"><div class="bar"><h3 id="ttl"></h3><button class="back" id="back" type="button">&larr; A&ndash;Z</button></div><div class="list" id="list"></div></div>
 <p class="note" id="note">Family names are added as records are submitted and verified.</p>
-<a class="addfam" href="https://josephsismart.github.io/greeks-riverland/w/family.html" target="_blank" rel="noopener">+ Add your family</a>
 </div>
 <script>
 var DATA = __DATA__;
