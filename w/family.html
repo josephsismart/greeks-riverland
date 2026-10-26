@@ -51,7 +51,7 @@ body.standalone{background:#fbf8f1}body.standalone .top{display:block}
 .full{display:none}
 body.squeezed{background:transparent}
 body.squeezed .wrap>.card,body.squeezed #app>*:not(.full){display:none}
-body.squeezed .full{display:flex;flex-direction:column;min-height:100vh;padding:4px 2px}
+body.squeezed .wrap{padding:0}body.squeezed .full{display:flex;flex-direction:column;height:100vh;padding:4px 2px}
 .full .fc{flex:1;display:flex;flex-direction:column;justify-content:flex-start;gap:14px;overflow:hidden;padding:0 0 20px}
 .full .fc>*:not(.pic){margin-left:18px;margin-right:18px}
 .full .pic{flex:1;min-height:170px;max-height:420px;background:url(../public/m/arch-family-community.jpg) center 30%/cover;filter:sepia(.25)}
@@ -66,6 +66,11 @@ body.squeezed .full{display:flex;flex-direction:column;min-height:100vh;padding:
 .two-btn{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.two-btn{grid-template-columns:1fr}}
 .full a.ph{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--olive);color:#fff;text-decoration:none;border-radius:14px;min-height:58px;padding:12px;font-weight:700;font-size:20px;margin-top:12px}
 .full .note{font-size:17px;color:var(--muted);text-align:center;margin:12px 0 0}
+/* The embed keeps one height-to-width ratio for desktop and phone, so on a short phone frame
+   the intro card drops its extras (photo first, then step details) instead of being cut off. */
+@media (max-height:1150px){.full .pic{min-height:110px}.full li small{font-size:16px}}
+@media (max-height:1020px){.full li small{display:none}.full ol{gap:10px}}
+@media (max-height:900px){.full .pic{display:none}}
 .done a.btn{display:inline-block;margin:14px 6px 0;background:var(--navy);color:#fff;padding:16px 26px;border-radius:14px;text-decoration:none;font-weight:700}
 </style></head><body>
 <div class="top"><h1>Add Your Family</h1><p>Three easy steps. Share as much or as little as you know.</p><div style="margin-top:12px"><a href="https://sites.google.com/view/greeksoftheriverland">&larr; Back to the website</a></div></div>
