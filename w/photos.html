@@ -46,7 +46,7 @@ function load(prep, main) {
   // If data.json had to be used and the live copy arrives later with different families or photos,
   // the widget is drawn again from the live copy (the page is put back as it was first, then redrawn).
   var used = false, cached = null, live = null, timer = null, shown = null, shell = null;
-  function key(d) { return JSON.stringify([d && d.families, d && d.photos, d && d.towns]); }
+  function key(d) { return JSON.stringify([d && d.families, d && d.photos, d && d.towns, d && d.facebook]); }
   function draw(d) {
     if (shell === null) shell = document.body.innerHTML; else document.body.innerHTML = shell;
     shown = d; main(prep ? prep(d) : d);
