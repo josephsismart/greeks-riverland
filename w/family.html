@@ -35,7 +35,10 @@ textarea.big{min-height:200px}
 .radio input{width:26px;height:26px;margin:0;accent-color:var(--navy)}
 .notice{background:var(--cream);border-left:6px solid var(--olive);padding:14px 16px;border-radius:10px;margin-top:18px}
 .photobtn{display:inline-flex;align-items:center;gap:12px;background:var(--olive);color:#fff;text-decoration:none;border-radius:14px;padding:16px 22px;font-weight:700;margin-top:10px}
-button.go{width:100%;background:var(--navy);color:#fff;border:0;border-radius:14px;padding:22px;font:700 26px Lora,serif;cursor:pointer;margin-top:20px}
+.go{width:100%;background:var(--navy);color:#fff;border:0;border-radius:14px;padding:22px;font:700 26px Lora,serif;cursor:pointer;margin-top:20px}
+a.go{display:block;box-sizing:border-box;text-align:center;text-decoration:none;margin-top:10px}
+.go2{background:#fff;color:var(--navy);border:3px solid var(--navy)}
+.or{text-align:center;margin:22px 0 0;color:#5f5b53;font-size:19px}
 button.go:disabled{opacity:.55;cursor:default}
 .err{color:#a3271b;font-weight:700;margin-top:12px;font-size:21px}
 #status{font-weight:700;color:var(--navy);margin-top:12px}
@@ -112,10 +115,12 @@ body.squeezed .full{display:flex;flex-direction:column;min-height:100vh;padding:
     <p class="help">Why they came, where they lived, friends and neighbours, celebrations, happy or hard times. Write it in your own words. We tidy the spelling.</p>
     <textarea id="story" class="big"></textarea>
     <label class="check"><input type="checkbox" id="perm"><span>I agree that this family information may be shown on the Greeks of the Riverland website. My email and phone will not be published, and wording may be lightly tidied.</span></label>
-    <div class="notice">Nothing appears on the website straight away. The project team checks every submission first.<br><b>Photos</b> are sent separately on the photo page, after this.</div>
+    <div class="notice">Nothing appears on the website straight away. The project team checks every submission first.</div>
     <div id="status"></div>
     <div class="err" id="err" role="alert"></div>
     <button class="go" id="send">Send my family's story</button>
+    <p class="or">Have old family photos?</p>
+    <a class="go go2" href="upload.html">Send family photos</a>
   </div>
 </div>
 <script>
